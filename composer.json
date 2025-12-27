@@ -1,0 +1,10 @@
+{
+  "name": "kusikusicms/monorepo",
+  "description": "Monorepo for KusikusiCMS packages and starter app.",
+  "type": "metapackage",
+  "license": "MIT",
+  "require": {},
+  "autoload": {},
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}

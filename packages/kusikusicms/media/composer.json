@@ -1,0 +1,29 @@
+{
+  "name": "kusikusicms/media",
+  "description": "Media manager for KusikusiCMS.",
+  "type": "library",
+  "license": "MIT",
+  "require": {
+    "php": ">=8.2",
+    "illuminate/support": "^12.0",
+    "illuminate/filesystem": "^12.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "KusikusiCMS\\Media\\": "src/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "KusikusiCMS\\Media\\MediaServiceProvider"
+      ]
+    }
+  },
+  "require-dev": {
+    "orchestra/testbench": "^9.0",
+    "phpunit/phpunit": "^11.0"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}
