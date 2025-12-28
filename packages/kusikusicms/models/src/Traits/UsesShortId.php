@@ -9,33 +9,46 @@ trait UsesShortId
 {
 
     /**
-     * The "booting" method of the model, This helps to magically create uuid for all new models
-     *
-     * @return void
+     * The "booting" method of the model. Automatically generates a short string id for new models.
      */
     public static function bootUsesShortId(): void
     {
         self::creating(function ($model) {
-            if (!isset($model[$model->getKeyName()])) {
+            $keyName = $model->getKeyName();
+            $provided = $model->getAttribute($keyName);
+            $maxLen = (int) Config::get('kusikusicms.models.short_id_length', 10);
+            // Safety cap against DB column length (26 in default migration)
+            $maxLen = max(1, min($maxLen, 26));
+
+            if (empty($provided)) {
+                $attempts = 0;
+                $maxAttempts = (int) Config::get('kusikusicms.models.short_id_max_attempts', 5);
                 do {
-                    $id = Shortid::generate(Config::get('kusikusicms.models.short_id_length', 10));
-                    $found_duplicate = self::where($model->getKeyName(), $id)->first();
-                } while (!!$found_duplicate);
-                $model->setAttribute($model->getKeyName(), $id);
+                    $attempts++;
+                    $id = Shortid::generate($maxLen);
+                    $exists = static::query()->where($keyName, $id)->exists();
+                    if (!$exists) {
+                        $model->setAttribute($keyName, $id);
+                        break;
+                    }
+                } while ($attempts < $maxAttempts);
+
+                if (empty($model->getAttribute($keyName))) {
+                    throw new \RuntimeException('Failed to generate a unique short ID after '
+                        .$maxAttempts.' attempts.');
+                }
             } else {
-                $model->setAttribute($model->getKeyName(), substr($model[$model->getKeyName()], 0, 16));
+                $model->setAttribute($keyName, substr((string) $provided, 0, $maxLen));
             }
         });
     }
-    
+
+    // Eloquent expects string IDs and non-incrementing for short IDs
     public $incrementing = false;
-    
     public $keyType = 'string';
 
     /**
      * Get the primary key for the model.
-     *
-     * @return string
      */
     public function getKeyName(): string
     {

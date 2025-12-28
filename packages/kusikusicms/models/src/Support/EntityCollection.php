@@ -5,10 +5,15 @@ namespace KusikusiCMS\Models\Support;
 use Illuminate\Database\Eloquent\Collection;
 use KusikusiCMS\Models\Entity;
 
+/**
+ * @extends Collection<int, Entity>
+ */
 class EntityCollection extends Collection
 {
     /**
-     * Methods
+     * Flatten the attached contents relation on each entity into a single associative array keyed by field.
+     *
+     * @return Collection<int, Entity> $this for chaining
      */
     public function flattenContentsByField(): Collection
     {
@@ -17,6 +22,12 @@ class EntityCollection extends Collection
         });
         return $this;
     }
+
+    /**
+     * Group the attached contents relation by field with per-lang values.
+     *
+     * @return Collection<int, Entity> $this for chaining
+     */
     public function groupContentsByField(): Collection
     {
         $this->each(function (Entity $entity) {
@@ -24,6 +35,12 @@ class EntityCollection extends Collection
         });
         return $this;
     }
+
+    /**
+     * Group the attached contents relation by language with per-field values.
+     *
+     * @return Collection<int, Entity> $this for chaining
+     */
     public function groupContentsByLang(): Collection
     {
         $this->each(function (Entity $entity) {
