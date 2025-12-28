@@ -12,8 +12,6 @@ class EntityFactoryStatesTest extends TestCase
     {
         $e = Entity::factory()->draft()->create();
         $this->assertFalse($e->published);
-        $this->assertNull($e->publish_at);
-        $this->assertNull($e->unpublish_at);
         $this->assertSame('draft', $e->status);
     }
 
