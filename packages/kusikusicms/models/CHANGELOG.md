@@ -1,0 +1,45 @@
+# Changelog — KusikusiCMS Models
+
+All notable changes to this package will be documented in this file.
+
+## 12.0.0-alpha.1 — 2025-12-28
+
+Initial Laravel 12–ready alpha with the following highlights:
+
+- Config & Provider hygiene
+  - Standardized config namespace to `kusikusicms.models.*`
+  - About entry visible via `php artisan about`
+
+- Entity model modernization
+  - Laravel 12 `Attribute::make` accessor for `status`
+  - Safer mass-assignment via guarded system fields
+  - Typed scope signatures
+
+- Traits & Collections
+  - `UsesShortId` now uses container-resolved `IdGenerator` with configurable length and collision retries
+  - Collections include typed PHPDoc and chainable helpers for content transformations
+
+- Migrations (fresh installs)
+  - Timezone-aware timestamps (`timestampsTz`, `softDeletesTz`) and `timestampTz` for publish windows
+  - Modern foreign key helpers and cascades
+
+- Factories & Seeder
+  - Factory states: `draft`, `scheduled`, `published`, `outdated`
+  - `withContents` helper for quick content attachment
+  - Demo seeder: `KusikusiCMS\Models\Database\Seeders\ModelsSeeder`
+
+- Events
+  - `$dispatchesEvents` retained so host apps can listen to lifecycle events
+
+- Testing & CI
+  - Package test suite using Orchestra Testbench (SQLite in-memory)
+  - Host app integration tests under `apps/starter`
+  - CI workflow runs both suites
+
+- Documentation
+  - README with quickstart and examples
+  - docs/: installation, configuration, models & scopes, events, factories & seeding, testing, id-generator, design-decisions
+
+Notes:
+- `whereContent` scope behavior is characterized by tests; a future update will align it with the intended operator-on-text-only semantics.
+- Relation scope aliases currently use dot-style (e.g., `parent.position`); a future update may switch to snake_case with full `entities.*` hydration.
