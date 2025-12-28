@@ -53,23 +53,15 @@ class Entity extends Model
     }
 
     /**
-     * The attributes that are mass assignable.
+     * The attributes that are guarded from mass assignment.
      *
      * @var array<int, string>
      */
-    protected $fillable
-        = [
-            'id',
-            'model',
-            'view',
-            'langs',
-            'props',
-            'published',
-            'parent_entity_id',
-            'created_at',
-            'publish_at',
-            'unpublish_at',
-        ];
+    protected $guarded = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
 
     /**
      * The attributes that should be cast.
@@ -86,26 +78,25 @@ class Entity extends Model
         ];
 
     /**
-     * isPublished attribute
+     * status attribute
      * @return Attribute
      */
     protected function status(): Attribute
     {
-        return new Attribute(
+        return Attribute::make(
             get: function (mixed $value, array $attributes) {
-                    $now = Carbon::now();
-                    if (!isset($attributes['published'])) {
-                        return 'unknown';
-                    } else if (!$attributes['published']) {
-                        return 'draft';
-                    } else if (!$attributes['publish_at'] || $attributes['publish_at'] > $now) {
-                        return 'scheduled';
-                    } else if (isset($attributes['unpublish_at']) && $attributes['unpublish_at'] < $now) {
-                        return 'outdated';
-                    } else {
-                        return 'published';
-                    }
-                },
+                $now = Carbon::now();
+                if (!isset($attributes['published'])) {
+                    return 'unknown';
+                } elseif (!$attributes['published']) {
+                    return 'draft';
+                } elseif (!$attributes['publish_at'] || $attributes['publish_at'] > $now) {
+                    return 'scheduled';
+                } elseif (isset($attributes['unpublish_at']) && $attributes['unpublish_at'] < $now) {
+                    return 'outdated';
+                }
+                return 'published';
+            },
         );
     }
 
@@ -219,13 +210,11 @@ class Entity extends Model
      */
     public function scopeChildrenOf(Builder $query, string $entity_id, ?string $tag = null): Builder
     {
-        return $query->join('entities_relations as child',
-            function ($join) use ($entity_id, $tag) {
+        return $query->join('entities_relations as child', function ($join) use ($entity_id, $tag) {
                 $join->on('child.caller_entity_id', '=', 'entities.id')
                     ->where('child.called_entity_id', '=', $entity_id)
                     ->where('child.depth', '=', 1)
-                    ->where('child.kind', '=',
-                        EntityRelation::RELATION_ANCESTOR)
+                    ->where('child.kind', '=', EntityRelation::RELATION_ANCESTOR)
                     ->when($tag, function ($q) use ($tag) {
                         return $q->whereJsonContains('child.tags', $tag);
                     });
@@ -264,7 +253,7 @@ class Entity extends Model
      *
      * @throws \Exception
      */
-    public function scopeAncestorsOf(Builder $query, $entity_id): Builder
+    public function scopeAncestorsOf(Builder $query, string $entity_id): Builder
     {
         return $query->join('entities_relations as ancestor', function ($join) use ($entity_id) {
             $join->on('ancestor.called_entity_id', '=', 'entities.id')
@@ -287,7 +276,7 @@ class Entity extends Model
      *
      * @return Builder
      */
-    public function scopeWithContents($query, string $lang = null, array $fields = null, ): Builder
+    public function scopeWithContents(Builder $query, ?string $lang = null, ?array $fields = null): Builder
     {
         return $query->with(['contents' => function($q) use ($lang, $fields) {
             $q->when($lang !== null, function ($q) use ($lang, $fields) {
@@ -310,7 +299,7 @@ class Entity extends Model
      *
      * @return Builder
      */
-    public function scopeOrderByContent($query, string $field, string $order = 'asc', string $lang = null)
+    public function scopeOrderByContent(Builder $query, string $field, string $order = 'asc', ?string $lang = null): Builder
     {
         if (!$lang) {
             $lang = Config::get('kusikusicms.models.default_language', 'en');
@@ -318,8 +307,7 @@ class Entity extends Model
         return $query->leftJoin("entities_contents as content_order_{$lang}_{$field}", function ($join) use ($field, $lang, $order) {
             $join->on("content_order_{$lang}_{$field}.entity_id", "entities.id")
                 ->where("content_order_{$lang}_{$field}.field", $field)
-                ->where("content_order_{$lang}_{$field}.lang", $lang)
-            ;
+                ->where("content_order_{$lang}_{$field}.lang", $lang);
         })
             ->orderBy("content_order_{$lang}_{$field}.text", $order);
     }
@@ -355,8 +343,7 @@ class Entity extends Model
                 ->where("content_where_{$lang}_{$field}.field", $operator, $field)
                 ->when($lang !== '', function ($q) use ($lang, $field) {
                     return $q->where("content_where_{$lang}_{$field}.lang", $lang);
-                })
-            ;
+                });
         })
             ->where("content_where_{$lang}_{$field}.text", $operator, $value);
     }
@@ -402,7 +389,7 @@ class Entity extends Model
                 'entity_id' => $this->id,
                 'field' => $key,
                 'text' => $value,
-                'lang' => $language ?? Config::get('kusikusicms-models.default_language', 'en')
+                'lang' => $language ?? Config::get('kusikusicms.models.default_language', 'en')
             ];
         }), uniqueBy: ['entity_id', 'field', 'lang'], update: ['text']);
     }
