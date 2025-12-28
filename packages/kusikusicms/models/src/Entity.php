@@ -313,7 +313,7 @@ class Entity extends Model
     public function scopeOrderByContent($query, string $field, string $order = 'asc', string $lang = null)
     {
         if (!$lang) {
-            $lang = Config::get('kusikusicms-models.default_language', 'en');
+            $lang = Config::get('kusikusicms.models.default_language', 'en');
         }
         return $query->leftJoin("entities_contents as content_order_{$lang}_{$field}", function ($join) use ($field, $lang, $order) {
             $join->on("content_order_{$lang}_{$field}.entity_id", "entities.id")
