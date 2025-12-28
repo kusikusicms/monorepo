@@ -12,3 +12,4 @@ apps/dev
 # Ignore lock files in package directories (libraries)
 packages/**/composer.lock
 packages/**/vendor
+**/.phpunit*

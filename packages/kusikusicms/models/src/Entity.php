@@ -44,6 +44,10 @@ class Entity extends Model
      */
     protected $table = 'entities';
 
+    // Eloquent expects string IDs and non-incrementing for short IDs
+    public $incrementing = false;
+    public $keyType = 'string';
+
     /**
      * Create a new factory instance for the Entity model.
      */

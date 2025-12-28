@@ -51,10 +51,6 @@ trait UsesShortId
         });
     }
 
-    // Eloquent expects string IDs and non-incrementing for short IDs
-    public $incrementing = false;
-    public $keyType = 'string';
-
     /**
      * Get the primary key for the model.
      */

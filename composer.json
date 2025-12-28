@@ -3,11 +3,22 @@
   "description": "Monorepo for KusikusiCMS packages and starter app.",
   "type": "metapackage",
   "license": "MIT",
-  "require": {},
+  "require": {
+    "pugx/shortid-php": "^1.3"
+  },
   "require-dev": {
     "orchestra/testbench": "^9.0"
   },
-  "autoload": {},
+  "autoload": {
+    "psr-4": {
+      "KusikusiCMS\\Models\\": "packages/kusikusicms/models/src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "packages/kusikusicms/models/tests/"
+    }
+  },
   "minimum-stability": "dev",
   "prefer-stable": true
 }
