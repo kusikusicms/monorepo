@@ -3,10 +3,11 @@
 /.idea/
 /.vscode/
 /.DS_Store
-composer.lock
 *.log
 .env
 apps/**/vendor/
 apps/**/node_modules/
 apps/**/.env
 apps/dev
+# Ignore lock files in package directories (libraries)
+packages/**/composer.lock
