@@ -3,7 +3,8 @@
 namespace KusikusiCMS\Models\Traits;
 
 use Illuminate\Support\Facades\Config;
-use PUGX\Shortid\Shortid;
+use KusikusiCMS\Models\Support\IdGenerator;
+use KusikusiCMS\Models\Support\ShortIdGenerator;
 
 trait UsesShortId
 {
@@ -23,9 +24,16 @@ trait UsesShortId
             if (empty($provided)) {
                 $attempts = 0;
                 $maxAttempts = (int) Config::get('kusikusicms.models.short_id_max_attempts', 5);
+
+                // Resolve the ID generator from the container; fallback to default implementation
+                $app = function_exists('app') ? app() : null;
+                $generator = $app && $app->bound(IdGenerator::class)
+                    ? $app->make(IdGenerator::class)
+                    : new ShortIdGenerator();
+
                 do {
                     $attempts++;
-                    $id = Shortid::generate($maxLen);
+                    $id = $generator->generate($maxLen);
                     $exists = static::query()->where($keyName, $id)->exists();
                     if (!$exists) {
                         $model->setAttribute($keyName, $id);

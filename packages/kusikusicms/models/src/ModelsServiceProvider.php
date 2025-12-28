@@ -4,6 +4,8 @@ namespace KusikusiCMS\Models;
 
 use Illuminate\Foundation\Console\AboutCommand;
 use Illuminate\Support\ServiceProvider;
+use KusikusiCMS\Models\Support\IdGenerator;
+use KusikusiCMS\Models\Support\ShortIdGenerator;
 
 class ModelsServiceProvider extends ServiceProvider
 {
@@ -13,6 +15,11 @@ class ModelsServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__.'/../config/models.php', 'kusikusicms.models');
+
+        // Bind the ID generator so tests (and apps) can override it if needed
+        $this->app->singleton(IdGenerator::class, function () {
+            return new ShortIdGenerator();
+        });
     }
 
     /**
