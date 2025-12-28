@@ -21,17 +21,17 @@ return new class extends Migration
             $table->integer('position')->default(0);
             $table->integer('depth')->unsigned()->default(0)->index('depth');
             $table->json('tags')->nullable();
-            $table->timestamps();
+            $table->timestampsTz();
             $table->foreign('caller_entity_id')
                 ->references('id')
                 ->on('entities')
-                ->onDelete('cascade')
-                ->onUpdate('cascade');
+                ->cascadeOnDelete()
+                ->cascadeOnUpdate();
             $table->foreign('called_entity_id')
                 ->references('id')
                 ->on('entities')
-                ->onDelete('restrict')
-                ->onUpdate('cascade');
+                ->restrictOnDelete()
+                ->cascadeOnUpdate();
             $table->unique(['caller_entity_id', 'called_entity_id', 'kind'], 'relation_search');
         });
     }

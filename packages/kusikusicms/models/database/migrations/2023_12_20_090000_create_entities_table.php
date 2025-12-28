@@ -21,33 +21,23 @@ return new class extends Migration
             $table->json('langs')->nullable();
             $table->string('parent_entity_id', 26)->index('parent')->nullable();
             $table->boolean('published')->index()->default(true);
-            $table->unsignedBigInteger('created_by')->nullable();
-            $table->unsignedBigInteger('updated_by')->nullable();
-            $table->timestamp('publish_at');
-            $table->timestamp('unpublish_at')->nullable();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete()->cascadeOnUpdate();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete()->cascadeOnUpdate();
+            $table->timestampTz('publish_at')->nullable();
+            $table->timestampTz('unpublish_at')->nullable();
             $table->integer('version')->unsigned()->default(1);
             $table->integer('version_tree')->unsigned()->default(1);
             $table->integer('version_relations')->unsigned()->default(1);
             $table->integer('version_full')->unsigned()->default(1);
-            $table->timestamps();
-            $table->softDeletes();
-            $table->foreign('created_by')
-                ->references('id')
-                ->on('users')
-                ->onDelete('set null')
-                ->onUpdate('cascade');
-            $table->foreign('updated_by')
-                ->references('id')
-                ->on('users')
-                ->onDelete('set null')
-                ->onUpdate('cascade');
+            $table->timestampsTz();
+            $table->softDeletesTz();
         });
         Schema::table('entities', function (Blueprint $table) {
             $table->foreign('parent_entity_id')
                 ->references('id')
                 ->on('entities')
-                ->onDelete('set null')
-                ->onUpdate('cascade');
+                ->nullOnDelete()
+                ->cascadeOnUpdate();
         });
     }
 

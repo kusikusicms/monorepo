@@ -17,25 +17,15 @@ return new class extends Migration
             $table->id('archive_id');
             $table->string('entity_id', 26)->nullable()->index();
             $table->string('kind', 32)->index();
-            $table->unsignedBigInteger('created_by')->nullable();
-            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete()->cascadeOnUpdate();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete()->cascadeOnUpdate();
             $table->json('payload');
-            $table->timestamps();
+            $table->timestampsTz();
             $table->foreign('entity_id')
                 ->references('id')
                 ->on('entities')
-                ->onDelete('set null')
-                ->onUpdate('cascade');
-            $table->foreign('created_by')
-                ->references('id')
-                ->on('users')
-                ->onDelete('set null')
-                ->onUpdate('cascade');
-            $table->foreign('updated_by')
-                ->references('id')
-                ->on('users')
-                ->onDelete('set null')
-                ->onUpdate('cascade');
+                ->nullOnDelete()
+                ->cascadeOnUpdate();
         });
     }
 

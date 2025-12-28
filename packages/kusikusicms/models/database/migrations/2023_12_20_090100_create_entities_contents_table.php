@@ -20,13 +20,13 @@ return new class extends Migration
             $table->char('lang', 5)->index();
             $table->string('field', 32)->index();
             $table->text('text')->nullable();
-            $table->timestamps();
+            $table->timestampsTz();
             $table->unique(['entity_id', 'lang', 'field']);
             $table->foreign('entity_id')
                 ->references('id')
                 ->on('entities')
-                ->onDelete('cascade')
-                ->onUpdate('cascade');
+                ->cascadeOnDelete()
+                ->cascadeOnUpdate();
         });
         switch (env('DB_CONNECTION')) {
             case 'mysql':
