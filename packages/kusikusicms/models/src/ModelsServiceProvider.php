@@ -2,21 +2,31 @@
 
 namespace KusikusiCMS\Models;
 
+use Illuminate\Foundation\Console\AboutCommand;
 use Illuminate\Support\ServiceProvider;
 
 class ModelsServiceProvider extends ServiceProvider
 {
-    public function register()
+    /**
+     * Register services
+     */
+    public function register(): void
     {
-        // Register bindings, config, etc.
         $this->mergeConfigFrom(__DIR__.'/../config/models.php', 'kusikusicms.models');
     }
 
-    public function boot()
+    /**
+     * Boots the service by publishing the package's configuration file to the application's configuration path.
+     */
+    public function boot(): void
     {
-        // Publish config
-        $this->publishes([
-            __DIR__.'/../config/models.php' => config_path('kusikusicms/models.php'),
-        ], 'kusikusicms-config');
+        AboutCommand::add('KusikusiCMS core models package', fn () => ['Version' => '12.0.0-alpha.1']);
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        if ($this->app->runningInConsole()) {
+            $this->publishes([
+                __DIR__
+                .'/../config/models.php' => config_path('kusikusicms/models.php'),
+            ], 'kusikusicms-config');
+        }
     }
 }

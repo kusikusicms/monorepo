@@ -1,5 +1,6 @@
 <?php
 
 return [
-    // Configuration options for KusikusiCMS Models package
+    'short_id_length' => 10,
+    'store_versions' => true
 ];
