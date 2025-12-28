@@ -92,7 +92,7 @@ class Entity extends Model
                 $now = Carbon::now();
                 if (!isset($attributes['published'])) {
                     return 'unknown';
-                } elseif (!$attributes['published'] || !$attributes['publish_at']) {
+                } elseif (!$attributes['published'] || $attributes['publish_at'] === null) {
                     return 'draft';
                 } elseif ($attributes['publish_at'] > $now) {
                     return 'scheduled';

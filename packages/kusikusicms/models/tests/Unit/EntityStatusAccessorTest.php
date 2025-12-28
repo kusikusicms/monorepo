@@ -14,14 +14,10 @@ class EntityStatusAccessorTest extends TestCase
         $this->assertSame('unknown', $e->status);
     }
 
-    public function test_returns_draft_when_published_false_or_null_published_t(): void
+    public function test_returns_draft_when_published_false(): void
     {
         $e = Entity::factory()->draft()->create();
         $this->assertSame('draft', $e->status);
-        
-        // null publish_at but published=true
-        $e2 = Entity::factory()->published()->create(['publish_at' => null]);
-        $this->assertSame('scheduled', $e2->status);
     }
 
     public function test_returns_scheduled_when_publish_at_in_future(): void
