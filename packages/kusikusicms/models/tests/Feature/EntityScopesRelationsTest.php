@@ -34,13 +34,8 @@ class EntityScopesRelationsTest extends TestCase
         $parent = $this->makeEntity('parent');
         $child1 = $this->makeEntity('child1', 'parent');
         $child2 = $this->makeEntity('child2', 'parent');
-        $other  = $this->makeEntity('other');
-
-        // Relations (depth 1 for direct children)
-        $this->relate('child1', 'parent', depth: 1, position: 1);
-        $this->relate('child2', 'parent', depth: 1, position: 2);
-        // Non-child relation should not be returned
-        $this->relate('other', 'parent', depth: 2, position: 1);
+        $other1  = $this->makeEntity('other1');
+        $other1  = $this->makeEntity('other2', 'child1');
 
         $rows = Entity::query()->childrenOf('parent')->orderBy('id')->get();
         $this->assertCount(2, $rows);
@@ -56,7 +51,6 @@ class EntityScopesRelationsTest extends TestCase
     {
         $parent = $this->makeEntity('parent');
         $child  = $this->makeEntity('child', 'parent');
-        $this->relate('child', 'parent', depth: 1, position: 3);
 
         $rows = Entity::query()->parentOf('child')->get();
         $this->assertCount(1, $rows);
@@ -74,10 +68,6 @@ class EntityScopesRelationsTest extends TestCase
         $grand = $this->makeEntity('grand');
         $parent = $this->makeEntity('parent', 'grand');
         $child  = $this->makeEntity('child', 'parent');
-
-        // Relations: child->parent (depth 1), child->grand (depth 2)
-        $this->relate('child', 'parent', depth: 1, position: 1);
-        $this->relate('child', 'grand', depth: 2, position: 1);
 
         $rows = Entity::query()->ancestorsOf('child')->orderBy('id')->get();
         $this->assertCount(2, $rows);

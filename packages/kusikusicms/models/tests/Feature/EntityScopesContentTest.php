@@ -26,7 +26,7 @@ class EntityScopesContentTest extends TestCase
     public function test_with_contents_filters_by_lang_and_fields(): void
     {
         $e = $this->makeEntityWithContents('e1', ['title' => 'Hello', 'body' => 'World'], 'en');
-        $this->makeEntityWithContents('e1', ['title' => 'Hola', 'body' => 'Mundo'], 'es');
+        $this->makeEntityWithContents('e2', ['title' => 'Hola', 'body' => 'Mundo'], 'es');
 
         $rows = Entity::query()->withContents('es', ['title'])->where('id', 'e1')->first();
         $this->assertNotNull($rows);

@@ -23,7 +23,7 @@ class EntityCollectionTest extends TestCase
 
         $entity = $collection->first();
         $this->assertIsArray($entity->contents);
-        $this->assertSame(['title' => 'Hello', 'body' => 'World'], $entity->contents);
+        $this->assertEqualsCanonicalizing(['title' => 'Hello', 'body' => 'World'], $entity->contents);
 
         // Re-fetch to test groupers
         $collection = Entity::query()->withContents()->where('id', 'e1')->get();

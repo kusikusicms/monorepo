@@ -407,29 +407,28 @@ class Entity extends Model
 
     public function flattenContentsByField(): Entity
     {
-        if (isset($this->contents) && $this->contents instanceof EntityContentsCollection) {
-            $this->contents = $this->contents->flattenByField();
-            $this->setRelation('contents', $this->contents);
+        if ($this->relationLoaded('contents') && $this->contents instanceof EntityContentsCollection) {
+            $this->setRelation('contents', $this->contents->flattenByField());
         }
         return $this;
     }
+
     public function groupContentsByField(): Entity
     {
-        if (isset($this->contents) && $this->contents instanceof EntityContentsCollection) {
-            $this->contents = $this->contents->groupByField();
-            $this->setRelation('contents', $this->contents);
+        if ($this->relationLoaded('contents') && $this->contents instanceof EntityContentsCollection) {
+            $this->setRelation('contents', $this->contents->groupByField());
         }
         return $this;
     }
 
     public function groupContentsByLang(): Entity
     {
-        if (isset($this->contents) && $this->contents instanceof EntityContentsCollection) {
-            $this->contents = $this->contents->groupByLang();
-            $this->setRelation('contents', $this->contents);
+        if ($this->relationLoaded('contents') && $this->contents instanceof EntityContentsCollection) {
+            $this->setRelation('contents', $this->contents->groupByLang());
         }
         return $this;
     }
+    
     /**
      * Get a specific key of the entity props field, using dot notation
      *
