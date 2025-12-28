@@ -44,16 +44,26 @@ Entity::query()->orderByContent('title', 'desc')->get();
 ```
 
 ### `whereContent(string $field, string $param2, ?string $param3 = null, ?string $param4 = null): Builder`
-Filter by content. Current implementation behavior is characterized by tests and may differ from the intended API.
-- Current behavior allows passing the operator as the 2nd arg (e.g., `'like'`) and applies it in the join building.
-- Intended (future) behavior: compare `field = :field` and apply the operator to `text` (e.g., `text like :value`).
+Filter by content using field equality and an operator applied to the `text` column. Two overloads are supported:
+- Overload A: `whereContent($field, $value, ?$lang = null)` → compares `field = :field` and `text = :value`.
+- Overload B: `whereContent($field, $operator, $value, ?$lang = null)` → compares `field = :field` and `text $operator :value`.
 
+Rules:
+- Language resolution: `$lang === null` uses `config('kusikusicms.models.default_language')`; `$lang === ''` searches across any language.
+- Operators: `=`, `!=`, `<>`, `like`, `not like`, `ilike`, `rlike` (driver support varies).
+- LIKE convenience: if you use `like`/`not like` without `%`, the value is wrapped as `%value%` automatically.
+
+Examples:
 ```
-// Current (works today):
+// Equals (default operator)
+Entity::query()->whereContent('title', 'Hello')->get();
+
+// LIKE (starts with)
 Entity::query()->whereContent('title', 'like', 'Hello%')->get();
-```
 
-> Note: The intended behavior is covered by a skipped spec test and will be implemented in a future minor update.
+// Any language
+Entity::query()->whereContent('title', 'like', 'Hola%', '')->get();
+```
 
 ## Relation graph scopes
 

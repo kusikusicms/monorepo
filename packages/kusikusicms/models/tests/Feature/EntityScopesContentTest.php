@@ -59,13 +59,12 @@ class EntityScopesContentTest extends TestCase
         $this->assertNotContains('y', $rows);
     }
 
-    public function test_where_content_intended_behavior_is_skipped_until_scope_is_fixed(): void
+    public function test_where_content_intended_behavior_now_passes(): void
     {
-        $this->markTestSkipped('Intended behavior: compare field with = and apply operator to text only. Implement after scope fix.');
         $this->makeEntityWithContents('x', ['title' => 'Laravel'], 'en');
         $this->makeEntityWithContents('y', ['title' => 'Symfony'], 'en');
 
-        // Intended API
+        // Intended API: field equality and operator on text
         $rows = Entity::query()->whereContent('title', 'like', 'Lara%')->pluck('id')->all();
         $this->assertSame(['x'], $rows);
     }

@@ -22,6 +22,8 @@ return new class extends Migration
             $table->text('text')->nullable();
             $table->timestampsTz();
             $table->unique(['entity_id', 'lang', 'field']);
+            // Composite index to speed up whereContent(field, operator, value, lang) lookups
+            $table->index(['field', 'lang'], 'entities_contents_field_lang_index');
             $table->foreign('entity_id')
                 ->references('id')
                 ->on('entities')

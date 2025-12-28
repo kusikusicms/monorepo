@@ -27,7 +27,7 @@ class ModelsServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        AboutCommand::add('KusikusiCMS core models package', fn () => ['Version' => '12.0.0-alpha.1']);
+        AboutCommand::add('KusikusiCMS core models package', fn () => ['Version' => '12.0.0-alpha.2']);
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         if ($this->app->runningInConsole()) {
             $this->publishes([

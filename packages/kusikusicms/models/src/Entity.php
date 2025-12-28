@@ -323,29 +323,36 @@ class Entity extends Model
      *
      * @return Builder
      */
-    public function scopeWhereContent(Builder $query, string $field, string $param2, string $param3 = null, string $param4 = null)
+    public function scopeWhereContent(Builder $query, string $field, string $param2, string $param3 = null, string $param4 = null): Builder
     {
-        if (Str::contains($param2, ['=', 'like'])) {
-            $operator = $param2;
-            $value = $param3;
+        // Determine overload: operator form or value form
+        $opList = ['=', '!=', '<>', 'like', 'not like', 'ilike', 'rlike'];
+        if (in_array(strtolower($param2), $opList, true)) {
+            $operator = strtolower($param2);
+            $value = (string) ($param3 ?? '');
             $lang = $param4;
         } else {
             $operator = '=';
-            $value = $param2;
+            $value = (string) $param2;
             $lang = $param3;
         }
-        if (!$lang) {
-            $lang = '';
+
+        // Resolve language: null -> default; '' -> any language
+        if ($lang === null) {
+            $lang = Config::get('kusikusicms.models.default_language', 'en');
         }
-        $value = $operator === 'like' ? "%$value%" : $value;
-        return $query->leftJoin("entities_contents as content_where_{$lang}_{$field}", function ($join) use ($field, $operator, $lang, $value) {
-            $join->on("content_where_{$lang}_{$field}.entity_id", "entities.id")
-                ->where("content_where_{$lang}_{$field}.field", $operator, $field)
-                ->when($lang !== '', function ($q) use ($lang, $field) {
-                    return $q->where("content_where_{$lang}_{$field}.lang", $lang);
-                });
-        })
-            ->where("content_where_{$lang}_{$field}.text", $operator, $value);
+
+        // Normalize LIKE wildcards if caller didn't pass any
+        if (in_array($operator, ['like', 'not like', 'ilike'], true) && !str_contains($value, '%')) {
+            $value = "%{$value}%";
+        }
+
+        // Use whereHas on relation to avoid alias collisions and ensure field equality
+        return $query->whereHas('contents', function ($q) use ($field, $operator, $value, $lang) {
+            $q->where('field', '=', $field)
+              ->when($lang !== '', fn ($q2) => $q2->where('lang', $lang))
+              ->where('text', $operator, $value);
+        });
     }
 
     /****************

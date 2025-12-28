@@ -2,6 +2,18 @@
 
 All notable changes to this package will be documented in this file.
 
+## 12.0.0-alpha.2 — 2025-12-28
+
+- Refined `whereContent` scope semantics:
+  - Always compares `field = :field` and applies the operator to `text` only
+  - Uses `whereHas` instead of joins to avoid alias collisions and hydration side-effects
+  - Language resolution: `null` → default config, `''` → any language
+  - LIKE values auto-wrapped with `%` when no wildcard is provided
+- Tests updated to assert the corrected behavior (previous spec is now active)
+- Documentation updated (README and docs/models-and-scopes.md) to reflect operators and language handling
+- Performance: added composite index on `(field, lang)` to `entities_contents`
+- About version updated to 12.0.0-alpha.2
+
 ## 12.0.0-alpha.1 — 2025-12-28
 
 Initial Laravel 12–ready alpha with the following highlights:

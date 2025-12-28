@@ -6,7 +6,7 @@ This package provides the core Eloquent models and helpers for KusikusiCMS on La
 - Collections helpers for transforming related contents
 - Factory states for realistic testing/seed data
 
-Version: 12.0.0-alpha.1
+Version: 12.0.0-alpha.2
 
 ## Installation
 
