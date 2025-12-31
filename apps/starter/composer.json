@@ -9,10 +9,7 @@
         "php": "^8.2",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
-        "kusikusicms/models": "^0.1",
-        "kusikusicms/website": "^0.1",
-        "kusikusicms/media": "^0.1",
-        "kusikusicms/admin": "^0.1"
+        "kusikusicms/models": "^12.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
