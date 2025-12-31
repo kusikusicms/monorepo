@@ -393,7 +393,7 @@ class Entity extends Model
      *
      * @throws \Exception
      */
-    public function createContent(array $fieldsAndValues, string $language = null): int
+    public function createContents(array $fieldsAndValues, string $language = null): int
     {
         return EntityContent::upsert(Arr::map($fieldsAndValues, function (string $value, string $key) use ($language) {
             return [

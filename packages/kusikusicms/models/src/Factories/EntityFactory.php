@@ -102,7 +102,7 @@ class EntityFactory extends Factory
     public function withContents(array $fields, ?string $lang = null): self
     {
         return $this->afterCreating(function (Entity $entity) use ($fields, $lang) {
-            $entity->createContent($fields, $lang);
+            $entity->createContents($fields, $lang);
         });
     }
 }
