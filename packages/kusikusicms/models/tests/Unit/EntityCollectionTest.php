@@ -15,7 +15,7 @@ class EntityCollectionTest extends TestCase
         EntityContent::create(['entity_id' => 'e1', 'lang' => 'en', 'field' => 'title', 'text' => 'Hello']);
         EntityContent::create(['entity_id' => 'e1', 'lang' => 'en', 'field' => 'body', 'text' => 'World']);
 
-        $collection = Entity::query()->withContents('en')->where('id', 'e1')->get();
+        $collection = Entity::query()->withContents(['lang' => 'en'])->where('id', 'e1')->get();
 
         // flattenContentsByField should return the same collection for chaining
         $returned = $collection->flattenContentsByField();

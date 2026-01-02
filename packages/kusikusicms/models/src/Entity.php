@@ -273,18 +273,23 @@ class Entity extends Model
     }
 
     /**
-     * Scope to include rawContents relation, filtered by lang and fields.
+     * Scope to include rawContents relation, filtered by options.
+     *
+     * Options:
+     * - 'lang'   => string|null Language code to filter by. When null, no lang filter is applied.
+     * - 'fields' => string|array|null One field or list of fields to include.
      *
      * @param  Builder  $query
-     * @param  string|null  $lang
-     * @param  array|null  $fields
-     *
+     * @param  array|null $options
      * @return Builder
      */
-    public function scopeWithContents(Builder $query, ?string $lang = null, ?array $fields = null): Builder
+    public function scopeWithContents(Builder $query, ?array $options = null): Builder
     {
+        $lang = $options['lang'] ?? null;
+        $fields = $options['fields'] ?? null;
+
         return $query->with(['rawContents' => function($q) use ($lang, $fields) {
-            $q->when($lang !== null, function ($q) use ($lang, $fields) {
+            $q->when($lang !== null, function ($q) use ($lang) {
                 return $q->where('lang', $lang);
             });
             $q->when($fields !== null, function ($q) use ($fields) {

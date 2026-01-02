@@ -28,7 +28,7 @@ class EntityScopesContentTest extends TestCase
         $e = $this->makeEntityWithContents('e1', ['title' => 'Hello', 'body' => 'World'], 'en');
         $this->makeEntityWithContents('e2', ['title' => 'Hola', 'body' => 'Mundo'], 'es');
 
-        $e2 = Entity::query()->withContents('es', ['title'])->where('id', 'e2')->first();
+        $e2 = Entity::query()->withContents(['lang' => 'es', 'fields' => ['title']])->where('id', 'e2')->first();
         $this->assertNotNull($e2);
         $this->assertCount(1, $e2->rawContents);
         $this->assertSame('es', $e2->rawContents->first()->lang);
