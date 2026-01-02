@@ -28,11 +28,10 @@ class EntityScopesContentTest extends TestCase
         $e = $this->makeEntityWithContents('e1', ['title' => 'Hello', 'body' => 'World'], 'en');
         $this->makeEntityWithContents('e2', ['title' => 'Hola', 'body' => 'Mundo'], 'es');
 
-        $e2 = Entity::query()->withContents(['lang' => 'es', 'fields' => ['title']])->where('id', 'e2')->first();
+        $e2 = Entity::query()->withContents(['lang' => 'es', 'fields' => ['title', 'body']])->where('id', 'e2')->first();
         $this->assertNotNull($e2);
-        $this->assertCount(1, $e2->rawContents);
-        $this->assertSame('es', $e2->rawContents->first()->lang);
-        $this->assertSame('title', $e2->rawContents->first()->field);
+        $this->assertSame('Hola', $e2->contents->title);
+        $this->assertSame('Mundo', $e2->contents->body);
     }
 
     public function test_order_by_content_uses_configured_default_language_and_respects_order(): void
