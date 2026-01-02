@@ -68,19 +68,20 @@ class Entity extends Model
     ];
 
     /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts
-        = [
+    * Get the attributes that should be cast.
+    *
+    * @return array<string, string>
+    */
+    protected function casts(): array
+    {
+        return [
             'props' => 'array',
             'publish_at' => 'datetime',
             'unpublish_at' => 'datetime',
             'langs' => 'array',
             'published' => 'boolean',
         ];
-
+    }
     /**
      * status attribute
      * @return Attribute
