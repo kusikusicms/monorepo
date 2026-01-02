@@ -290,21 +290,19 @@ class Entity extends Model
      */
     public function rawContents(): HasMany
     {
-        return $this
-            ->hasMany(EntityContent::class, 'entity_id', 'id');
+        return $this->hasMany(EntityContent::class, 'entity_id', 'id');
     }
 
     /**
-     * The contentsSupport relationship. The same as rawContents but used by the scopeWithContents method
+     * Other contents relationships for special ways to access the contents of an entity.
      */
     public function contentsSupport(): HasMany
     {
-        return $this
-            ->hasMany(EntityContent::class, 'entity_id', 'id');
+        return $this->hasMany(EntityContent::class, 'entity_id', 'id');
     }
      
     /**
-     * Scope to include contents relation, filtered by options.
+     * Scope to include contents relation, filtered by options in a dev frienldy format.
      *
      * Options:
      * - 'lang'   => string|null Language code to filter by. When null, no lang filter is applied.
@@ -333,7 +331,7 @@ class Entity extends Model
     private $lastUsedLang;
     
     /** 
-     * Attribute to return the contents of the entity IN A DEV FRIENDLY FORMAT. 
+     * Attribute to return the contents of the entity in a dev-friendly format. 
      */
     protected function contents(): Attribute
     {
@@ -356,6 +354,51 @@ class Entity extends Model
      * Always include the contents accessor
      */
     protected $appends = ['contents'];
+
+    /**
+     * Attribute to return the contents of the entity grouped by field.
+     */
+    protected function contentsByField(): Attribute
+    {
+        return Attribute::make(
+            get: function (mixed $value, array $attributes) {
+                if (! $this->relationLoaded('rawContents')) {
+                    return [];
+                } else {
+                    return $this->rawContents->reduce(function ($carry, $item) {
+                        if (!isset($carry[$item->field])) {
+                            $carry[$item->field] = [];
+                        }
+                        $carry[$item->field][$item->lang] = $item->text;
+                        return $carry;
+                    }, []);
+                }
+            }
+        );
+    }
+    /**
+     * Attribute to return the contents of the entity grouped by lang.
+     */
+    protected function contentsByLang(): Attribute
+    {
+        return Attribute::make(
+            get: function (mixed $value, array $attributes) {
+                if (! $this->relationLoaded('rawContents')) {
+                    return [];
+                } else {
+                    return $this->rawContents->reduce(function ($carry, $item) {
+                        if (!isset($carry[$item->lang])) {
+                            $carry[$item->lang] = [];
+                        }
+                        $carry[$item->lang][$item->field] = $item->text;
+                        return $carry;
+                    }, []);
+                }
+            }
+        );
+    }
+    
+    
 
     /**
      * Scope to order the result by a content field.

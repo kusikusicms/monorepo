@@ -37,9 +37,9 @@ class ContentsClass extends StdClass
         return isset($this->fields[$name]);
     }
     
-    public function __toString()
+    public function __toString(): string
     {
-        return 'json_encode($this->fields);';
+        return json_encode($this);
     }
-    
+
 }
