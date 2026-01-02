@@ -273,7 +273,7 @@ class Entity extends Model
     }
 
     /**
-     * Scope to include contents relation, filtered by lang and fields.
+     * Scope to include rawContents relation, filtered by lang and fields.
      *
      * @param  Builder  $query
      * @param  string|null  $lang
@@ -283,7 +283,7 @@ class Entity extends Model
      */
     public function scopeWithContents(Builder $query, ?string $lang = null, ?array $fields = null): Builder
     {
-        return $query->with(['contents' => function($q) use ($lang, $fields) {
+        return $query->with(['rawContents' => function($q) use ($lang, $fields) {
             $q->when($lang !== null, function ($q) use ($lang, $fields) {
                 return $q->where('lang', $lang);
             });
@@ -353,7 +353,7 @@ class Entity extends Model
         }
 
         // Use whereHas on relation to avoid alias collisions and ensure field equality
-        return $query->whereHas('contents', function ($q) use ($field, $operator, $value, $lang) {
+        return $query->whereHas('rawContents', function ($q) use ($field, $operator, $value, $lang) {
             $q->where('field', '=', $field)
               ->when($lang !== '', fn ($q2) => $q2->where('lang', $lang))
               ->where('text', $operator, $value);
@@ -374,9 +374,9 @@ class Entity extends Model
     }
 
     /**
-     * The contents relationship
+     * The rawContents relationship
      */
-    public function contents(): HasMany
+    public function rawContents(): HasMany
     {
         return $this
             ->hasMany(EntityContent::class, 'entity_id', 'id');
@@ -387,10 +387,10 @@ class Entity extends Model
      ***************/
 
     /**
-     * Create contents for the current Entity.
+     * Create rawContents for the current Entity.
      *
      * @param  array  $fieldsAndValues  An associative array of fields and their value
-     * @param  string|null  $language The id of the language of the contents
+     * @param  string|null  $language The id of the language of the rawContents
      *
      * @throws \Exception
      */
@@ -408,24 +408,33 @@ class Entity extends Model
 
     public function flattenContentsByField(): Entity
     {
-        if ($this->relationLoaded('contents') && $this->contents instanceof EntityContentsCollection) {
-            $this->setRelation('contents', $this->contents->flattenByField());
+        if ($this->relationLoaded('rawContents')) {
+            $raw = $this->getRelation('rawContents');
+            if ($raw instanceof EntityContentsCollection) {
+                $this->setRelation('rawContents', $raw->flattenByField());
+            }
         }
         return $this;
     }
 
     public function groupContentsByField(): Entity
     {
-        if ($this->relationLoaded('contents') && $this->contents instanceof EntityContentsCollection) {
-            $this->setRelation('contents', $this->contents->groupByField());
+        if ($this->relationLoaded('rawContents')) {
+            $raw = $this->getRelation('rawContents');
+            if ($raw instanceof EntityContentsCollection) {
+                $this->setRelation('rawContents', $raw->groupByField());
+            }
         }
         return $this;
     }
 
     public function groupContentsByLang(): Entity
     {
-        if ($this->relationLoaded('contents') && $this->contents instanceof EntityContentsCollection) {
-            $this->setRelation('contents', $this->contents->groupByLang());
+        if ($this->relationLoaded('rawContents')) {
+            $raw = $this->getRelation('rawContents');
+            if ($raw instanceof EntityContentsCollection) {
+                $this->setRelation('rawContents', $raw->groupByLang());
+            }
         }
         return $this;
     }

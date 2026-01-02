@@ -11,7 +11,7 @@ use KusikusiCMS\Models\EntityContent;
 class EntityContentsCollection extends Collection
 {
     /**
-     * Flatten contents to an associative array keyed by field: value is text for the current language.
+     * Flatten rawContents to an associative array keyed by field: value is text for the current language.
      *
      * @return array<string, string>
      */
@@ -24,7 +24,7 @@ class EntityContentsCollection extends Collection
     }
 
     /**
-     * Group contents by field, each containing an associative array of lang => text.
+     * Group rawContents by field, each containing an associative array of lang => text.
      *
      * @return array<string, array<string, string>>
      */
@@ -40,7 +40,7 @@ class EntityContentsCollection extends Collection
     }
 
     /**
-     * Group contents by language, each containing an associative array of field => text.
+     * Group rawContents by language, each containing an associative array of field => text.
      *
      * @return array<string, array<string, string>>
      */

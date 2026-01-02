@@ -11,7 +11,7 @@ use KusikusiCMS\Models\Entity;
 class EntityCollection extends Collection
 {
     /**
-     * Flatten the attached contents relation on each entity into a single associative array keyed by field.
+     * Flatten the attached rawContents relation on each entity into a single associative array keyed by field.
      *
      * @return Collection<int, Entity> $this for chaining
      */
@@ -24,7 +24,7 @@ class EntityCollection extends Collection
     }
 
     /**
-     * Group the attached contents relation by field with per-lang values.
+     * Group the attached rawContents relation by field with per-lang values.
      *
      * @return Collection<int, Entity> $this for chaining
      */
@@ -37,7 +37,7 @@ class EntityCollection extends Collection
     }
 
     /**
-     * Group the attached contents relation by language with per-field values.
+     * Group the attached rawContents relation by language with per-field values.
      *
      * @return Collection<int, Entity> $this for chaining
      */

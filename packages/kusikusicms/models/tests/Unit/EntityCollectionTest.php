@@ -22,23 +22,23 @@ class EntityCollectionTest extends TestCase
         $this->assertSame($collection, $returned);
 
         $entity = $collection->first();
-        $this->assertIsArray($entity->contents);
-        $this->assertEqualsCanonicalizing(['title' => 'Hello', 'body' => 'World'], $entity->contents);
+        $this->assertIsArray($entity->rawContents);
+        $this->assertEqualsCanonicalizing(['title' => 'Hello', 'body' => 'World'], $entity->rawContents);
 
         // Re-fetch to test groupers
         $collection = Entity::query()->withContents()->where('id', 'e1')->get();
         $returned2 = $collection->groupContentsByField();
         $this->assertSame($collection, $returned2);
         $entity = $collection->first();
-        $this->assertArrayHasKey('title', $entity->contents);
-        $this->assertArrayHasKey('en', $entity->contents['title']);
+        $this->assertArrayHasKey('title', $entity->rawContents);
+        $this->assertArrayHasKey('en', $entity->rawContents['title']);
 
         // Group by language
         $collection = Entity::query()->withContents()->where('id', 'e1')->get();
         $returned3 = $collection->groupContentsByLang();
         $this->assertSame($collection, $returned3);
         $entity = $collection->first();
-        $this->assertArrayHasKey('en', $entity->contents);
-        $this->assertArrayHasKey('title', $entity->contents['en']);
+        $this->assertArrayHasKey('en', $entity->rawContents);
+        $this->assertArrayHasKey('title', $entity->rawContents['en']);
     }
 }

@@ -54,7 +54,7 @@ $entity = Entity::create(['model' => 'Article']);
 
 ### Attach contents
 ```
-$entity->createContent([
+$entity->createContents([
   'title' => 'Hello',
   'body'  => 'World',
 ]); // defaults to config('kusikusicms.models.default_language')

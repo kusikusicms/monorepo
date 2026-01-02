@@ -16,11 +16,11 @@ echo $e->status; // "published"
 ```
 
 ## Content helpers
-### `Entity::createContent(array $fields, ?string $lang = null): int`
+### `Entity::createContents(array $fields, ?string $lang = null): int`
 Upserts multiple fields for the entity in the given (or default) language.
 
 ```
-$e->createContent(['title' => 'Hello', 'body' => 'World'], 'en');
+$e->createContents(['title' => 'Hello', 'body' => 'World'], 'en');
 ```
 
 ## Scopes (Entity)

@@ -95,7 +95,7 @@ class EntityFactory extends Factory
     }
 
     /**
-     * Attach contents after creating using provided fields (uses default language from config).
+     * Attach rawContents after creating using provided fields (uses default language from config).
      *
      * Example: Entity::factory()->withContents(['title' => 'Hello'])->create();
      */

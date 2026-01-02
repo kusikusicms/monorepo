@@ -30,9 +30,9 @@ class EntityScopesContentTest extends TestCase
 
         $e2 = Entity::query()->withContents('es', ['title'])->where('id', 'e2')->first();
         $this->assertNotNull($e2);
-        $this->assertCount(1, $e2->contents);
-        $this->assertSame('es', $e2->contents->first()->lang);
-        $this->assertSame('title', $e2->contents->first()->field);
+        $this->assertCount(1, $e2->rawContents);
+        $this->assertSame('es', $e2->rawContents->first()->lang);
+        $this->assertSame('title', $e2->rawContents->first()->field);
     }
 
     public function test_order_by_content_uses_configured_default_language_and_respects_order(): void
