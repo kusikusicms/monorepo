@@ -12,8 +12,7 @@ class TestCase extends BaseTestCase
     protected function getPackageProviders($app): array
     {
         return [
-            \KusikusiCMS\Models\ModelsServiceProvider::class,
-            \KusikusiCMS\Models\EntityEventsServiceProvider::class,
+            \KusikusiCMS\Models\ModelsServiceProvider::class
         ];
     }
 
