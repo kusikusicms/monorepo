@@ -16,11 +16,11 @@ echo $e->status; // "published"
 ```
 
 ## Content helpers
-### `Entity::createContent(array $fields, ?string $lang = null): int`
+### `Entity::createContents(array $fields, ?string $lang = null): int`
 Upserts multiple fields for the entity in the given (or default) language.
 
 ```
-$e->createContent(['title' => 'Hello', 'body' => 'World'], 'en');
+$e->createContents(['title' => 'Hello', 'body' => 'World'], 'en');
 ```
 
 ## Scopes (Entity)
@@ -31,10 +31,11 @@ Filter by model ID string.
 Entity::query()->ofModel('Article')->get();
 ```
 
-### `withContents(?string $lang = null, ?array $fields = null): Builder`
+### `withContents(?array $options = null): Builder`
 Eager load the `contents` relation optionally filtered by language and field(s).
+Options keys: `lang` (string|null) and `fields` (string|array|null).
 ```
-Entity::query()->withContents('es', ['title', 'summary'])->get();
+Entity::query()->withContents(['lang' => 'es', 'fields' => ['title', 'summary']])->get();
 ```
 
 ### `orderByContent(string $field, string $order = 'asc', ?string $lang = null): Builder`

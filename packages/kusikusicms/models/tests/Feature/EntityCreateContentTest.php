@@ -12,13 +12,13 @@ class EntityCreateContentTest extends TestCase
     public function test_upserts_multiple_fields_and_returns_affected_rows(): void
     {
         $e = Entity::create(['id' => 'e1', 'model' => 'Entity']);
-        $count = $e->createContent(['title' => 'Hello', 'body' => 'World'], 'en');
+        $count = $e->createContents(['title' => 'Hello', 'body' => 'World'], 'en');
         $this->assertGreaterThanOrEqual(2, $count);
         $this->assertDatabaseHas('entities_contents', ['entity_id' => 'e1', 'lang' => 'en', 'field' => 'title', 'text' => 'Hello']);
         $this->assertDatabaseHas('entities_contents', ['entity_id' => 'e1', 'lang' => 'en', 'field' => 'body', 'text' => 'World']);
 
         // Upsert should update text
-        $count2 = $e->createContent(['title' => 'Hello 2'], 'en');
+        $count2 = $e->createContents(['title' => 'Hello 2'], 'en');
         $this->assertGreaterThanOrEqual(1, $count2);
         $this->assertDatabaseHas('entities_contents', ['entity_id' => 'e1', 'lang' => 'en', 'field' => 'title', 'text' => 'Hello 2']);
     }
@@ -27,7 +27,7 @@ class EntityCreateContentTest extends TestCase
     {
         Config::set('kusikusicms.models.default_language', 'es');
         $e = Entity::create(['id' => 'e2', 'model' => 'Entity']);
-        $e->createContent(['title' => 'Titulo']);
+        $e->createContents(['title' => 'Titulo']);
         $this->assertDatabaseHas('entities_contents', ['entity_id' => 'e2', 'lang' => 'es', 'field' => 'title', 'text' => 'Titulo']);
     }
 }

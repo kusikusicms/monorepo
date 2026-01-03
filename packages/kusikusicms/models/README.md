@@ -54,7 +54,7 @@ $entity = Entity::create(['model' => 'Article']);
 
 ### Attach contents
 ```
-$entity->createContent([
+$entity->createContents([
   'title' => 'Hello',
   'body'  => 'World',
 ]); // defaults to config('kusikusicms.models.default_language')
@@ -63,7 +63,7 @@ $entity->createContent([
 ### Query with content-aware scopes
 - Load related contents with optional filters:
 ```
-Entity::query()->withContents('es', ['title'])->get();
+Entity::query()->withContents(['lang' => 'es', 'fields' => ['title']])->get();
 ```
 - Order by a content field (uses configured default language if omitted):
 ```
@@ -109,7 +109,7 @@ See docs/events.md for the full list.
 
 When loading `contents`, use collection helpers to transform related rows into convenient arrays:
 ```
-$entities = Entity::withContents('en')->get();
+$entities = Entity::withContents(['lang' => 'en'])->get();
 $entities->flattenContentsByField();      // ['title' => 'Hello', 'body' => 'World']
 $entities->groupContentsByField();        // ['title' => ['en' => 'Hello'], ...]
 $entities->groupContentsByLang();         // ['en' => ['title' => 'Hello'], ...]

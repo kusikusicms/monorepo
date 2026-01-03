@@ -32,6 +32,8 @@ use KusikusiCMS\Models\Factories\EntityFactory;
 use KusikusiCMS\Models\Support\EntityCollection;
 use KusikusiCMS\Models\Support\EntityContentsCollection;
 use KusikusiCMS\Models\Traits\UsesShortId;
+use KusikusiCMS\Models\Support\ContentsClass;
+use stdClass;
 
 class Entity extends Model
 {
@@ -44,7 +46,9 @@ class Entity extends Model
      */
     protected $table = 'entities';
 
-    // Eloquent expects string IDs and non-incrementing for short IDs
+    /** 
+     * Eloquent expects string IDs and non-incrementing for short IDs
+     */
     public $incrementing = false;
     public $keyType = 'string';
 
@@ -68,19 +72,20 @@ class Entity extends Model
     ];
 
     /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts
-        = [
+    * Get the attributes that should be cast.
+    *
+    * @return array<string, string>
+    */
+    protected function casts(): array
+    {
+        return [
             'props' => 'array',
             'publish_at' => 'datetime',
             'unpublish_at' => 'datetime',
             'langs' => 'array',
             'published' => 'boolean',
         ];
-
+    }
     /**
      * status attribute
      * @return Attribute
@@ -191,9 +196,11 @@ class Entity extends Model
         self::refreshAncestorRelationsOfEntity($this);
     }
 
-    /**********
-     * SCOPES *
-     **********/
+    /**************************************************************************
+     * 
+     * HIERARCHY SCOPES
+     * 
+     **************************************************************************/
 
     /**
      * Scope a query to only include entities of a given modelId.
@@ -271,19 +278,48 @@ class Entity extends Model
             ->addSelect('ancestor.tags as ancestor.tags');
     }
 
+    /***************************************************************************
+     * 
+     * CONTENTS RELATED SCOPES AND ATTRIBUTES
+     * 
+     * *************************************************************************
+     */
+
     /**
-     * Scope to include contents relation, filtered by lang and fields.
+     * The rawContents relationship, used for a standard way to access the contents of an entity.
+     */
+    public function rawContents(): HasMany
+    {
+        return $this->hasMany(EntityContent::class, 'entity_id', 'id');
+    }
+
+    /**
+     * Other contents relationships for special ways to access the contents of an entity.
+     */
+    public function contentsSupport(): HasMany
+    {
+        return $this->hasMany(EntityContent::class, 'entity_id', 'id');
+    }
+     
+    /**
+     * Scope to include contents relation, filtered by options in a dev frienldy format.
+     *
+     * Options:
+     * - 'lang'   => string|null Language code to filter by. When null, no lang filter is applied.
+     * - 'fields' => string|array|null One field or list of fields to include.
      *
      * @param  Builder  $query
-     * @param  string|null  $lang
-     * @param  array|null  $fields
-     *
+     * @param  array|null $options
      * @return Builder
      */
-    public function scopeWithContents(Builder $query, ?string $lang = null, ?array $fields = null): Builder
+    public function scopeWithContents(Builder $query, ?array $options = null): Builder
     {
-        return $query->with(['contents' => function($q) use ($lang, $fields) {
-            $q->when($lang !== null, function ($q) use ($lang, $fields) {
+        $lang = $options['lang'] ?? Config::get('kusikusicms.models.default_language', 'en');
+        $this->lastUsedLang = $lang;
+        $fields = $options['fields'] ?? null;
+
+        return $query->with(['contentsSupport' => function($q) use ($lang, $fields) {
+            $q->when($lang !== null, function ($q) use ($lang) {
                 return $q->where('lang', $lang);
             });
             $q->when($fields !== null, function ($q) use ($fields) {
@@ -292,6 +328,77 @@ class Entity extends Model
             });
         }]);
     }
+    private $lastUsedLang;
+    
+    /** 
+     * Attribute to return the contents of the entity in a dev-friendly format. 
+     */
+    protected function contents(): Attribute
+    {
+        return Attribute::make(
+            get: function (mixed $value, array $attributes) {
+                if (! $this->relationLoaded('contentsSupport')) {
+                    return new ContentsClass();
+                } else {
+                    $this->makeHidden('contentsSupport');
+                    return $this->contentsSupport->reduce(function ($carry, $item) {
+                        $carry->{$item->field} = $item->text;
+                        return $carry;
+                    }, new ContentsClass);
+                }
+            }
+        );
+    }
+
+    /**
+     * Always include the contents accessor
+     */
+    protected $appends = ['contents'];
+
+    /**
+     * Attribute to return the contents of the entity grouped by field.
+     */
+    protected function contentsByField(): Attribute
+    {
+        return Attribute::make(
+            get: function (mixed $value, array $attributes) {
+                if (! $this->relationLoaded('rawContents')) {
+                    return [];
+                } else {
+                    return $this->rawContents->reduce(function ($carry, $item) {
+                        if (!isset($carry[$item->field])) {
+                            $carry[$item->field] = [];
+                        }
+                        $carry[$item->field][$item->lang] = $item->text;
+                        return $carry;
+                    }, []);
+                }
+            }
+        );
+    }
+    /**
+     * Attribute to return the contents of the entity grouped by lang.
+     */
+    protected function contentsByLang(): Attribute
+    {
+        return Attribute::make(
+            get: function (mixed $value, array $attributes) {
+                if (! $this->relationLoaded('rawContents')) {
+                    return [];
+                } else {
+                    return $this->rawContents->reduce(function ($carry, $item) {
+                        if (!isset($carry[$item->lang])) {
+                            $carry[$item->lang] = [];
+                        }
+                        $carry[$item->lang][$item->field] = $item->text;
+                        return $carry;
+                    }, []);
+                }
+            }
+        );
+    }
+    
+    
 
     /**
      * Scope to order the result by a content field.
@@ -306,7 +413,7 @@ class Entity extends Model
     public function scopeOrderByContent(Builder $query, string $field, string $order = 'asc', ?string $lang = null): Builder
     {
         if (!$lang) {
-            $lang = Config::get('kusikusicms.models.default_language', 'en');
+            $lang = $this->lastUsedLang ?? Config::get('kusikusicms.models.default_language', 'en');
         }
         return $query->leftJoin("entities_contents as content_order_{$lang}_{$field}", function ($join) use ($field, $lang, $order) {
             $join->on("content_order_{$lang}_{$field}.entity_id", "entities.id")
@@ -341,9 +448,8 @@ class Entity extends Model
             $lang = $param3;
         }
 
-        // Resolve language: null -> default; '' -> any language
         if ($lang === null) {
-            $lang = Config::get('kusikusicms.models.default_language', 'en');
+            $lang = $this->lastUsedLang ?? Config::get('kusikusicms.models.default_language', 'en');
         }
 
         // Normalize LIKE wildcards if caller didn't pass any
@@ -352,7 +458,7 @@ class Entity extends Model
         }
 
         // Use whereHas on relation to avoid alias collisions and ensure field equality
-        return $query->whereHas('contents', function ($q) use ($field, $operator, $value, $lang) {
+        return $query->whereHas('contentsSupport', function ($q) use ($field, $operator, $value, $lang) {
             $q->where('field', '=', $field)
               ->when($lang !== '', fn ($q2) => $q2->where('lang', $lang))
               ->where('text', $operator, $value);
@@ -372,24 +478,15 @@ class Entity extends Model
             ->hasMany(EntityRelation::class, 'caller_entity_id', 'id');
     }
 
-    /**
-     * The contents relationship
-     */
-    public function contents(): HasMany
-    {
-        return $this
-            ->hasMany(EntityContent::class, 'entity_id', 'id');
-    }
-
     /****************
      * Methods
      ***************/
 
     /**
-     * Create contents for the current Entity.
+     * Create rawContents for the current Entity.
      *
      * @param  array  $fieldsAndValues  An associative array of fields and their value
-     * @param  string|null  $language The id of the language of the contents
+     * @param  string|null  $language The id of the language of the rawContents
      *
      * @throws \Exception
      */
@@ -403,30 +500,6 @@ class Entity extends Model
                 'lang' => $language ?? Config::get('kusikusicms.models.default_language', 'en')
             ];
         }), uniqueBy: ['entity_id', 'field', 'lang'], update: ['text']);
-    }
-
-    public function flattenContentsByField(): Entity
-    {
-        if ($this->relationLoaded('contents') && $this->contents instanceof EntityContentsCollection) {
-            $this->setRelation('contents', $this->contents->flattenByField());
-        }
-        return $this;
-    }
-
-    public function groupContentsByField(): Entity
-    {
-        if ($this->relationLoaded('contents') && $this->contents instanceof EntityContentsCollection) {
-            $this->setRelation('contents', $this->contents->groupByField());
-        }
-        return $this;
-    }
-
-    public function groupContentsByLang(): Entity
-    {
-        if ($this->relationLoaded('contents') && $this->contents instanceof EntityContentsCollection) {
-            $this->setRelation('contents', $this->contents->groupByLang());
-        }
-        return $this;
     }
     
     /**
