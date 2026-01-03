@@ -95,6 +95,30 @@ class EntityFactory extends Factory
     }
 
     /**
+     * Set the parent entity.
+     */
+    public function childOf(string $entity_id): self
+    {
+        return $this->state(function () use ($entity_id) {
+            return [
+                'parent_entity_id' => $entity_id
+            ];
+        });
+    }
+
+    /**
+     * Set the parent entity.
+     */
+    public function id(string $entity_id): self
+    {
+        return $this->state(function () use ($entity_id) {
+            return [
+                'id' => $entity_id
+            ];
+        });
+    }
+    
+    /**
      * Attach rawContents after creating using provided fields (uses default language from config).
      *
      * Example: Entity::factory()->withContents(['title' => 'Hello'])->create();
