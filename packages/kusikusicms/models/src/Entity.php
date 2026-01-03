@@ -146,59 +146,10 @@ class Entity extends Model
         return new EntityCollection($models);
     }
 
-    /**
-     * Static function to refresh the relations of ANCESTOR kind for the given Entity ID.
-     * It also recreates children ANCESTOR relations recursively.
-     */
-    public static function refreshAncestorsRelationsById(string $entity_id): void
-    {
-        $entity = Entity::find($entity_id);
-        if ($entity) {
-            self::refreshAncestorRelationsOfEntity($entity);
-        }
-    }
-
-    /**
-     * Static function to refresh the relations of ANCESTOR kind for the given Entity.
-     * It also recreates children's ANCESTOR relations recursively.
-     */
-    public static function refreshAncestorRelationsOfEntity(Entity $entity): void
-    {
-        // First clear all ancestor relations of the entity
-        EntityRelation::query()
-            ->where('caller_entity_id', $entity->id)
-            ->where('kind', EntityRelation::RELATION_ANCESTOR)
-            ->delete();
-        // Now recreate all ancestor relations
-        $currentAncestor = Entity::find($entity->parent_entity_id);
-        $currentDepth = 1;
-        while ($currentAncestor) {
-            EntityRelation::create([
-                'caller_entity_id' => $entity->id,
-                'called_entity_id' => $currentAncestor->id,
-                'kind' => EntityRelation::RELATION_ANCESTOR,
-                'depth' => $currentDepth,
-            ]);
-            $currentAncestor = Entity::find($currentAncestor->parent_entity_id);
-            $currentDepth++;
-        }
-        // Descendants should be updated as well
-        $children = Entity::where('parent_entity_id', $entity->id)->get();
-        foreach ($children as $child) {
-            self::refreshAncestorRelationsOfEntity($child);
-        }
-    }
-
-    /** Refresh the relations of ANCESTOR kind of the Entity
-     */
-    public function refreshAncestorsRelations(): void
-    {
-        self::refreshAncestorRelationsOfEntity($this);
-    }
-
     /**************************************************************************
      * 
-     * HIERARCHY SCOPES
+     * HIERARCHY
+     * Scopes and helper methods
      * 
      **************************************************************************/
 
@@ -278,9 +229,61 @@ class Entity extends Model
             ->addSelect('ancestor.tags as ancestor.tags');
     }
 
+
+    /**
+     * Static function to refresh the relations of ANCESTOR kind for the given Entity ID.
+     * It also recreates children ANCESTOR relations recursively.
+     */
+    public static function refreshAncestorsRelationsById(string $entity_id): void
+    {
+        $entity = Entity::findOrFail($entity_id);
+        if ($entity) {
+            self::refreshAncestorRelationsOfEntity($entity);
+        }
+    }
+
+    /**
+     * Static function to refresh the relations of ANCESTOR kind for the given Entity.
+     * It also recreates children's ANCESTOR relations recursively.
+     */
+    public static function refreshAncestorRelationsOfEntity(Entity $entity): void
+    {
+        // First, clear all ancestor relations of the entity
+        EntityRelation::query()
+            ->where('caller_entity_id', $entity->id)
+            ->where('kind', EntityRelation::RELATION_ANCESTOR)
+            ->delete();
+        // Now recreate all ancestor relations
+        $currentAncestor = Entity::find($entity->parent_entity_id);
+        $currentDepth = 1;
+        while ($currentAncestor) {
+            EntityRelation::create([
+                'caller_entity_id' => $entity->id,
+                'called_entity_id' => $currentAncestor->id,
+                'kind' => EntityRelation::RELATION_ANCESTOR,
+                'depth' => $currentDepth,
+            ]);
+            $currentAncestor = Entity::find($currentAncestor->parent_entity_id);
+            $currentDepth++;
+        }
+        // Descendants should be updated as well
+        $children = Entity::where('parent_entity_id', $entity->id)->get();
+        foreach ($children as $child) {
+            self::refreshAncestorRelationsOfEntity($child);
+        }
+    }
+
+    /** Refresh the relations of ANCESTOR kind of the Entity
+     */
+    public function refreshAncestorsRelations(): void
+    {
+        self::refreshAncestorRelationsOfEntity($this);
+    }
+
     /***************************************************************************
      * 
-     * CONTENTS RELATED SCOPES AND ATTRIBUTES
+     * CONTENTS
+     * Scopes and attributes
      * 
      * *************************************************************************
      */
@@ -465,9 +468,11 @@ class Entity extends Model
         });
     }
 
-    /****************
-     * Relationships
-     ***************/
+    /************************************************************************
+     * 
+     * OTHER RELATIONS
+     * 
+     ***********************************************************************/
 
     /**
      * The generic relations relationship
