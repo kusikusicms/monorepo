@@ -1,3 +1,30 @@
+## 1.0.0 (2026-01-04)
+
+### Features
+
+* add `childOf` and `id` methods to `EntityFactory` ([327daf7](https://github.com/kusikusicms/monorepo/commit/327daf74c1bd7c78229ed98293928af9fc54ceb7))
+* add `descendantsOf` scope to `Entity` for querying descendants ([acaeb14](https://github.com/kusikusicms/monorepo/commit/acaeb14b3f1ce2150daf775d74cfa3682aab3f5c))
+* add `relatedBy` and `relating` scopes to `Entity` with options and tests ([ea84312](https://github.com/kusikusicms/monorepo/commit/ea8431230a3acb115e4d6cf03b9c231e0bb0d33e))
+* add `rootOf` scope to `Entity` with tests and documentation ([c67defd](https://github.com/kusikusicms/monorepo/commit/c67defdd33a03995e6277ef2d3023a007b6e462d))
+* add `siblingsOf` scope to `Entity` with options and tests ([bc4f700](https://github.com/kusikusicms/monorepo/commit/bc4f700809ab2a4027abe544e74c0f7f2cd61e57))
+* add `toTree` method to `EntityCollection` for hierarchical data structuring ([03c0396](https://github.com/kusikusicms/monorepo/commit/03c0396b5efe29415021d4960ff889d11ec7b109))
+* add comprehensive test coverage for core models, collections, scopes, and utilities ([8b3cf39](https://github.com/kusikusicms/monorepo/commit/8b3cf39f186bd35da6d8ebdb7df9730001cadd57))
+* add default language configuration to models and fix config path in Entity ([6e36086](https://github.com/kusikusicms/monorepo/commit/6e36086052c0546b345fc18a36b0cb322999a15d))
+* enhance short ID generation and add content grouping utilities ([74827bd](https://github.com/kusikusicms/monorepo/commit/74827bd09c9d0e0d6705dd9b7d6a4667a08093fb))
+* extend EntityFactory with new states and content attachment ([af895ef](https://github.com/kusikusicms/monorepo/commit/af895ef36b48e5e15a8dc4e3f09d2d86e0b14524))
+* include `parent_entity_id` in `Entity` query selection ([ee8dda6](https://github.com/kusikusicms/monorepo/commit/ee8dda638907a6e5200e5279f1e6ccae0c3ade97))
+* Initial monorepo structure ([0c170cb](https://github.com/kusikusicms/monorepo/commit/0c170cb1ccaf7400d96b4658095acdcb934f032a))
+* refine `whereContent` scope and improve performance ([906fe69](https://github.com/kusikusicms/monorepo/commit/906fe69db67596958687347505d6a4909bcae984))
+* Starting core models, events, factories, relationships, migrations, and configurations for KusikusiCMS using an old version. Non-working version. ([f036c71](https://github.com/kusikusicms/monorepo/commit/f036c718e1750819bf289b73cf5b8ae96b76e23f))
+* update `ancestorsOf` scope to support options array and add related tests ([c50b4d0](https://github.com/kusikusicms/monorepo/commit/c50b4d072d439991d5ff044ff567473aa6f6e237))
+* update `descendantsOf` scope to support options array and add related tests ([1fb421b](https://github.com/kusikusicms/monorepo/commit/1fb421b321f1e72c19c486e48850659b85a6a57b))
+
+### Bug Fixes
+
+* adjust `Entity` status logic and tests for consistency ([6f087f4](https://github.com/kusikusicms/monorepo/commit/6f087f44ec7a11d3bacca7dd115593b6da92aa52))
+* refine `Entity` status handling and update tests ([182f917](https://github.com/kusikusicms/monorepo/commit/182f917cc792eb883711fd24a507657f0d5e17c5))
+* rename `createContent` to `createContents` for consistency ([7321df1](https://github.com/kusikusicms/monorepo/commit/7321df11933545d71b5ecf278d0f9951f0fd2628))
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
