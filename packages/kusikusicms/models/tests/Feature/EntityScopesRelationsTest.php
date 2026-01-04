@@ -361,4 +361,321 @@ class EntityScopesRelationsTest extends TestCase
         // Should return empty collection (no other children with same parent)
         $this->assertCount(0, $rows);
     }
+    public function test_related_by_scope_basic_and_meta_defaults(): void
+    {
+        $a = $this->makeEntity('a');
+        $b = $this->makeEntity('b');
+        $c = $this->makeEntity('c');
+        $parent = $this->makeEntity('parent');
+
+        // Non-ancestor relations (should be included by default)
+        EntityRelation::create([
+            'caller_entity_id' => 'a',
+            'called_entity_id' => 'b',
+            'kind' => 'link',
+            'position' => 2,
+            'depth' => 1,
+            'tags' => null,
+        ]);
+        EntityRelation::create([
+            'caller_entity_id' => 'a',
+            'called_entity_id' => 'c',
+            'kind' => 'reference',
+            'position' => 1,
+            'depth' => 3,
+            'tags' => null,
+        ]);
+        // Ancestor relation should be excluded by default
+        $this->relate('a', 'parent', 1, EntityRelation::RELATION_ANCESTOR, 0);
+
+        $rows = Entity::query()->relatedBy('a')->orderBy('id')->get();
+        $this->assertSame(['b', 'c', 'parent'], $rows->pluck('id')->values()->all());
+
+        $attrs = $rows->first()->getAttributes();
+        $this->assertArrayHasKey('related_by.relation_id', $attrs);
+        $this->assertArrayHasKey('related_by.kind', $attrs);
+        $this->assertArrayHasKey('related_by.position', $attrs);
+        $this->assertArrayHasKey('related_by.depth', $attrs);
+        $this->assertArrayHasKey('related_by.tags', $attrs);
+    }
+
+    public function test_related_by_scope_filters_by_kind_tag_and_can_hide_meta(): void
+    {
+        $a = $this->makeEntity('a');
+        $b = $this->makeEntity('b');
+        $c = $this->makeEntity('c');
+
+        EntityRelation::create([
+            'caller_entity_id' => 'a',
+            'called_entity_id' => 'b',
+            'kind' => 'link',
+            'position' => 0,
+            'depth' => 1,
+            'tags' => ['featured'],
+        ]);
+        EntityRelation::create([
+            'caller_entity_id' => 'a',
+            'called_entity_id' => 'c',
+            'kind' => 'link',
+            'position' => 0,
+            'depth' => 1,
+            'tags' => ['other'],
+        ]);
+
+        $rows = Entity::query()->relatedBy('a', [
+            'kind' => 'link',
+            'tag' => 'featured',
+            'includeRelationMeta' => false,
+        ])->get();
+
+        $this->assertSame(['b'], $rows->pluck('id')->values()->all());
+        $attrs = $rows->first()->getAttributes();
+        $this->assertArrayNotHasKey('related_by.relation_id', $attrs);
+        $this->assertArrayNotHasKey('related_by.kind', $attrs);
+        $this->assertArrayNotHasKey('related_by.position', $attrs);
+        $this->assertArrayNotHasKey('related_by.depth', $attrs);
+        $this->assertArrayNotHasKey('related_by.tags', $attrs);
+    }
+
+    public function test_related_by_scope_order_by_depth_and_position(): void
+    {
+        $a = $this->makeEntity('a');
+        $b = $this->makeEntity('b');
+        $c = $this->makeEntity('c');
+
+        EntityRelation::create([
+            'caller_entity_id' => 'a',
+            'called_entity_id' => 'b',
+            'kind' => 'link',
+            'position' => 5,
+            'depth' => 2,
+            'tags' => null,
+        ]);
+        EntityRelation::create([
+            'caller_entity_id' => 'a',
+            'called_entity_id' => 'c',
+            'kind' => 'link',
+            'position' => 1,
+            'depth' => 1,
+            'tags' => null,
+        ]);
+
+        $byDepthAsc = Entity::query()->relatedBy('a', ['orderBy' => 'depth asc'])->get();
+        $this->assertSame(['c', 'b'], $byDepthAsc->pluck('id')->values()->all());
+
+        $byPosDesc = Entity::query()->relatedBy('a', ['orderBy' => 'position_desc'])->get();
+        $this->assertSame(['b', 'c'], $byPosDesc->pluck('id')->values()->all());
+    }
+
+    public function test_related_by_scope_kind_accepts_array_and_except_kind_excludes(): void
+    {
+        $a = $this->makeEntity('a');
+        $b = $this->makeEntity('b');
+        $c = $this->makeEntity('c');
+        $d = $this->makeEntity('d');
+        $parent = $this->makeEntity('parent');
+
+        // Create various kinds
+        EntityRelation::create([
+            'caller_entity_id' => 'a',
+            'called_entity_id' => 'b',
+            'kind' => 'link',
+            'position' => 0,
+            'depth' => 1,
+            'tags' => null,
+        ]);
+        EntityRelation::create([
+            'caller_entity_id' => 'a',
+            'called_entity_id' => 'c',
+            'kind' => 'reference',
+            'position' => 0,
+            'depth' => 1,
+            'tags' => null,
+        ]);
+        EntityRelation::create([
+            'caller_entity_id' => 'a',
+            'called_entity_id' => 'd',
+            'kind' => 'mention',
+            'position' => 0,
+            'depth' => 1,
+            'tags' => null,
+        ]);
+        // Ancestor kind
+        $this->relate('a', 'parent', 1, EntityRelation::RELATION_ANCESTOR, 0);
+
+        // kind as array should include link and reference (b and c)
+        $rowsKinds = Entity::query()->relatedBy('a', ['kind' => ['link', 'reference']])->orderBy('id')->get();
+        $this->assertSame(['b', 'c'], $rowsKinds->pluck('id')->values()->all());
+
+        // exceptKind as string should exclude ancestor (parent)
+        $rowsExcept = Entity::query()->relatedBy('a', ['exceptKind' => EntityRelation::RELATION_ANCESTOR])->orderBy('id')->get();
+        $this->assertSame(['b', 'c', 'd'], $rowsExcept->pluck('id')->values()->all());
+
+        // exceptKind as array should exclude multiple kinds
+        $rowsExceptMany = Entity::query()->relatedBy('a', ['exceptKind' => [EntityRelation::RELATION_ANCESTOR, 'mention']])->orderBy('id')->get();
+        $this->assertSame(['b', 'c'], $rowsExceptMany->pluck('id')->values()->all());
+
+        // Both kind (array) and exceptKind (overlapping); exclusion wins
+        $rowsOverlap = Entity::query()->relatedBy('a', ['kind' => ['link', 'mention'], 'exceptKind' => ['mention']])->orderBy('id')->get();
+        $this->assertSame(['b'], $rowsOverlap->pluck('id')->values()->all());
+    }
+
+    public function test_relating_scope_basic_and_meta_defaults(): void
+    {
+        $a = $this->makeEntity('a');
+        $b = $this->makeEntity('b');
+        $c = $this->makeEntity('c');
+        $parent = $this->makeEntity('parent');
+
+        // Non-ancestor incoming relations
+        EntityRelation::create([
+            'caller_entity_id' => 'b',
+            'called_entity_id' => 'a',
+            'kind' => 'link',
+            'position' => 2,
+            'depth' => 1,
+            'tags' => null,
+        ]);
+        EntityRelation::create([
+            'caller_entity_id' => 'c',
+            'called_entity_id' => 'a',
+            'kind' => 'reference',
+            'position' => 1,
+            'depth' => 4,
+            'tags' => null,
+        ]);
+        // Ancestor incoming should be excluded
+        $this->relate('a', 'parent', 1, EntityRelation::RELATION_ANCESTOR, 0);
+
+        $rows = Entity::query()->relating('a')->orderBy('id')->get();
+        $this->assertSame(['b', 'c'], $rows->pluck('id')->values()->all());
+
+        $attrs = $rows->first()->getAttributes();
+        $this->assertArrayHasKey('relating.relation_id', $attrs);
+        $this->assertArrayHasKey('relating.kind', $attrs);
+        $this->assertArrayHasKey('relating.position', $attrs);
+        $this->assertArrayHasKey('relating.depth', $attrs);
+        $this->assertArrayHasKey('relating.tags', $attrs);
+    }
+
+    public function test_relating_scope_filters_by_kind_tag_and_can_hide_meta(): void
+    {
+        $a = $this->makeEntity('a');
+        $b = $this->makeEntity('b');
+        $c = $this->makeEntity('c');
+
+        EntityRelation::create([
+            'caller_entity_id' => 'b',
+            'called_entity_id' => 'a',
+            'kind' => 'link',
+            'position' => 0,
+            'depth' => 1,
+            'tags' => ['featured'],
+        ]);
+        EntityRelation::create([
+            'caller_entity_id' => 'c',
+            'called_entity_id' => 'a',
+            'kind' => 'link',
+            'position' => 0,
+            'depth' => 1,
+            'tags' => ['other'],
+        ]);
+
+        $rows = Entity::query()->relating('a', [
+            'kind' => 'link',
+            'tag' => 'featured',
+            'includeRelationMeta' => false,
+        ])->get();
+
+        $this->assertSame(['b'], $rows->pluck('id')->values()->all());
+        $attrs = $rows->first()->getAttributes();
+        $this->assertArrayNotHasKey('relating.relation_id', $attrs);
+        $this->assertArrayNotHasKey('relating.kind', $attrs);
+        $this->assertArrayNotHasKey('relating.position', $attrs);
+        $this->assertArrayNotHasKey('relating.depth', $attrs);
+        $this->assertArrayNotHasKey('relating.tags', $attrs);
+    }
+
+    public function test_relating_scope_order_by_depth_and_position(): void
+    {
+        $a = $this->makeEntity('a');
+        $b = $this->makeEntity('b');
+        $c = $this->makeEntity('c');
+
+        EntityRelation::create([
+            'caller_entity_id' => 'b',
+            'called_entity_id' => 'a',
+            'kind' => 'link',
+            'position' => 7,
+            'depth' => 3,
+            'tags' => null,
+        ]);
+        EntityRelation::create([
+            'caller_entity_id' => 'c',
+            'called_entity_id' => 'a',
+            'kind' => 'link',
+            'position' => 2,
+            'depth' => 1,
+            'tags' => null,
+        ]);
+
+        $byDepthAsc = Entity::query()->relating('a', ['orderBy' => ['column' => 'depth', 'direction' => 'asc']])->get();
+        $this->assertSame(['c', 'b'], $byDepthAsc->pluck('id')->values()->all());
+
+        $byPosDesc = Entity::query()->relating('a', ['orderBy' => 'position desc'])->get();
+        $this->assertSame(['b', 'c'], $byPosDesc->pluck('id')->values()->all());
+    }
+
+    public function test_relating_scope_kind_accepts_array_and_except_kind_excludes(): void
+    {
+        $a = $this->makeEntity('a');
+        $b = $this->makeEntity('b');
+        $c = $this->makeEntity('c');
+        $d = $this->makeEntity('d');
+        $parent = $this->makeEntity('parent');
+
+        // Create various kinds incoming to a
+        EntityRelation::create([
+            'caller_entity_id' => 'b',
+            'called_entity_id' => 'a',
+            'kind' => 'link',
+            'position' => 0,
+            'depth' => 1,
+            'tags' => null,
+        ]);
+        EntityRelation::create([
+            'caller_entity_id' => 'c',
+            'called_entity_id' => 'a',
+            'kind' => 'reference',
+            'position' => 0,
+            'depth' => 1,
+            'tags' => null,
+        ]);
+        EntityRelation::create([
+            'caller_entity_id' => 'd',
+            'called_entity_id' => 'a',
+            'kind' => 'mention',
+            'position' => 0,
+            'depth' => 1,
+            'tags' => null,
+        ]);
+        // Also ancestor relation (a has parent)
+        $this->relate('a', 'parent', 1, EntityRelation::RELATION_ANCESTOR, 0);
+
+        // kind as array should include link and reference (b and c)
+        $rowsKinds = Entity::query()->relating('a', ['kind' => ['link', 'reference']])->orderBy('id')->get();
+        $this->assertSame(['b', 'c'], $rowsKinds->pluck('id')->values()->all());
+
+        // exceptKind as string should exclude mention
+        $rowsExcept = Entity::query()->relating('a', ['exceptKind' => 'mention'])->orderBy('id')->get();
+        $this->assertSame(['b', 'c'], $rowsExcept->pluck('id')->values()->all());
+
+        // exceptKind as array should exclude link and mention
+        $rowsExceptMany = Entity::query()->relating('a', ['exceptKind' => ['mention', 'link']])->orderBy('id')->get();
+        $this->assertSame(['c'], $rowsExceptMany->pluck('id')->values()->all());
+
+        // Both kind (array) and exceptKind (overlapping); exclusion wins
+        $rowsOverlap = Entity::query()->relating('a', ['kind' => ['link', 'mention'], 'exceptKind' => ['mention']])->orderBy('id')->get();
+        $this->assertSame(['b'], $rowsOverlap->pluck('id')->values()->all());
+    }
 }

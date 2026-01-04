@@ -121,6 +121,65 @@ Entity::query()->siblingsOf($id, ['includeSelf' => true])->get();
 Entity::query()->siblingsOf($id, ['includeRelationMeta' => false])->get();
 ```
 
+### `relatedBy(string $entityId, array $options = []): Builder`
+Entities that the given entity calls (outgoing relations). Exposes `related_by.*` dot-style aliases.
+
+Options:
+- `kind` (string|array|null): Filter by one kind (string) or several kinds (array). When omitted/null, all kinds are included.
+- `exceptKind` (string|array|null): Exclude one kind (string) or several kinds (array) from the results.
+- `tag` (string|null): Filter by a JSON tag present in the relation `tags` column.
+- `includeRelationMeta` (bool, default true): Include `related_by.*` metadata columns in the select.
+- `orderBy` (string|array|null): Order the results by relation metadata. Accepts:
+  - Strings: `'depth asc'`, `'depth desc'`, `'position asc'`, `'position desc'` (also `'depth_asc'` style).
+  - Array: `['column' => 'depth|position', 'direction' => 'asc|desc']`.
+
+Examples:
+```
+// All outgoing relations
+Entity::query()->relatedBy($id)->get();
+
+// Only kinds link or reference
+Entity::query()->relatedBy($id, ['kind' => ['link', 'reference']])->get();
+
+// Exclude ancestor and mention kinds
+Entity::query()->relatedBy($id, ['exceptKind' => ['ancestor', 'mention']])->get();
+
+// Only links tagged as "featured", ordered by position desc
+Entity::query()->relatedBy($id, [
+  'kind' => 'link',
+  'tag' => 'featured',
+  'orderBy' => 'position desc',
+])->get();
+
+// Without relation meta columns
+Entity::query()->relatedBy($id, ['includeRelationMeta' => false])->get();
+```
+
+### `relating(string $entityId, array $options = []): Builder`
+Entities that call the given entity (incoming relations). Exposes `relating.*` dot-style aliases.
+
+Options:
+- `kind` (string|array|null): Filter by one kind (string) or several kinds (array). When omitted/null, all kinds are included.
+- `exceptKind` (string|array|null): Exclude one kind (string) or several kinds (array) from the results.
+- `tag` (string|null): Filter by a JSON tag present in the relation `tags` column.
+- `includeRelationMeta` (bool, default true): Include `relating.*` metadata columns in the select.
+- `orderBy` (string|array|null): Same forms as in `relatedBy`.
+
+Examples:
+```
+// All incoming relations
+Entity::query()->relating($id)->get();
+
+// Only incoming of kinds link or reference
+Entity::query()->relating($id, ['kind' => ['link', 'reference']])->get();
+
+// Exclude ancestor and mention kinds
+Entity::query()->relating($id, ['exceptKind' => ['ancestor', 'mention']])->get();
+
+// Only incoming of kind "reference", ordered by depth asc
+Entity::query()->relating($id, ['kind' => 'reference', 'orderBy' => 'depth asc'])->get();
+```
+
 ### `rootOf(string $entityId): Builder`
 Furthest ancestor (root) of a given entity. Exposes `root.*` dot-style aliases.
 

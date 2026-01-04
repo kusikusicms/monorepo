@@ -453,6 +453,169 @@ class Entity extends Model
     }
 
     /**
+     * Scope a query to only get entities being called by (outgoing relations from a source entity).
+     *
+     * Options (array):
+     * - kind (string|array|null): Filter by one kind (string) or several kinds (array). When omitted/null, all kinds are included.
+     * - exceptKind (string|array|null): Exclude one kind (string) or several kinds (array) from the results.
+     * - tag (string|null): Filter by presence of a JSON tag on the relation.
+     * - includeRelationMeta (bool): Whether to include relation meta columns in the select (default true). Aliases: related_by.*
+     * - orderBy (string|array|null): Order by relation meta. Accepts strings like 'depth asc', 'depth desc', 'position asc', 'position desc',
+     *                                or compact forms 'depth_asc', 'position_desc', or array ['column' => 'depth|position', 'direction' => 'asc|desc'].
+     *
+     * @param  Builder $query
+     * @param  string $entity_id The id of the entity calling the relations
+     * @param  array $options
+     * @return Builder
+     */
+    public function scopeRelatedBy(Builder $query, string $entity_id, array $options = []): Builder
+    {
+        $kindOpt = $options['kind'] ?? null;
+        $exceptKindOpt = $options['exceptKind'] ?? null;
+        $tag = $options['tag'] ?? null;
+        $includeRelationMeta = array_key_exists('includeRelationMeta', $options) ? (bool)$options['includeRelationMeta'] : true;
+        $orderBy = $options['orderBy'] ?? null;
+
+        // Normalize kinds to arrays as needed
+        $kinds = is_array($kindOpt) ? array_values($kindOpt) : ($kindOpt !== null ? [(string)$kindOpt] : null);
+        $exceptKinds = is_array($exceptKindOpt) ? array_values($exceptKindOpt) : ($exceptKindOpt !== null ? [(string)$exceptKindOpt] : []);
+
+        $query->join('entities_relations as related_by', function ($join) use ($entity_id, $kinds, $exceptKinds, $tag) {
+            $join->on('related_by.called_entity_id', '=', 'entities.id')
+                ->where('related_by.caller_entity_id', '=', $entity_id)
+                ->when($tag, function ($q) use ($tag) {
+                    return $q->whereJsonContains('related_by.tags', $tag);
+                });
+            if ($kinds !== null && count($kinds) > 0) {
+                $join->whereIn('related_by.kind', $kinds);
+            }
+            if (!empty($exceptKinds)) {
+                $join->whereNotIn('related_by.kind', $exceptKinds);
+            }
+        });
+
+        // Always select the entity id
+        $query->addSelect('id');
+
+        if ($includeRelationMeta) {
+            $query->addSelect('related_by.relation_id as related_by.relation_id')
+                ->addSelect('related_by.kind as related_by.kind')
+                ->addSelect('related_by.position as related_by.position')
+                ->addSelect('related_by.depth as related_by.depth')
+                ->addSelect('related_by.tags as related_by.tags');
+        }
+
+        // Optional ordering by relation meta
+        if (!empty($orderBy)) {
+            $parsed = ['column' => null, 'direction' => 'asc'];
+            if (is_string($orderBy)) {
+                $s = strtolower(trim($orderBy));
+                $s = str_replace('_', ' ', $s);
+                if (in_array($s, ['depth asc', 'depth desc', 'position asc', 'position desc'], true)) {
+                    [$col, $dir] = explode(' ', $s);
+                    $parsed['column'] = $col;
+                    $parsed['direction'] = $dir;
+                }
+            } elseif (is_array($orderBy)) {
+                $col = strtolower((string)($orderBy['column'] ?? ''));
+                $dir = strtolower((string)($orderBy['direction'] ?? 'asc'));
+                if (in_array($col, ['depth', 'position'], true)) {
+                    $parsed['column'] = $col;
+                }
+                if (in_array($dir, ['asc', 'desc'], true)) {
+                    $parsed['direction'] = $dir;
+                }
+            }
+            if ($parsed['column']) {
+                $query->orderBy("related_by." . $parsed['column'], $parsed['direction']);
+            }
+        }
+
+        return $query;
+    }
+
+    /**
+     * Scope a query to only get entities calling (incoming relations to a target entity).
+     *
+     * Options (array):
+     * - kind (string|array|null): Filter by one kind (string) or several kinds (array). When omitted/null, all kinds are included (default).
+     * - exceptKind (string|array|null): Exclude one kind (string) or several kinds (array) from the results.
+     * - tag (string|null): Filter by presence of a JSON tag on the relation.
+     * - includeRelationMeta (bool): Whether to include relation meta columns in the select (default true). Aliases: relating.*
+     * - orderBy (string|array|null): Order by relation meta; accepts same forms as in scopeRelatedBy: 'depth asc|desc', 'position asc|desc',
+     *                                'depth_asc'/'position_desc', or array ['column' => 'depth|position', 'direction' => 'asc|desc'].
+     *
+     * @param Builder $query
+     * @param string $entity_id The id of the entity receiving the relations (target)
+     * @param array $options
+     * @return Builder
+     * @throws \Exception
+     */
+    public function scopeRelating(Builder $query, string $entity_id, array $options = []): Builder
+    {
+        $kindOpt = $options['kind'] ?? null;
+        $exceptKindOpt = $options['exceptKind'] ?? null;
+        $tag = $options['tag'] ?? null;
+        $includeRelationMeta = array_key_exists('includeRelationMeta', $options) ? (bool)$options['includeRelationMeta'] : true;
+        $orderBy = $options['orderBy'] ?? null;
+
+        $kinds = is_array($kindOpt) ? array_values($kindOpt) : ($kindOpt !== null ? [(string)$kindOpt] : null);
+        $exceptKinds = is_array($exceptKindOpt) ? array_values($exceptKindOpt) : ($exceptKindOpt !== null ? [(string)$exceptKindOpt] : []);
+
+        $query->join('entities_relations as relating', function ($join) use ($entity_id, $kinds, $exceptKinds, $tag) {
+            $join->on('relating.caller_entity_id', '=', 'entities.id')
+                ->where('relating.called_entity_id', '=', $entity_id)
+                ->when($tag, function ($q) use ($tag) {
+                    return $q->whereJsonContains('relating.tags', $tag);
+                });
+            if ($kinds !== null && count($kinds) > 0) {
+                $join->whereIn('relating.kind', $kinds);
+            }
+            if (!empty($exceptKinds)) {
+                $join->whereNotIn('relating.kind', $exceptKinds);
+            }
+        });
+
+        // Always select the entity id
+        $query->addSelect('id');
+
+        if ($includeRelationMeta) {
+            $query->addSelect('relating.relation_id as relating.relation_id')
+                ->addSelect('relating.kind as relating.kind')
+                ->addSelect('relating.position as relating.position')
+                ->addSelect('relating.depth as relating.depth')
+                ->addSelect('relating.tags as relating.tags');
+        }
+
+        if (!empty($orderBy)) {
+            $parsed = ['column' => null, 'direction' => 'asc'];
+            if (is_string($orderBy)) {
+                $s = strtolower(trim($orderBy));
+                $s = str_replace('_', ' ', $s);
+                if (in_array($s, ['depth asc', 'depth desc', 'position asc', 'position desc'], true)) {
+                    [$col, $dir] = explode(' ', $s);
+                    $parsed['column'] = $col;
+                    $parsed['direction'] = $dir;
+                }
+            } elseif (is_array($orderBy)) {
+                $col = strtolower((string)($orderBy['column'] ?? ''));
+                $dir = strtolower((string)($orderBy['direction'] ?? 'asc'));
+                if (in_array($col, ['depth', 'position'], true)) {
+                    $parsed['column'] = $col;
+                }
+                if (in_array($dir, ['asc', 'desc'], true)) {
+                    $parsed['direction'] = $dir;
+                }
+            }
+            if ($parsed['column']) {
+                $query->orderBy("relating." . $parsed['column'], $parsed['direction']);
+            }
+        }
+
+        return $query;
+    }
+
+    /**
      * Static function to refresh the relations of ANCESTOR kind for the given Entity ID.
      * It also recreates children ANCESTOR relations recursively.
      */
