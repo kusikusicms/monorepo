@@ -253,4 +253,87 @@ class EntityScopesRelationsTest extends TestCase
         ])->get();
         $this->assertSame(['grand', 'parent', 'child'], $rowsDesc->pluck('id')->values()->all());
     }
+
+    public function test_siblings_of_scope_returns_entities_with_same_parent(): void
+    {
+        // parent -> child1, child2, child3
+        $parent = $this->makeEntity('parent');
+        $child1 = $this->makeEntity('child1', 'parent');
+        $child2 = $this->makeEntity('child2', 'parent');
+        $child3 = $this->makeEntity('child3', 'parent');
+        $other  = $this->makeEntity('other');
+
+        $rows = Entity::query()->siblingsOf('child1')->orderBy('id')->get();
+        // Should return child2 and child3 (not child1 itself or other)
+        $this->assertSame(['child2', 'child3'], $rows->pluck('id')->values()->all());
+
+        // Verify relation metadata is present
+        $attrs = $rows->first()->getAttributes();
+        $this->assertArrayHasKey('sibling.relation_id', $attrs);
+        $this->assertArrayHasKey('sibling.position', $attrs);
+        $this->assertArrayHasKey('sibling.depth', $attrs);
+        $this->assertArrayHasKey('sibling.tags', $attrs);
+    }
+
+    public function test_siblings_of_scope_excludes_self_by_default(): void
+    {
+        $parent = $this->makeEntity('parent');
+        $child1 = $this->makeEntity('child1', 'parent');
+        $child2 = $this->makeEntity('child2', 'parent');
+
+        $rows = Entity::query()->siblingsOf('child1')->orderBy('id')->get();
+        // Should not include child1 itself
+        $this->assertSame(['child2'], $rows->pluck('id')->values()->all());
+        $this->assertNotContains('child1', $rows->pluck('id')->all());
+    }
+
+    public function test_siblings_of_scope_can_include_self_when_flag_true(): void
+    {
+        $parent = $this->makeEntity('parent');
+        $child1 = $this->makeEntity('child1', 'parent');
+        $child2 = $this->makeEntity('child2', 'parent');
+        $child3 = $this->makeEntity('child3', 'parent');
+
+        $rows = Entity::query()->siblingsOf('child1', ['includeSelf' => true])->orderBy('id')->get();
+        // Should include child1 itself along with siblings
+        $this->assertSame(['child1', 'child2', 'child3'], $rows->pluck('id')->values()->all());
+    }
+
+    public function test_siblings_of_scope_can_hide_relation_meta_columns(): void
+    {
+        $parent = $this->makeEntity('parent');
+        $child1 = $this->makeEntity('child1', 'parent');
+        $child2 = $this->makeEntity('child2', 'parent');
+
+        $rows = Entity::query()->siblingsOf('child1', ['includeRelationMeta' => false])->orderBy('id')->get();
+        $this->assertSame(['child2'], $rows->pluck('id')->values()->all());
+
+        $attrs = $rows->first()->getAttributes();
+        $this->assertArrayNotHasKey('sibling.relation_id', $attrs);
+        $this->assertArrayNotHasKey('sibling.position', $attrs);
+        $this->assertArrayNotHasKey('sibling.depth', $attrs);
+        $this->assertArrayNotHasKey('sibling.tags', $attrs);
+    }
+
+    public function test_siblings_of_scope_handles_entity_with_no_parent(): void
+    {
+        // Entity with no parent (parent_entity_id is null)
+        $orphan = $this->makeEntity('orphan');
+        $other  = $this->makeEntity('other');
+
+        $rows = Entity::query()->siblingsOf('orphan')->get();
+        // Should return empty collection (no siblings if no parent)
+        $this->assertCount(0, $rows);
+    }
+
+    public function test_siblings_of_scope_handles_entity_with_no_siblings(): void
+    {
+        // Entity with parent but no siblings
+        $parent = $this->makeEntity('parent');
+        $onlyChild = $this->makeEntity('onlyChild', 'parent');
+
+        $rows = Entity::query()->siblingsOf('onlyChild')->get();
+        // Should return empty collection (no other children with same parent)
+        $this->assertCount(0, $rows);
+    }
 }

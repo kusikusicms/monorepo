@@ -80,10 +80,45 @@ Direct parent of a given entity. Exposes `parent.*` dot-style aliases.
 Entity::query()->parentOf($childId)->first();
 ```
 
-### `ancestorsOf(string $entityId): Builder`
+### `ancestorsOf(string $entityId, array $options = []): Builder`
 All ancestors (any depth). Exposes `ancestor.*` dot-style aliases.
+
+Options:
+- `includeSelf` (bool, default false): Include the entity itself in results
+- `includeRelationMeta` (bool, default true): Include `ancestor.*` metadata columns
+- `order` (string): Order by hierarchy depth ('ascending' | 'descending' | 'asc' | 'desc')
+
 ```
 Entity::query()->ancestorsOf($id)->get();
+Entity::query()->ancestorsOf($id, ['includeSelf' => true, 'order' => 'asc'])->get();
+```
+
+### `descendantsOf(string $entityId, array $options = []): Builder`
+All descendants of a given entity. Exposes `descendant.*` dot-style aliases.
+
+Options:
+- `maxDepth` (int, default 99): Maximum depth to include
+- `includeSelf` (bool, default false): Include the ancestor entity itself in results
+- `includeRelationMeta` (bool, default true): Include `descendant.*` metadata columns
+
+```
+Entity::query()->descendantsOf($id)->get();
+Entity::query()->descendantsOf($id, ['maxDepth' => 2, 'includeSelf' => true])->get();
+```
+
+### `siblingsOf(string $entityId, array $options = []): Builder`
+All siblings (entities sharing the same parent) of a given entity. Exposes `sibling.*` dot-style aliases.
+
+Siblings are entities that share the same `parent_entity_id`. Returns an empty collection if the entity has no parent or no siblings.
+
+Options:
+- `includeSelf` (bool, default false): Include the entity itself in results
+- `includeRelationMeta` (bool, default true): Include `sibling.*` metadata columns
+
+```
+Entity::query()->siblingsOf($id)->get();
+Entity::query()->siblingsOf($id, ['includeSelf' => true])->get();
+Entity::query()->siblingsOf($id, ['includeRelationMeta' => false])->get();
 ```
 
 > Upcoming change: We plan to switch to snake_case aliases (e.g., `parent_position`) and include `entities.*` in selects for consistent hydration. That change will be documented as a minor breaking change with migration guidance.

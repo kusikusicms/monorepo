@@ -80,6 +80,8 @@ Entity::query()->whereContent('title', 'like', 'Hello%')->get();
 Entity::query()->childrenOf($parentId)->get();
 Entity::query()->parentOf($childId)->first();
 Entity::query()->ancestorsOf($entityId)->get();
+Entity::query()->descendantsOf($entityId)->get();
+Entity::query()->siblingsOf($entityId)->get();
 ```
 
 ### Factory states

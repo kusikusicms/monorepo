@@ -367,6 +367,65 @@ class Entity extends Model
     }
 
     /**
+     * Scope a query to only include siblings of a given entity id.
+     *
+     * Siblings are entities that share the same parent_entity_id.
+     *
+     * Options (array) — second parameter:
+     * - includeSelf (bool): Whether to include the referenced entity itself (default false).
+     * - includeRelationMeta (bool): Whether to include sibling.* meta columns in the select (default true).
+     *
+     * @param Builder $query
+     * @param string $entity_id The id of the entity
+     * @param array $options Options array
+     * @return Builder
+     */
+    public function scopeSiblingsOf(Builder $query, string $entity_id, array $options = []): Builder
+    {
+        $includeSelf = (bool)($options['includeSelf'] ?? false);
+        $includeRelationMeta = array_key_exists('includeRelationMeta', $options)
+            ? (bool)$options['includeRelationMeta']
+            : true;
+
+        // Subquery to get the parent_entity_id of the given entity
+        $parentSubquery = Entity::query()
+            ->select('parent_entity_id')
+            ->where('id', '=', $entity_id)
+            ->limit(1);
+
+        // Find all entities with the same parent_entity_id
+        $query->whereIn('entities.parent_entity_id', $parentSubquery)
+            ->whereNotNull('entities.parent_entity_id');
+
+        // Exclude self by default
+        if (!$includeSelf) {
+            $query->where('entities.id', '!=', $entity_id);
+        }
+        
+        // LEFT JOIN with entities_relations to get sibling metadata (from child relation)
+        $query->leftJoin('entities_relations as sibling', function ($join) use ($entity_id) {
+            $join->on('sibling.caller_entity_id', '=', 'entities.id')
+                ->where('sibling.called_entity_id', '=',
+                    Entity::query()->select('parent_entity_id')->where('id', '=', $entity_id)->limit(1))
+                ->where('sibling.depth', '=', 1)
+                ->where('sibling.kind', '=', EntityRelation::RELATION_ANCESTOR);
+        });
+
+        // Always select the entity id
+        $query->addSelect('id');
+
+        // Optionally include relation meta columns
+        if ($includeRelationMeta) {
+            $query->addSelect('sibling.relation_id as sibling.relation_id')
+                ->addSelect('sibling.position as sibling.position')
+                ->addSelect('sibling.depth as sibling.depth')
+                ->addSelect('sibling.tags as sibling.tags');
+        }
+
+        return $query;
+    }
+
+    /**
      * Static function to refresh the relations of ANCESTOR kind for the given Entity ID.
      * It also recreates children ANCESTOR relations recursively.
      */
