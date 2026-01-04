@@ -323,8 +323,8 @@ class Entity extends Model
             $query->whereNotNull('descendant.relation_id');
         }
 
-        // Always select the entity id
-        $query->addSelect('id');
+        // Always select the entity id and parent entity id
+        $query->addSelect('id', 'parent_entity_id');
 
         // Optionally include relation meta columns
         if ($includeRelationMeta) {
