@@ -426,6 +426,33 @@ class Entity extends Model
     }
 
     /**
+     * Scope a query to include only the furthest ancestor (root) of a given entity.
+     *
+     * Example:
+     * Entity::query()->rootOf($id)->first();
+     *
+     * If the entity has no ancestors (is a root itself), the scope returns an empty set.
+     */
+    public function scopeRootOf(Builder $query, string $entity_id): Builder
+    {
+        // Join ancestors and take the one with maximum depth
+        $query->join('entities_relations as root', function ($join) use ($entity_id) {
+            $join->on('root.called_entity_id', '=', 'entities.id')
+                ->where('root.caller_entity_id', '=', $entity_id)
+                ->where('root.kind', '=', EntityRelation::RELATION_ANCESTOR);
+        })
+        ->addSelect('id')
+        ->addSelect('root.relation_id as root.relation_id')
+        ->addSelect('root.position as root.position')
+        ->addSelect('root.depth as root.depth')
+        ->addSelect('root.tags as root.tags')
+        ->orderByDesc('root.depth')
+        ->limit(1);
+
+        return $query;
+    }
+
+    /**
      * Static function to refresh the relations of ANCESTOR kind for the given Entity ID.
      * It also recreates children ANCESTOR relations recursively.
      */

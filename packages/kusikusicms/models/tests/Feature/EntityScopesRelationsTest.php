@@ -29,6 +29,31 @@ class EntityScopesRelationsTest extends TestCase
         ]);
     }
 
+    public function test_root_of_scope_returns_furthest_ancestor(): void
+    {
+        $grand = $this->makeEntity('grand');
+        $parent = $this->makeEntity('parent', 'grand');
+        $child  = $this->makeEntity('child', 'parent');
+
+        $rows = Entity::query()->rootOf('child')->get();
+        $this->assertCount(1, $rows);
+        $this->assertSame('grand', $rows->first()->id);
+
+        $attrs = $rows->first()->getAttributes();
+        $this->assertArrayHasKey('root.relation_id', $attrs);
+        $this->assertArrayHasKey('root.position', $attrs);
+        $this->assertArrayHasKey('root.depth', $attrs);
+        $this->assertArrayHasKey('root.tags', $attrs);
+    }
+
+    public function test_root_of_scope_returns_empty_for_root_entity(): void
+    {
+        $root = $this->makeEntity('root');
+
+        $rows = Entity::query()->rootOf('root')->get();
+        $this->assertCount(0, $rows);
+    }
+
     public function test_children_of_scope_returns_direct_children(): void
     {
         $parent = $this->makeEntity('parent');

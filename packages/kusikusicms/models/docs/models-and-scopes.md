@@ -121,6 +121,20 @@ Entity::query()->siblingsOf($id, ['includeSelf' => true])->get();
 Entity::query()->siblingsOf($id, ['includeRelationMeta' => false])->get();
 ```
 
+### `rootOf(string $entityId): Builder`
+Furthest ancestor (root) of a given entity. Exposes `root.*` dot-style aliases.
+
+Rules:
+- Returns a single row (the topmost ancestor) or an empty set if the entity has no ancestors.
+- Selected meta columns: `root.relation_id`, `root.position`, `root.depth`, `root.tags`.
+
+```
+// Get the root entity
+$root = Entity::query()->rootOf($id)->first();
+
+// When there is no ancestor, returns null with ->first() or empty with ->get()
+```
+
 > Upcoming change: We plan to switch to snake_case aliases (e.g., `parent_position`) and include `entities.*` in selects for consistent hydration. That change will be documented as a minor breaking change with migration guidance.
 
 ## Collections helpers
