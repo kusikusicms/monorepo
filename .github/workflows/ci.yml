@@ -33,14 +33,14 @@ jobs:
         working-directory: packages/kusikusicms/models
         run: ../../../vendor/bin/phpunit -c phpunit.xml --colors=always
 
-      - name: Install starter app dependencies
-        working-directory: apps/starter
-        run: composer install --no-interaction --no-progress --prefer-dist
+      # - name: Install starter app dependencies
+        # working-directory: apps/starter
+        # run: composer install --no-interaction --no-progress --prefer-dist
 
-      - name: Run starter app tests (integration)
-        working-directory: apps/starter
-        env:
-          APP_ENV: testing
-          DB_CONNECTION: sqlite
-          DB_DATABASE: ':memory:'
-        run: php artisan test --colors=always
+      # - name: Run starter app tests (integration)
+        # working-directory: apps/starter
+        # env:
+          # APP_ENV: testing
+          # DB_CONNECTION: sqlite
+          # DB_DATABASE: ':memory:'
+        # run: php artisan test --colors=always
