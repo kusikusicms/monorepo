@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Monorepo Split
-        uses: symplify/monorepo-split-github-action@v2.6.0
+        uses: symplify/monorepo-split-github-action@v2.4.0
         with:
           # GitHub token with repo permissions
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -24,8 +24,12 @@ jobs:
           # mapping: "local_directory::remote_repository"
           directories_to_repositories: |
             models::git@github.com:kusikusicms/models.git
-            website::git@github.com:kusikusicms/website.git
-            media::git@github.com:kusikusicms/media.git
-            admin::git@github.com:kusikusicms/admin.git
+            # website::git@github.com:kusikusicms/website.git
+            # media::git@github.com:kusikusicms/media.git
+            # admin::git@github.com:kusikusicms/admin.git
           # tags will be split too
           tag: true
+          user_email: 'ramses@cuatromedios.com'
+          user_name: 'Ramses Moreno'
+          repository_organization: 'KusikusiCMS'
+          repository_name: 'KusikusiCMS'
