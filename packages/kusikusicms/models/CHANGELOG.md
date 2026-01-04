@@ -36,7 +36,7 @@ Initial Laravel 12–ready alpha with the following highlights:
   - Modern foreign key helpers and cascades
 
 - Factories & Seeder
-  - Factory states: `draft`, `scheduled`, `published`, `outdated`
+  - Factory states: `draft`, `scheduled`, `live`, `expired`
   - `withContents` helper for quick content attachment
   - Demo seeder: `KusikusiCMS\Models\Database\Seeders\ModelsSeeder`
 

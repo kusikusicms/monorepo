@@ -7,12 +7,12 @@ This package includes the following primary models:
 - `KusikusiCMS\Models\EntityArchive` — stores versions/archives (reserved for future use).
 
 ## Entity status accessor
-`$entity->status` returns one of: `unknown`, `draft`, `scheduled`, `outdated`, `published` based on `published`, `publish_at`, `unpublish_at`.
+`$entity->status` returns one of: `unknown`, `draft`, `scheduled`, `expired`, `live` based on `published`, `publish_at`, `unpublish_at`.
 
 Example:
 ```
-$e = Entity::factory()->published()->create();
-echo $e->status; // "published"
+$e = Entity::factory()->live()->create();
+echo $e->status; // "live"
 ```
 
 ## Content helpers

@@ -61,9 +61,9 @@ class EntityFactory extends Factory
     }
 
     /**
-     * Published: currently within publish window.
+     * Live: currently within publish window.
      */
-    public function published(?Carbon $since = null, ?Carbon $until = null): self
+    public function live(?Carbon $since = null, ?Carbon $until = null): self
     {
         return $this->state(function () use ($since, $until) {
             $now = Carbon::now();
@@ -78,9 +78,9 @@ class EntityFactory extends Factory
     }
 
     /**
-     * Outdated: already unpublished (unpublish_at in the past).
+     * Expired: already unpublished (unpublish_at in the past).
      */
-    public function outdated(?Carbon $publishedSince = null, ?Carbon $unpublishedAt = null): self
+    public function expired(?Carbon $publishedSince = null, ?Carbon $unpublishedAt = null): self
     {
         return $this->state(function () use ($publishedSince, $unpublishedAt) {
             $now = Carbon::now();

@@ -7,8 +7,8 @@ The package includes a class-based factory for `Entity` with expressive states, 
 ### States
 - `draft()` — `published=false`, clears `publish_at`/`unpublish_at`.
 - `scheduled(?Carbon $when = null)` — `published=true`, `publish_at` in the future.
-- `published(?Carbon $since = null, ?Carbon $until = null)` — currently visible (within window).
-- `outdated(?Carbon $publishedSince = null, ?Carbon $unpublishedAt = null)` — `unpublish_at` in the past.
+- `live(?Carbon $since = null, ?Carbon $until = null)` — currently visible (within window).
+- `expired(?Carbon $publishedSince = null, ?Carbon $unpublishedAt = null)` — `unpublish_at` in the past.
 
 ### Helpers
 - `withContents(array $fields, ?string $lang = null)` — attaches contents after creation.
@@ -19,10 +19,10 @@ use KusikusiCMS\Models\Entity;
 
 Entity::factory()->draft()->create();
 Entity::factory()->scheduled()->create();
-Entity::factory()->published()->create();
-Entity::factory()->outdated()->create();
+Entity::factory()->live()->create();
+Entity::factory()->expired()->create();
 
-Entity::factory()->published()->withContents(['title' => 'Hello'])->create();
+Entity::factory()->live()->withContents(['title' => 'Hello'])->create();
 ```
 
 ## Seeder: `KusikusiCMS\Models\Database\Seeders\ModelsSeeder`

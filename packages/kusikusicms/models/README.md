@@ -86,11 +86,11 @@ Entity::query()->ancestorsOf($entityId)->get();
 ```
 Entity::factory()->draft()->create();
 Entity::factory()->scheduled()->create();
-Entity::factory()->published()->create();
-Entity::factory()->outdated()->create();
+Entity::factory()->live()->create();
+Entity::factory()->expired()->create();
 
 // With contents helper
-Entity::factory()->published()->withContents(['title' => 'Hello'])->create();
+Entity::factory()->live()->withContents(['title' => 'Hello'])->create();
 ```
 
 ### Events

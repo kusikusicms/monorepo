@@ -95,18 +95,47 @@ class Entity extends Model
         return Attribute::make(
             get: function (mixed $value, array $attributes) {
                 $now = Carbon::now();
-                if (!isset($attributes['published'])) {
+                // Use model accessors to ensure casts/defaults are applied even if $attributes is partial
+                $published = $this->getAttribute('published');
+                $publishAt = $this->getAttribute('publish_at');
+                $unpublishAt = $this->getAttribute('unpublish_at');
+
+                if ($published === null) {
                     return 'unknown';
-                } elseif (!$attributes['published'] || $attributes['publish_at'] === null) {
-                    return 'draft';
-                } elseif ($attributes['publish_at'] > $now) {
-                    return 'scheduled';
-                } elseif (isset($attributes['unpublish_at']) && $attributes['unpublish_at'] < $now) {
-                    return 'outdated';
                 }
-                return 'published';
+                if (!$published || $publishAt === null) {
+                    return 'draft';
+                }
+                if ($publishAt instanceof Carbon ? $publishAt->greaterThan($now) : $publishAt > $now) {
+                    return 'scheduled';
+                }
+                if ($unpublishAt !== null && ($unpublishAt instanceof Carbon ? $unpublishAt->lessThan($now) : $unpublishAt < $now)) {
+                    return 'expired';
+                }
+                return 'live';
             },
         );
+    }
+    
+    /**
+     * Scope a query to only include entities that are currently live.
+     *
+     * Live means:
+     * - live flag is true
+     * - publish_at is not null and <= now
+     * - unpublish_at is null OR > now
+     */
+    public function scopeCurrentlyLive(Builder $query): Builder
+    {
+        $now = Carbon::now()->toDateTimeString();
+        return $query
+            ->where('published', true)
+            ->whereNotNull('publish_at')
+            ->where('publish_at', '<=', $now)
+            ->where(function ($q) use ($now) {
+                $q->whereNull('unpublish_at')
+                    ->orWhere('unpublish_at', '>', $now);
+            });
     }
 
 

@@ -15,25 +15,25 @@ class ModelsSeeder extends Seeder
         // Draft entity (unpublished)
         Entity::factory()
             ->draft()
-            ->withContents(['title' => 'Draft entity', 'body' => 'Not yet published'])
+            ->withContents(['title' => 'Draft entity', 'body' => 'Not yet live'])
             ->create();
 
         // Scheduled entity (publish in the future)
         Entity::factory()
             ->scheduled()
-            ->withContents(['title' => 'Scheduled entity', 'body' => 'Will be published soon'])
+            ->withContents(['title' => 'Scheduled entity', 'body' => 'Will be live soon'])
             ->create();
 
-        // Published entity (currently visible)
+        // Live entity (currently visible)
         Entity::factory()
-            ->published()
-            ->withContents(['title' => 'Published entity', 'body' => 'This is live'])
+            ->live()
+            ->withContents(['title' => 'Live entity', 'body' => 'This is live'])
             ->create();
 
-        // Outdated entity (unpublished in the past)
+        // Expired entity (unpublished in the past)
         Entity::factory()
-            ->outdated()
-            ->withContents(['title' => 'Outdated entity', 'body' => 'This was published and is now outdated'])
+            ->expired()
+            ->withContents(['title' => 'Expired entity', 'body' => 'This was live and is now expired'])
             ->create();
     }
 }
