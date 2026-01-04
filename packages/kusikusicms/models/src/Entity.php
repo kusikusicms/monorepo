@@ -237,19 +237,59 @@ class Entity extends Model
      * @return Builder
      * @throws \Exception
      */
-    public function scopeDescendantsOf($query, $entity_id, $depth = 99)
+    /**
+     * Scope a query to only include descendants of a given entity id.
+     *
+     * Options (array) — third parameter:
+     * - maxDepth (int): Maximum depth to include (default 99). Replaces old $depth parameter.
+     * - includeSelf (bool): Whether to include the ancestor entity itself in the result set (default false).
+     * - includeRelationMeta (bool): Whether to include descendant.* meta columns in the select (default true).
+     *
+     * For backward compatibility, if the third parameter is an integer, it will be treated as ['maxDepth' => $thirdParam].
+     */
+    public function scopeDescendantsOf($query, $entity_id, $options = [])
     {
-        $query->join('entities_relations as descendant', function ($join) use ($entity_id, $depth) {
+        // Backward compatibility: allow passing a numeric depth as the 3rd argument
+        if (!is_array($options)) {
+            $options = ['maxDepth' => $options];
+        }
+
+        $maxDepth = (int)($options['maxDepth'] ?? 99);
+        $includeSelf = (bool)($options['includeSelf'] ?? false);
+        $includeRelationMeta = array_key_exists('includeRelationMeta', $options)
+            ? (bool)$options['includeRelationMeta']
+            : true;
+
+        // Use LEFT JOIN so we can optionally include the ancestor row (self) without a matching relation
+        $query->leftJoin('entities_relations as descendant', function ($join) use ($entity_id, $maxDepth) {
             $join->on('descendant.caller_entity_id', '=', 'entities.id')
                 ->where('descendant.called_entity_id', '=', $entity_id)
                 ->where('descendant.kind', '=', EntityRelation::RELATION_ANCESTOR)
-                ->where('descendant.depth', '<=', $depth);
-        })
-            ->addSelect('id')
-            ->addSelect('descendant.relation_id as descendant.relation_id')
-            ->addSelect('descendant.position as descendant.position')
-            ->addSelect('descendant.depth as descendant.depth')
-            ->addSelect('descendant.tags as descendant.tags');
+                ->where('descendant.depth', '<=', $maxDepth);
+        });
+
+        // When includeSelf=false, require the join to exist. When true, allow the self row even without join
+        if ($includeSelf) {
+            $query->where(function ($q) use ($entity_id) {
+                $q->whereNotNull('descendant.relation_id')
+                    ->orWhere('entities.id', '=', $entity_id);
+            });
+        } else {
+            $query->whereNotNull('descendant.relation_id');
+        }
+
+        // Always select the entity id
+        $query->addSelect('id');
+
+        // Optionally include relation meta columns
+        if ($includeRelationMeta) {
+            $query->addSelect('descendant.relation_id as descendant.relation_id')
+                ->addSelect('descendant.position as descendant.position')
+                ->addSelect('descendant.depth as descendant.depth')
+                ->addSelect('descendant.tags as descendant.tags');
+        }
+
+        return $query;
     }
 
     /**

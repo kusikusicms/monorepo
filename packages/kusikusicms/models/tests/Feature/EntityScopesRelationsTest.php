@@ -111,11 +111,51 @@ class EntityScopesRelationsTest extends TestCase
 
         // Relations generated via observers
         // Depth = 1 should include only direct descendants (depth <= 1)
-        $rows = Entity::query()->descendantsOf('grand', 1)->orderBy('id')->get();
+        $rows = Entity::query()->descendantsOf('grand', ['maxDepth' => 1])->orderBy('id')->get();
         $this->assertSame(['parent'], $rows->pluck('id')->values()->all());
 
         // Depth = 2 should include both
-        $rows2 = Entity::query()->descendantsOf('grand', 2)->orderBy('id')->get();
+        $rows2 = Entity::query()->descendantsOf('grand', ['maxDepth' => 2])->orderBy('id')->get();
         $this->assertSame(['child', 'parent'], $rows2->pluck('id')->values()->all());
+    }
+    public function test_descendants_of_scope_can_include_self_when_flag_true(): void
+    {
+        // grand -> parent -> child
+        $grand  = $this->makeEntity('grand');
+        $parent = $this->makeEntity('parent', 'grand');
+        $child  = $this->makeEntity('child', 'parent');
+
+        // Default (includeSelf=false) should not include the ancestor entity itself
+        $rowsDefault = Entity::query()->descendantsOf('grand')->orderBy('id')->get();
+        $this->assertSame(['child', 'parent'], $rowsDefault->pluck('id')->values()->all());
+
+        // includeSelf=true should include the ancestor entity as well
+        $rowsWithSelf = Entity::query()->descendantsOf('grand', ['includeSelf' => true])->orderBy('id')->get();
+        $this->assertSame(['child', 'grand', 'parent'], $rowsWithSelf->pluck('id')->values()->all());
+
+        // The self row should have null meta columns (since no relation row exists)
+        $grandRow = $rowsWithSelf->firstWhere('id', 'grand');
+        $this->assertNotNull($grandRow);
+        $attrs = $grandRow->getAttributes();
+        $this->assertArrayHasKey('id', $attrs);
+        $this->assertArrayHasKey('descendant.relation_id', $attrs);
+        $this->assertNull($attrs['descendant.relation_id']);
+    }
+
+    public function test_descendants_of_scope_can_hide_relation_meta_columns(): void
+    {
+        // grand -> parent -> child
+        $grand  = $this->makeEntity('grand');
+        $parent = $this->makeEntity('parent', 'grand');
+        $child  = $this->makeEntity('child', 'parent');
+
+        $rows = Entity::query()->descendantsOf('grand', ['includeRelationMeta' => false])->orderBy('id')->get();
+        $this->assertSame(['child', 'parent'], $rows->pluck('id')->values()->all());
+
+        $attrs = $rows->first()->getAttributes();
+        $this->assertArrayNotHasKey('descendant.relation_id', $attrs);
+        $this->assertArrayNotHasKey('descendant.position', $attrs);
+        $this->assertArrayNotHasKey('descendant.depth', $attrs);
+        $this->assertArrayNotHasKey('descendant.tags', $attrs);
     }
 }
