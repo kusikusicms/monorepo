@@ -215,18 +215,63 @@ class Entity extends Model
      *
      * @throws \Exception
      */
-    public function scopeAncestorsOf(Builder $query, string $entity_id): Builder
+    /**
+     * Scope a query to only include the ancestors of a given entity.
+     *
+     * Options (array) — second parameter:
+     * - includeSelf (bool): Whether to include the referenced entity itself (the child/source) (default false).
+     * - includeRelationMeta (bool): Whether to include ancestor.* meta columns in the select (default true).
+     * - order (string): Controls order by hierarchy depth. Accepts 'ascending' | 'descending' | 'asc' | 'desc'.
+     *                    Ascending means closest ancestor first (depth 1, then 2, ...). When includeSelf=true,
+     *                    self is treated as depth 0 and appears first on ascending and last on descending. If not provided,
+     *                    no specific ordering is applied (preserves previous behavior).
+     */
+    public function scopeAncestorsOf(Builder $query, string $entity_id, array $options = []): Builder
     {
-        return $query->join('entities_relations as ancestor', function ($join) use ($entity_id) {
+        $includeSelf = (bool)($options['includeSelf'] ?? false);
+        $includeRelationMeta = array_key_exists('includeRelationMeta', $options)
+            ? (bool)$options['includeRelationMeta']
+            : true;
+        $orderOpt = isset($options['order']) ? strtolower((string)$options['order']) : null;
+        $direction = "desc";
+        if ($orderOpt === 'ascending' || $orderOpt === 'asc') {
+            $direction = 'asc';
+        }
+
+        // Use LEFT JOIN so we can optionally include the self row (the referenced entity) without a matching relation
+        $query->leftJoin('entities_relations as ancestor', function ($join) use ($entity_id) {
             $join->on('ancestor.called_entity_id', '=', 'entities.id')
                 ->where('ancestor.caller_entity_id', '=', $entity_id)
                 ->where('ancestor.kind', '=', EntityRelation::RELATION_ANCESTOR);
-        })
-            ->addSelect('id')
-            ->addSelect('ancestor.relation_id as ancestor.relation_id')
-            ->addSelect('ancestor.position as ancestor.position')
-            ->addSelect('ancestor.depth as ancestor.depth')
-            ->addSelect('ancestor.tags as ancestor.tags');
+        });
+
+        // When includeSelf=false, require the join to exist. When true, allow the self row even without join
+        if ($includeSelf) {
+            $query->where(function ($q) use ($entity_id) {
+                $q->whereNotNull('ancestor.relation_id')
+                    ->orWhere('entities.id', '=', $entity_id);
+            });
+        } else {
+            $query->whereNotNull('ancestor.relation_id');
+        }
+
+        // Always select the entity id
+        $query->addSelect('id');
+
+        // Optionally include relation meta columns
+        if ($includeRelationMeta) {
+            $query->addSelect('ancestor.relation_id as ancestor.relation_id')
+                ->addSelect('ancestor.position as ancestor.position')
+                ->addSelect('ancestor.depth as ancestor.depth')
+                ->addSelect('ancestor.tags as ancestor.tags');
+        }
+
+        $query->orderByRaw(
+            "CASE WHEN entities.id = ? THEN 0 ELSE ancestor.depth END $direction",
+            [$entity_id]
+        );
+
+        return $query;
     }
 
     /**

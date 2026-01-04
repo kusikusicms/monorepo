@@ -158,4 +158,99 @@ class EntityScopesRelationsTest extends TestCase
         $this->assertArrayNotHasKey('descendant.depth', $attrs);
         $this->assertArrayNotHasKey('descendant.tags', $attrs);
     }
+
+    public function test_ancestors_of_scope_can_include_self_when_flag_true(): void
+    {
+        // grand -> parent -> child
+        $grand  = $this->makeEntity('grand');
+        $parent = $this->makeEntity('parent', 'grand');
+        $child  = $this->makeEntity('child', 'parent');
+
+        // Default (includeSelf=false) should not include the child itself
+        $rowsDefault = Entity::query()->ancestorsOf('child')->orderBy('id')->get();
+        $this->assertSame(['grand', 'parent'], $rowsDefault->pluck('id')->sort()->values()->all());
+
+        // includeSelf=true should include the child entity as well
+        $rowsWithSelf = Entity::query()->ancestorsOf('child', ['includeSelf' => true])->orderBy('id')->get();
+        $this->assertSame(['child', 'grand', 'parent'], $rowsWithSelf->pluck('id')->sort()->values()->all());
+
+        // The self row should have null meta columns (since no relation row exists for self)
+        $childRow = $rowsWithSelf->firstWhere('id', 'child');
+        $this->assertNotNull($childRow);
+        $attrs = $childRow->getAttributes();
+        $this->assertArrayHasKey('id', $attrs);
+        $this->assertArrayHasKey('ancestor.relation_id', $attrs);
+        $this->assertNull($attrs['ancestor.relation_id']);
+    }
+
+    public function test_ancestors_of_scope_can_hide_relation_meta_columns(): void
+    {
+        // grand -> parent -> child
+        $grand  = $this->makeEntity('grand');
+        $parent = $this->makeEntity('parent', 'grand');
+        $child  = $this->makeEntity('child', 'parent');
+
+        $rows = Entity::query()->ancestorsOf('child', ['includeRelationMeta' => false])->orderBy('id')->get();
+        $this->assertSame(['grand', 'parent'], $rows->pluck('id')->sort()->values()->all());
+
+        $attrs = $rows->first()->getAttributes();
+        $this->assertArrayNotHasKey('ancestor.relation_id', $attrs);
+        $this->assertArrayNotHasKey('ancestor.position', $attrs);
+        $this->assertArrayNotHasKey('ancestor.depth', $attrs);
+        $this->assertArrayNotHasKey('ancestor.tags', $attrs);
+    }
+
+    public function test_ancestors_of_scope_orders_by_hierarchy_ascending(): void
+    {
+        // grand -> parent -> child
+        $grand  = $this->makeEntity('grand');
+        $parent = $this->makeEntity('parent', 'grand');
+        $child  = $this->makeEntity('child', 'parent');
+
+        $rows = Entity::query()->ancestorsOf('child', ['order' => 'ascending'])->get();
+        // Ascending: closest ancestor first => parent, then grand
+        $this->assertSame(['parent', 'grand'], $rows->pluck('id')->values()->all());
+
+        // Shortcut should work too
+        $rowsAsc = Entity::query()->ancestorsOf('child', ['order' => 'asc'])->get();
+        $this->assertSame(['parent', 'grand'], $rowsAsc->pluck('id')->values()->all());
+    }
+
+    public function test_ancestors_of_scope_orders_by_hierarchy_descending(): void
+    {
+        // grand -> parent -> child
+        $grand  = $this->makeEntity('grand');
+        $parent = $this->makeEntity('parent', 'grand');
+        $child  = $this->makeEntity('child', 'parent');
+
+        $rows = Entity::query()->ancestorsOf('child', ['order' => 'descending'])->get();
+        // Descending: farthest ancestor first => grand, then parent
+        $this->assertSame(['grand', 'parent'], $rows->pluck('id')->values()->all());
+
+        // Shortcut should work too
+        $rowsDesc = Entity::query()->ancestorsOf('child', ['order' => 'desc'])->get();
+        $this->assertSame(['grand', 'parent'], $rowsDesc->pluck('id')->values()->all());
+    }
+
+    public function test_ancestors_of_scope_order_with_self_row(): void
+    {
+        // grand -> parent -> child
+        $grand  = $this->makeEntity('grand');
+        $parent = $this->makeEntity('parent', 'grand');
+        $child  = $this->makeEntity('child', 'parent');
+
+        // includeSelf + ascending => child (self depth 0), parent (1), grand (2)
+        $rowsAsc = Entity::query()->ancestorsOf('child', [
+            'includeSelf' => true,
+            'order' => 'ascending',
+        ])->get();
+        $this->assertSame(['child', 'parent', 'grand'], $rowsAsc->pluck('id')->values()->all());
+
+        // includeSelf + descending => grand (2), parent (1), child (0)
+        $rowsDesc = Entity::query()->ancestorsOf('child', [
+            'includeSelf' => true,
+            'order' => 'descending',
+        ])->get();
+        $this->assertSame(['grand', 'parent', 'child'], $rowsDesc->pluck('id')->values()->all());
+    }
 }
