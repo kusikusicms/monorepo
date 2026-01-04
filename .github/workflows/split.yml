@@ -27,9 +27,7 @@ jobs:
             # website::git@github.com:kusikusicms/website.git
             # media::git@github.com:kusikusicms/media.git
             # admin::git@github.com:kusikusicms/admin.git
-          # tags will be split too
-          tag: true
+          tag: false
           user_email: 'ramses@cuatromedios.com'
-          user_name: 'Ramses Moreno'
+          user_name: 'ramsesmoreno'
           repository_organization: 'KusikusiCMS'
-          repository_name: 'KusikusiCMS'
