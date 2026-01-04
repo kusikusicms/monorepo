@@ -229,6 +229,28 @@ class Entity extends Model
             ->addSelect('ancestor.tags as ancestor.tags');
     }
 
+    /**
+     * Scope a query to only include descendants of a given entity id.
+     *
+     * @param Builder $query
+     * @param number $entity_id The id of the  entity
+     * @return Builder
+     * @throws \Exception
+     */
+    public function scopeDescendantsOf($query, $entity_id, $depth = 99)
+    {
+        $query->join('entities_relations as descendant', function ($join) use ($entity_id, $depth) {
+            $join->on('descendant.caller_entity_id', '=', 'entities.id')
+                ->where('descendant.called_entity_id', '=', $entity_id)
+                ->where('descendant.kind', '=', EntityRelation::RELATION_ANCESTOR)
+                ->where('descendant.depth', '<=', $depth);
+        })
+            ->addSelect('id')
+            ->addSelect('descendant.relation_id as descendant.relation_id')
+            ->addSelect('descendant.position as descendant.position')
+            ->addSelect('descendant.depth as descendant.depth')
+            ->addSelect('descendant.tags as descendant.tags');
+    }
 
     /**
      * Static function to refresh the relations of ANCESTOR kind for the given Entity ID.

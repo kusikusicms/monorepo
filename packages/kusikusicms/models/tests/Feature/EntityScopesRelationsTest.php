@@ -79,4 +79,43 @@ class EntityScopesRelationsTest extends TestCase
         $this->assertArrayHasKey('ancestor.depth', $attrs);
         $this->assertArrayHasKey('ancestor.tags', $attrs);
     }
+
+    public function test_descendants_of_scope_returns_all_descendants(): void
+    {
+        // Build a small tree: grand -> parent -> child
+        $grand  = $this->makeEntity('grand');
+        $parent = $this->makeEntity('parent', 'grand');
+        $child  = $this->makeEntity('child', 'parent');
+        $other  = $this->makeEntity('other');
+
+        // Relations are created automatically via observers when setting parent_entity_id
+        $rows = Entity::query()->descendantsOf('grand')->orderBy('id')->get();
+
+        // Should contain both descendants (parent, child) but not unrelated entity
+        $this->assertSame(['child', 'parent'], $rows->pluck('id')->values()->all());
+        $this->assertNotContains('other', $rows->pluck('id')->all());
+
+        // Characterize that the joined alias-selected columns exist in attributes
+        $attrs = $rows->first()->getAttributes();
+        $this->assertArrayHasKey('descendant.relation_id', $attrs);
+        $this->assertArrayHasKey('descendant.position', $attrs);
+        $this->assertArrayHasKey('descendant.depth', $attrs);
+        $this->assertArrayHasKey('descendant.tags', $attrs);
+    }
+
+    public function test_descendants_of_scope_respects_depth_limit(): void
+    {
+        $grand  = $this->makeEntity('grand');
+        $parent = $this->makeEntity('parent', 'grand');
+        $child  = $this->makeEntity('child', 'parent');
+
+        // Relations generated via observers
+        // Depth = 1 should include only direct descendants (depth <= 1)
+        $rows = Entity::query()->descendantsOf('grand', 1)->orderBy('id')->get();
+        $this->assertSame(['parent'], $rows->pluck('id')->values()->all());
+
+        // Depth = 2 should include both
+        $rows2 = Entity::query()->descendantsOf('grand', 2)->orderBy('id')->get();
+        $this->assertSame(['child', 'parent'], $rows2->pluck('id')->values()->all());
+    }
 }
