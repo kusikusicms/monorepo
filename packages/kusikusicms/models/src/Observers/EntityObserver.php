@@ -3,6 +3,8 @@
 namespace KusikusiCMS\Models\Observers;
 
 use KusikusiCMS\Models\Entity;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 /**
  * Observer for Entity lifecycle events.
@@ -20,13 +22,34 @@ class EntityObserver
      */
     public function saved(Entity $entity): void
     {
-        if ($entity->wasChanged('parent_entity_id')) {
+        if ($entity->isDirty('parent_entity_id')) {
             Entity::refreshAncestorRelationsOfEntity($entity);
         }
     }
 
     // The following methods are defined for future extension and clarity.
-    public function creating(Entity $entity): void {}
+    public function creating(Entity $entity): void {
+        // Check if the id is already in use
+        if (Entity::find($entity[$entity->getKeyName()])) {
+            abort(403, 'Duplicated Entity ID "'.$entity[$entity->getKeyName()].'"');
+        }
+        // Setting default values, some of them cannot be set as default attributes.
+        if (! isset($entity->model)) {
+            $entity->model = 'Entity';
+        }
+        if (! isset($entity->publish_at)) {
+            $entity->publish_at = Carbon::now();
+        }
+        if (! isset($entity->view)) {
+            $entity->view = Str::snake($entity['model']);
+        }
+        if (! isset($entity->props)) {
+            $entity->props = new \ArrayObject;
+        }
+        if (! isset($entity->published)) {
+            $entity->published = true;
+        }
+    }
     public function created(Entity $entity): void {}
     public function updating(Entity $entity): void {}
     public function updated(Entity $entity): void {}

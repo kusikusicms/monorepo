@@ -33,7 +33,7 @@ This document highlights key choices in the KusikusiCMS Models package and the r
 - This hybrid approach balances isolation with end-to-end confidence for consumers.
 
 ## 7) Factories and seeding for realistic states
-- Factory states (`draft`, `scheduled`, `published`, `outdated`) encode common lifecycle scenarios directly into tests and seeds.
+- Factory states (`draft`, `scheduled`, `live`, `expired`) encode common lifecycle scenarios directly into tests and seeds.
 - A package seeder demonstrates usage and accelerates manual testing.
 
 ## 8) Configuration namespace standardization

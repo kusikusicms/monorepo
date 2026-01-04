@@ -80,17 +80,19 @@ Entity::query()->whereContent('title', 'like', 'Hello%')->get();
 Entity::query()->childrenOf($parentId)->get();
 Entity::query()->parentOf($childId)->first();
 Entity::query()->ancestorsOf($entityId)->get();
+Entity::query()->descendantsOf($entityId)->get();
+Entity::query()->siblingsOf($entityId)->get();
 ```
 
 ### Factory states
 ```
 Entity::factory()->draft()->create();
 Entity::factory()->scheduled()->create();
-Entity::factory()->published()->create();
-Entity::factory()->outdated()->create();
+Entity::factory()->live()->create();
+Entity::factory()->expired()->create();
 
 // With contents helper
-Entity::factory()->published()->withContents(['title' => 'Hello'])->create();
+Entity::factory()->live()->withContents(['title' => 'Hello'])->create();
 ```
 
 ### Events

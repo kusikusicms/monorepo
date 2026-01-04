@@ -61,9 +61,9 @@ class EntityFactory extends Factory
     }
 
     /**
-     * Published: currently within publish window.
+     * Live: currently within publish window.
      */
-    public function published(?Carbon $since = null, ?Carbon $until = null): self
+    public function live(?Carbon $since = null, ?Carbon $until = null): self
     {
         return $this->state(function () use ($since, $until) {
             $now = Carbon::now();
@@ -78,9 +78,9 @@ class EntityFactory extends Factory
     }
 
     /**
-     * Outdated: already unpublished (unpublish_at in the past).
+     * Expired: already unpublished (unpublish_at in the past).
      */
-    public function outdated(?Carbon $publishedSince = null, ?Carbon $unpublishedAt = null): self
+    public function expired(?Carbon $publishedSince = null, ?Carbon $unpublishedAt = null): self
     {
         return $this->state(function () use ($publishedSince, $unpublishedAt) {
             $now = Carbon::now();
@@ -94,6 +94,30 @@ class EntityFactory extends Factory
         });
     }
 
+    /**
+     * Set the parent entity.
+     */
+    public function childOf(string $entity_id): self
+    {
+        return $this->state(function () use ($entity_id) {
+            return [
+                'parent_entity_id' => $entity_id
+            ];
+        });
+    }
+
+    /**
+     * Set the parent entity.
+     */
+    public function id(string $entity_id): self
+    {
+        return $this->state(function () use ($entity_id) {
+            return [
+                'id' => $entity_id
+            ];
+        });
+    }
+    
     /**
      * Attach rawContents after creating using provided fields (uses default language from config).
      *

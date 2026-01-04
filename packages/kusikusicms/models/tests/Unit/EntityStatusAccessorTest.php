@@ -27,15 +27,15 @@ class EntityStatusAccessorTest extends TestCase
         $this->assertSame('scheduled', $e1->status);
     }
 
-    public function test_returns_outdated_when_unpublish_at_in_past(): void
+    public function test_returns_expired_when_unpublish_at_in_past(): void
     {
-        $e = Entity::factory()->outdated()->create();
-        $this->assertSame('outdated', $e->status);
+        $e = Entity::factory()->expired()->create();
+        $this->assertSame('expired', $e->status);
     }
 
-    public function test_returns_published_when_now_within_window(): void
+    public function test_returns_live_when_now_within_window(): void
     {
-        $e = Entity::factory()->published()->create();
-        $this->assertSame('published', $e->status);
+        $e = Entity::factory()->live()->create();
+        $this->assertSame('live', $e->status);
     }
 }

@@ -14,7 +14,7 @@ class PackageUsageTest extends TestCase
         Event::fake([EntityCreated::class]);
 
         $entity = Entity::factory()
-            ->published()
+            ->live()
             ->withContents(['title' => 'Hello'])
             ->create();
 
@@ -32,8 +32,8 @@ class PackageUsageTest extends TestCase
 
     public function test_order_by_content_scope_orders_by_content_text(): void
     {
-        $a = Entity::factory()->published()->withContents(['title' => 'A title'])->create();
-        $b = Entity::factory()->published()->withContents(['title' => 'B title'])->create();
+        $a = Entity::factory()->live()->withContents(['title' => 'A title'])->create();
+        $b = Entity::factory()->live()->withContents(['title' => 'B title'])->create();
 
         $ordered = Entity::query()->orderByContent('title', 'asc')->pluck('id')->all();
 
