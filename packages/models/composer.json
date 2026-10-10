@@ -4,7 +4,7 @@
   "type": "library",
   "license": "MIT",
   "require": {
-    "php": ">=8.4",
+    "php": "^8.4",
     "illuminate/support": "^12.0",
     "illuminate/database": "^12.0",
     "pugx/shortid-php": "^1.3"
