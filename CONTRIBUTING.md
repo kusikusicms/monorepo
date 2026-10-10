@@ -10,7 +10,7 @@ Thank you for considering contributing! This document explains how to set up you
 
 ## Development setup
 
-Requirements: PHP 8.2+, Composer, SQLite.
+Requirements: PHP 8.4+, Composer, SQLite.
 
 ```bash
 composer install            # at the repo root
