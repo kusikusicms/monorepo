@@ -149,7 +149,7 @@ Before changing classes under `packages/`:
 
 ## 12) Git and documentation
 
-- Commit messages: Conventional style preferred (feat:, fix:, refactor:, docs:, test:, chore:).
+- Commit messages: Conventional style preferred (feat:, fix:, refactor:, docs:, test:, chore:, style:). Always use a scope, that should be the app or package name (models, media, sandbox, starter) 
 - Update `CHANGELOG.md` for user-facing changes in packages.
 - Keep `README.md` instructions accurate if setup steps change.
 
