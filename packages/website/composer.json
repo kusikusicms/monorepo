@@ -1,0 +1,38 @@
+{
+  "name": "kusikusicms/website",
+  "description": "Website/router manager for KusikusiCMS.",
+  "type": "library",
+  "license": "MIT",
+  "require": {
+    "php": ">=8.2",
+    "illuminate/support": "^12.0",
+    "illuminate/routing": "^12.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "KusikusiCMS\\Website\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "KusikusiCMS\\Website\\Tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "KusikusiCMS\\Website\\WebsiteServiceProvider"
+      ]
+    },
+    "branch-alias": {
+      "dev-main": "12.x-dev"
+    }
+  },
+  "require-dev": {
+    "orchestra/testbench": "^10.0",
+    "phpunit/phpunit": "^11.0"
+  },
+  "config": {
+    "sort-packages": true
+  }
+}

@@ -12,15 +12,16 @@ This document describes how autonomous coding agents should operate in this repo
 - Language/stack: PHP (Laravel ecosystem), Composer packages, Blade templates, Node tooling for frontend assets.
 - Monorepo layout:
   - `apps/` — Application(s) built with/around the packages.
-    - `apps/starter/` — Development/demo Laravel app (controllers, routes, views).
-  - `packages/` — Reusable packages for the CMS.
-    - `packages/kusikusicms/models/` — Core models and domain entities (e.g., `Entity`), events, collections, etc.
+    - `apps/sandbox/` — Development Laravel app wired to the local `packages/*` through symlinked path repositories.
+    - `apps/starter/` — Clean end-user template (`kusikusicms/starter`), installs the packages from Packagist; do not add path repositories here.
+  - `packages/` — Reusable packages for the CMS (`models`, `website`, `media`, `admin`).
+    - `packages/models/` — Core models and domain entities (e.g., `Entity`), events, collections, etc.
   - Root files: `README.md`, `CHANGELOG.md`, `composer.json`, `package.json`, etc.
 
 Primary domain concepts visible in recent work:
 - `Entity` model and related domain events (`EntityCreating`, `EntitySaving`, `EntityDeleted`, etc.).
 - `EntityCollection` support utilities.
-- MVC via Laravel: Controllers under `apps/starter/app/Http/Controllers/`, views under `apps/starter/resources/views/`.
+- MVC via Laravel: Controllers under `apps/sandbox/app/Http/Controllers/`, views under `apps/sandbox/resources/views/`.
 
 ---
 
@@ -38,7 +39,7 @@ Primary domain concepts visible in recent work:
 - Do not edit files under `vendor/` or generated artifacts.
 - Do not introduce breaking changes to public classes/functions in `packages/` unless explicitly approved by the user.
 - Follow PSR-12 coding style and Laravel naming/location conventions.
-- Keep business logic inside packages; keep app-specific glue in `apps/starter/` unless instructed otherwise.
+- Keep business logic inside packages; keep app-specific glue in `apps/sandbox/` unless instructed otherwise.
 - Do not commit secrets or environment-specific credentials; `.env` values must be documented, not committed.
 - Keep database migrations idempotent and backward compatible when possible.
 - Respect domain events: if changing `Entity` lifecycle, confirm correct event dispatch order and payload.
@@ -48,11 +49,11 @@ Primary domain concepts visible in recent work:
 ## 4) Common commands
 
 PHP/Composer:
-- Install deps: `composer install`
-- Code style (if configured): `composer cs` or `composer lint` (check `composer.json` scripts)
-- Tests (if present): `vendor/bin/phpunit`
+- Install deps (repo root): `composer install`
+- Code style: `composer lint` (Pint); CI runs `composer lint -- --test`
+- Tests for all packages: `composer test`
 
-Laravel app (in `apps/starter/`):
+Laravel app (in `apps/sandbox/`):
 - Migrate DB: `php artisan migrate`
 - Serve app: `php artisan serve`
 
@@ -61,17 +62,17 @@ Node (when working on assets):
 - Build: `npm run build`
 - Dev: `npm run dev`
 
-Note: Paths may require `cd apps/starter` before artisan commands.
+Note: Paths may require `cd apps/sandbox` before artisan commands.
 
 ---
 
 ## 5) Repository conventions
 
 - PHP version: follow `composer.json` `php` constraint.
-- Namespaces: match folder structure (PSR-4). For packages under `packages/kusikusicms/*`, ensure `composer.json` `autoload` maps are honored.
-- Events: Classes under `packages/kusikusicms/models/src/Events/` represent domain lifecycle hooks. Prefer dispatching them via Laravel’s model/events system rather than manual calls.
+- Namespaces: match folder structure (PSR-4). For packages under `packages/*`, ensure `composer.json` `autoload` maps are honored.
+- Events: Classes under `packages/models/src/Events/` represent domain lifecycle hooks. Prefer dispatching them via Laravel’s model/events system rather than manual calls.
 - Collections: Domain-specific collections (e.g., `EntityCollection`) should extend Laravel collections appropriately and be type-safe where possible.
-- Controllers/Views: App-layer endpoints live under `apps/starter/app/Http/Controllers` with Blade views under `apps/starter/resources/views`.
+- Controllers/Views: App-layer endpoints live under `apps/sandbox/app/Http/Controllers` with Blade views under `apps/sandbox/resources/views`.
 
 ---
 
@@ -109,12 +110,12 @@ Note: Paths may require `cd apps/starter` before artisan commands.
 
 ## 8) File/location guidance
 
-- New domain classes (entities, value objects, services): place under relevant package, e.g., `packages/kusikusicms/models/src/` with proper namespace.
-- New events: `packages/kusikusicms/models/src/Events/`.
-- App controllers: `apps/starter/app/Http/Controllers/`.
-- Blade views: `apps/starter/resources/views/`.
-- Config published to app: under `apps/starter/config/` if required.
-- Database migrations (for the app): `apps/starter/database/migrations/`.
+- New domain classes (entities, value objects, services): place under relevant package, e.g., `packages/models/src/` with proper namespace.
+- New events: `packages/models/src/Events/`.
+- App controllers: `apps/sandbox/app/Http/Controllers/`.
+- Blade views: `apps/sandbox/resources/views/`.
+- Config published to app: under `apps/sandbox/config/` if required.
+- Database migrations (for the app): `apps/sandbox/database/migrations/`.
 
 ---
 
@@ -159,17 +160,17 @@ Before changing classes under `packages/`:
 - If requirements are ambiguous or risky (e.g., potential breaking changes), ask for clarification.
 - Prefer minimal diff; avoid mass auto-formatting unrelated code.
 - Preserve existing license headers and file docblocks.
-- When touching critical files (e.g., `packages/kusikusicms/models/src/Entity.php`), double-check event flows and collection types.
+- When touching critical files (e.g., `packages/models/src/Entity.php`), double-check event flows and collection types.
 
 ---
 
 ## 14) Quick reference: frequently touched files
 
-- `packages/kusikusicms/models/src/Entity.php` — Core entity model; changes may affect multiple events and collections.
-- `packages/kusikusicms/models/src/Support/EntityCollection.php` — Collection semantics for entities.
-- `packages/kusikusicms/models/src/Events/*.php` — Lifecycle events.
-- `apps/dev/app/Http/Controllers/EntityController.php` — App-level endpoints for entities.
-- `apps/dev/resources/views/entity-show.blade.php` — Rendering layer for entity details.
+- `packages/models/src/Entity.php` — Core entity model; changes may affect multiple events and collections.
+- `packages/models/src/Support/EntityCollection.php` — Collection semantics for entities.
+- `packages/models/src/Events/*.php` — Lifecycle events.
+- `apps/sandbox/app/Http/Controllers/EntityController.php` — App-level endpoints for entities.
+- `apps/sandbox/resources/views/entity-show.blade.php` — Rendering layer for entity details.
 
 ---
 

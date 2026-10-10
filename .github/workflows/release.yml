@@ -15,6 +15,9 @@ jobs:
   release:
     name: semantic-release
     runs-on: ubuntu-latest
+    outputs:
+      released: ${{ steps.version.outputs.released }}
+      tag: ${{ steps.version.outputs.tag }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,11 +31,53 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: |
-          npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
 
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          npx semantic-release@25
+          git tag --sort=-v:refname | head -n 1 > "$RUNNER_TEMP/tag-before"
+          npx semantic-release
+
+      - name: Detect new version
+        id: version
+        run: |
+          git fetch --tags --force
+          before="$(cat "$RUNNER_TEMP/tag-before")"
+          after="$(git tag --sort=-v:refname | head -n 1)"
+          if [ -n "$after" ] && [ "$before" != "$after" ]; then
+            echo "released=true" >> "$GITHUB_OUTPUT"
+            echo "tag=$after" >> "$GITHUB_OUTPUT"
+          else
+            echo "released=false" >> "$GITHUB_OUTPUT"
+            echo "tag=" >> "$GITHUB_OUTPUT"
+          fi
+
+  split:
+    name: Split ${{ matrix.package }}
+    needs: release
+    if: needs.release.outputs.released == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [ models, website, media, admin ]
+    steps:
+      - name: Checkout released tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release.outputs.tag }}
+          fetch-depth: 0
+
+      - name: Split package to its own repository
+        uses: symplify/monorepo-split-github-action@v2.3.0
+        env:
+          # PAT with push access to the split repositories (GITHUB_TOKEN cannot push to other repos)
+          GITHUB_TOKEN: ${{ secrets.SPLIT_TOKEN }}
+        with:
+          package_directory: 'packages/${{ matrix.package }}'
+          repository_organization: 'kusikusicms'
+          repository_name: '${{ matrix.package }}'
+          branch: 'main'
+          tag: ${{ needs.release.outputs.tag }}

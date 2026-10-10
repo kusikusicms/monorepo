@@ -1,71 +1,82 @@
-KusikusiCMS Monorepo
+# KusikusiCMS
 
-This repository hosts the KusikusiCMS ecosystem:
+KusikusiCMS brings CMS features to Laravel projects the standard Laravel way: Composer packages, service providers with auto-discovery, Eloquent models, migrations and publishable config. Use it to build a website or blog from scratch, or add it to an existing Laravel application.
 
-- packages/kusikusicms/models — Core Eloquent models used by the CMS
-- packages/kusikusicms/website — Website/router manager for KusikusiCMS
-- packages/kusikusicms/media — Media manager
-- packages/kusikusicms/admin — Admin UI for managing content
-- apps/starter — A Laravel starter project wired to use all local packages via Composer path repositories
+| Package | Description |
+| --- | --- |
+| [`kusikusicms/models`](packages/models) | Core Eloquent models (`Entity`, contents, relations) and domain events |
+| [`kusikusicms/website`](packages/website) | Website/router manager |
+| [`kusikusicms/media`](packages/media) | Media manager |
+| [`kusikusicms/admin`](packages/admin) | Admin UI for managing content |
 
-Goals
-- Develop all related packages in a single repository.
-- Use a standard, Laravel-friendly layout.
-- Support publishing each package independently to Packagist (via repo splits).
+## Installation
 
-Repository layout
-- packages/kusikusicms/* — Individual packages, each a valid Composer package with PSR-4 autoloading and a Laravel Service Provider.
-- apps/starter — A Laravel application configured to consume the packages via Composer path repositories (see instructions below to initialize the app).
-- .github/workflows/split.yml — GitHub Actions workflow to split packages to individual repositories for Packagist publishing.
+### In an existing Laravel 12 application
 
-Quick start
+```bash
+composer require kusikusicms/models kusikusicms/website kusikusicms/media kusikusicms/admin
+php artisan migrate
+```
 
-A) Starter app (committed)
-- A full Laravel 12 starter app is committed at `apps/starter`. It requires the KusikusiCMS packages as normal Composer dependencies (intended for end users via Packagist).
-- Note: Until packages are published to Packagist, `composer install` in `apps/starter` will fail to resolve them. Use the Dev App below for local development.
+Service providers are registered through Laravel package auto-discovery. Publish configuration when you need to customize it:
 
-Run the starter app once packages are published:
-- cd apps/starter
-- composer install
-- php artisan serve
+```bash
+# every package
+php artisan vendor:publish --tag=kusikusicms-config
 
-B) Dev app (path-repo wired to local packages)
-- Generate a local Laravel 12 app that uses the monorepo packages via Composer path repositories:
+# a single package
+php artisan vendor:publish --tag=kusikusicms-models-config
+php artisan vendor:publish --tag=kusikusicms-models-migrations
+```
 
-  bash apps/dev/bootstrap.sh
+Package routes (`admin`, `website`, `media`) can be configured or disabled in `config/kusikusicms/<package>.php`:
 
-- Start the dev server:
-  cd apps/dev && php artisan serve
+```php
+'routes' => [
+    'enabled' => true,
+    'prefix' => 'admin',
+    'middleware' => ['web'],
+],
+```
 
-Package auto-discovery
-- Packages are set up with Laravel package auto-discovery via the `extra.laravel.providers` key. No manual registration should be necessary.
+### New project from the starter template
 
-Releasing and publishing packages
-- This monorepo uses unified versioning and automated releases via Semantic Release. Pushing conventional commits to `main` will produce GitHub releases and update the root `CHANGELOG.md`.
-- Repo splits are handled by `.github/workflows/split.yml` using `symplify/monorepo-split-github-action`, mirroring tags and directories under `packages/kusikusicms/*` to individual repositories (e.g., github.com/kusikusicms/models, etc.). Connect each split repo to Packagist.
-- Update the `split.yml` mapping with your actual destination repos before enabling the workflow.
+```bash
+composer create-project kusikusicms/starter my-site
+cd my-site
+php artisan serve
+```
 
-Conventional commits
-- Format commit messages using the Conventional Commits spec. Common types:
-  - feat: new feature (minor release)
-  - fix: bug fix (patch release)
-  - perf: performance improvement (patch release)
-  - docs, style, refactor, test, chore: non-user facing changes
-- Breaking changes: add `!` after the type/scope or include a `BREAKING CHANGE:` footer to trigger a major release. Example: `feat!: drop PHP 8.2`
+## Repository layout
 
-Release automation
-- Workflow: `.github/workflows/release.yml` runs on pushes to `main` and manual dispatch.
-- Config: `.releaserc.json` with plugins for commit analysis, notes, changelog, git commit, and GitHub release.
-- Output: a tag `vX.Y.Z`, a GitHub Release with notes, and an updated `CHANGELOG.md` committed back to `main`.
-- Split: once the tag exists, the split workflow can mirror it to the per-package repos where Packagist will detect the new version.
+```
+packages/   models, website, media, admin  (each one a Composer library)
+apps/
+  sandbox/  Laravel app wired to the local packages (symlinked path repositories)
+  starter/  Template published as kusikusicms/starter (packages from Packagist)
+```
 
-Testing packages
-- Each package includes a minimal skeleton and is set up to support Testbench. You can add `orchestra/testbench` in `require-dev` and write package tests under `tests/`.
+Each package is split to its own read-only repository (`kusikusicms/<package>`) on every release, and published to Packagist from there.
 
-Contributing
-- Make changes in the package directories.
-- Use the starter app for manual end-to-end testing.
-- Use conventional commits in PR titles and merge commits. Releases are produced automatically from `main`.
+## Versioning
 
-License
-- MIT License © 2025 Cuatromedos SC. See `LICENSE` at the repository root.
+Versions are aligned with Laravel major versions: `12.x` supports Laravel 12, `13.x` will support Laravel 13, and so on. Within a Laravel major, releases follow semver (`feat:` → minor, `fix:` → patch). `BREAKING CHANGE` commits are reserved for moving to the next Laravel major. All packages share the same version number.
+
+## Development
+
+```bash
+composer install        # root workspace: autoloads and tests all packages
+composer test           # run every package test suite
+composer lint           # format code with Pint
+
+cd apps/sandbox
+cp .env.example .env && composer install
+php artisan key:generate && php artisan migrate
+php artisan serve
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full workflow, conventional commits and the release process.
+
+## License
+
+MIT License © 2025 Cuatromedios SC. See [LICENSE](LICENSE).

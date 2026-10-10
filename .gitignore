@@ -2,14 +2,15 @@
 /node_modules/
 /.idea/
 /.vscode/
-/.DS_Store
+**/.DS_Store
 *.log
 .env
 apps/**/vendor/
 apps/**/node_modules/
 apps/**/.env
-apps/dev
 # Ignore lock files in package directories (libraries)
 packages/**/composer.lock
 packages/**/vendor
-**/.phpunit*
+**/.phpunit*apps/sandbox/composer.lock
+/.junie/plans/**
+.phpunit.result.cache

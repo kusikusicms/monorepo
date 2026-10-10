@@ -1,33 +1,49 @@
-name: Monorepo Split
+name: Monorepo Split (manual)
 
+# Manual re-split of every package, e.g. when a split failed after a release.
+# Normal splits run automatically from release.yml.
 on:
-  push:
-    tags:
-      - 'v*'
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to split and publish (e.g. v12.0.1). Leave empty to only update main.'
+        required: false
+        default: ''
 
 jobs:
-  split_packages:
-    name: Split Packages
+  split:
+    name: Split ${{ matrix.package }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [ models, website, media, admin ]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Monorepo Split
-        uses: symplify/monorepo-split-github-action@v2.4.0
         with:
-          # GitHub token with repo permissions
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          # Directory to start from (root)
-          package_directory: 'packages/kusikusicms'
-          # mapping: "local_directory::remote_repository"
-          directories_to_repositories: |
-            models::git@github.com:kusikusicms/models.git
-            # website::git@github.com:kusikusicms/website.git
-            # media::git@github.com:kusikusicms/media.git
-            # admin::git@github.com:kusikusicms/admin.git
-          tag: false
-          user_email: 'ramses@cuatromedios.com'
-          user_name: 'ramsesmoreno'
-          repository_organization: 'KusikusiCMS'
+          ref: ${{ inputs.tag || github.ref }}
+          fetch-depth: 0
+
+      - name: Split package (with tag)
+        if: ${{ inputs.tag != '' }}
+        uses: symplify/monorepo-split-github-action@v2.3.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.SPLIT_TOKEN }}
+        with:
+          package_directory: 'packages/${{ matrix.package }}'
+          repository_organization: 'kusikusicms'
+          repository_name: '${{ matrix.package }}'
+          branch: 'main'
+          tag: ${{ inputs.tag }}
+
+      - name: Split package (branch only)
+        if: ${{ inputs.tag == '' }}
+        uses: symplify/monorepo-split-github-action@v2.3.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.SPLIT_TOKEN }}
+        with:
+          package_directory: 'packages/${{ matrix.package }}'
+          repository_organization: 'kusikusicms'
+          repository_name: '${{ matrix.package }}'
+          branch: 'main'
