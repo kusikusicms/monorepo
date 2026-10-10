@@ -1,6 +1,6 @@
 # KusikusiCMS Models (Laravel 12)
 
-This package provides the core Eloquent models and helpers for KusikusiCMS on Laravel 12, including:
+This package provides the core Eloquent models and helpers for KusikusiCMS on Laravel, including:
 - `Entity` with short string IDs, lifecycle events, scopes, and content helpers
 - `EntityContent`, `EntityRelation`, and `EntityArchive`
 - Collections helpers for transforming related contents
@@ -45,15 +45,17 @@ php artisan migrate
 
 ## Quick start
 
-### Create an entity (short ID assigned automatically)
-```
+### Create an entity
+```PHP
 use KusikusiCMS\Models\Entity;
 
-$entity = Entity::create(['model' => 'Article']);
+$entity = Entity::create(['model' => 'Article']); // short ID assigned automatically
+$entity = Entity::create(['id' => 'home', 'model' => 'Home']); // short ID given
+$entity = Entity::create(['model' => 'Box', 'props' => ['width' => 23]]); // with props
 ```
 
-### Attach contents
-```
+### Attach contents records
+```PHP
 $entity->createContents([
   'title' => 'Hello',
   'body'  => 'World',
@@ -62,21 +64,21 @@ $entity->createContents([
 
 ### Query with content-aware scopes
 - Load related contents with optional filters:
-```
+```PHP
 Entity::query()->withContents(['lang' => 'es', 'fields' => ['title']])->get();
 ```
 - Order by a content field (uses configured default language if omitted):
-```
+```PHP
 Entity::query()->orderByContent('title', 'desc')->get();
 ```
 - Filter by a content field:
-```
+```PHP
 // Current behavior is characterized in tests; future version will compare `field =` and apply operator to `text` only.
 Entity::query()->whereContent('title', 'like', 'Hello%')->get();
 ```
 
 ### Relations graph scopes
-```
+```PHP
 Entity::query()->childrenOf($parentId)->get();
 Entity::query()->parentOf($childId)->first();
 Entity::query()->ancestorsOf($entityId)->get();
@@ -85,7 +87,7 @@ Entity::query()->siblingsOf($entityId)->get();
 ```
 
 ### Factory states
-```
+```PHP
 Entity::factory()->draft()->create();
 Entity::factory()->scheduled()->create();
 Entity::factory()->live()->create();
@@ -98,7 +100,7 @@ Entity::factory()->live()->withContents(['title' => 'Hello'])->create();
 ### Events
 
 `Entity` dispatches custom events via `$dispatchesEvents` so host apps can listen to them. Example:
-```
+```PHP
 use Illuminate\Support\Facades\Event;
 use KusikusiCMS\Models\Events\EntityCreated;
 
@@ -110,7 +112,7 @@ See docs/events.md for the full list.
 ### Collections helpers
 
 When loading `contents`, use collection helpers to transform related rows into convenient arrays:
-```
+```PHP
 $entities = Entity::withContents(['lang' => 'en'])->get();
 $entities->flattenContentsByField();      // ['title' => 'Hello', 'body' => 'World']
 $entities->groupContentsByField();        // ['title' => ['en' => 'Hello'], ...]
@@ -120,7 +122,7 @@ $entities->groupContentsByLang();         // ['en' => ['title' => 'Hello'], ...]
 ## Testing
 
 - Package tests (Orchestra Testbench):
-```
+```shell
 cd packages/models
 ../../vendor/bin/phpunit
 ```

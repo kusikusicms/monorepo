@@ -12,7 +12,7 @@ class EntityController extends Controller
     public function show(string $id): View
     {
         $entity1 = Entity::query()
-            ->select(['id', 'parent_entity_id', 'model', 'publish_at', 'unpublish_at'])
+            ->select(['id', 'parent_entity_id', 'model', 'props', 'publish_at', 'unpublish_at'])
             ->withContents()
             ->find($id);
         $children = Entity::query()
@@ -23,22 +23,24 @@ class EntityController extends Controller
             ->get();
         $descendants = Entity::query()
             ->select('id', 'model')
-            ->descendantsOf($id, ["includeRelationMeta" => false, "includeSelf" => true])
+            ->descendantsOf($id, ['includeRelationMeta' => false, 'includeSelf' => false])
             ->withContents()
             ->get()
             ->toTree();
         $ancestors = Entity::query()
             ->select('id', 'model')
-            ->ancestorsOf($id, ["includeRelationMeta" => false, "includeSelf" => true])
+            ->ancestorsOf($id, ['includeRelationMeta' => false, 'includeSelf' => false])
             ->withContents()
             ->get();
+
         return view('entity-show', [
-            "entity1" => $entity1,
-            "children" => $children,
-            "descendants" => $descendants,
-            "ancestors" => $ancestors
+            'entity1' => $entity1,
+            'children' => $children,
+            'descendants' => $descendants,
+            'ancestors' => $ancestors,
         ]);
     }
+
     public function store(Request $request): RedirectResponse
     {
         $entity = Entity::factory()
@@ -54,6 +56,7 @@ class EntityController extends Controller
             })
             ->withContents(['title' => $request->input('title')])
             ->create();
+
         return redirect()->route('home', $entity->id)
             ->with('status', 'Entity created successfully!');
     }

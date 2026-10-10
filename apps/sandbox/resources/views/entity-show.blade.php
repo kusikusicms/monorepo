@@ -26,7 +26,6 @@
             <h2>Children</h2>
             <pre>@foreach($children as $e){{ $e->id }}<br>{{ json_encode($e->contentsByLang ?? []) }}<br><br>@endforeach</pre>
 
-            <hr>
             <h2>Descendants</h2>
             <pre>{{ $descendants->toJSON(JSON_PRETTY_PRINT) }}</pre>
 
