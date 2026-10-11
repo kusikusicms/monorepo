@@ -1,6 +1,6 @@
 # AGENTS.md — Project‑specific guidelines for coding agents
 
-Updated: 2026-01-03 20:09 (local)
+Updated: 2026-10-10 (local)
 
 This document describes how autonomous coding agents should operate in this repository. It provides context, constraints, commands, file layout, and quality gates so agents can make safe, effective changes with minimal human intervention.
 
@@ -16,7 +16,9 @@ This document describes how autonomous coding agents should operate in this repo
     - `apps/starter/` — Clean end-user template (`kusikusicms/starter`), installs the packages from Packagist; do not add path repositories here.
   - `packages/` — Reusable packages for the CMS (`models`, `website`, `media`, `admin`).
     - `packages/models/` — Core models and domain entities (e.g., `Entity`), events, collections, etc.
-  - Root files: `README.md`, `CHANGELOG.md`, `composer.json`, `package.json`, etc.
+  - Root files: `README.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, `SECURITY.md`, `composer.json`, `package.json`, etc.
+  - `monorepo.json` — source of truth for which projects (packages and apps) are split to read-only repositories (`split`) and published to Packagist on release (`publish`), and for the Laravel major (`laravelMajor`, currently 13) the versions are locked to. Do not hardcode project lists in workflows; read this file.
+  - `docs/repository-setup.md` — checklist of GitHub/Packagist settings that live outside the repository.
 
 Primary domain concepts visible in recent work:
 - `Entity` model and related domain events (`EntityCreating`, `EntitySaving`, `EntityDeleted`, etc.).
@@ -40,7 +42,7 @@ Primary domain concepts visible in recent work:
 - Do not introduce breaking changes to public classes/functions in `packages/` unless explicitly approved by the user.
 - Follow PSR-12 coding style and Laravel naming/location conventions.
 - Keep business logic inside packages; keep app-specific glue in `apps/sandbox/` unless instructed otherwise.
-- Do not commit secrets or environment-specific credentials; `.env` values must be documented, not committed.
+- Do not commit secrets or environment-specific credentials; `.env` values must be documented, not committed. Workflow secrets (`SPLIT_TOKEN`, `RELEASE_APP_ID`, `RELEASE_APP_PRIVATE_KEY`, `PACKAGIST_*`) are configured in GitHub only.
 - Keep database migrations idempotent and backward compatible when possible.
 - Respect domain events: if changing `Entity` lifecycle, confirm correct event dispatch order and payload.
 
@@ -51,16 +53,21 @@ Primary domain concepts visible in recent work:
 PHP/Composer:
 - Install deps (repo root): `composer install`
 - Code style: `composer lint` (Pint); CI runs `composer lint -- --test`
+- Static analysis: `composer analyse` (Larastan/PHPStan level 5, `phpstan.neon` + `phpstan-baseline.neon`). New code must not add errors; do not grow the baseline.
 - Tests for all packages: `composer test`
+- Dependency audit: `composer audit` and `npm audit --omit=dev`
+- Validate a composer file: `composer validate --strict --no-check-lock --no-check-publish --working-dir=<dir>`
 
 Laravel app (in `apps/sandbox/`):
 - Migrate DB: `php artisan migrate`
 - Serve app: `php artisan serve`
 
-Node (when working on assets):
-- Install deps: `npm install`
-- Build: `npm run build`
-- Dev: `npm run dev`
+Node:
+- Install deps (root, also installs the husky git hook): `npm install`
+- Check a commit message: `echo "feat(models): x" | npx commitlint`
+- Check a range: `npx commitlint --from origin/main --to HEAD`
+- Release preview (needs the right branch/remote state): `npx semantic-release --dry-run --no-ci`
+- Assets in apps (when working on them): `npm run build`, `npm run dev`
 
 Note: Paths may require `cd apps/sandbox` before artisan commands.
 
@@ -122,7 +129,7 @@ Note: Paths may require `cd apps/sandbox` before artisan commands.
 ## 9) Backward compatibility checklist (packages)
 
 Before changing classes under `packages/`:
-- Public API unchanged? If changed, document migration and update `CHANGELOG.md`.
+- Public API unchanged? If changed, document the migration in the README and the PR (the changelog is generated at release time).
 - Events still dispatched with same payloads and order?
 - Default behavior preserved for existing consumers?
 - Are there deprecation paths where possible?
@@ -149,9 +156,20 @@ Before changing classes under `packages/`:
 
 ## 12) Git and documentation
 
-- Commit messages: Conventional style preferred (feat:, fix:, refactor:, docs:, test:, chore:, style:). Always use a scope, that should be the app or package name (models, media, sandbox, starter) 
-- Update `CHANGELOG.md` for user-facing changes in packages.
-- Keep `README.md` instructions accurate if setup steps change.
+- Commit messages: Conventional Commits are **enforced** (commitlint via the husky `commit-msg` hook and in CI). Format `type(scope): description`.
+  - Types: `feat`, `fix`, `perf`, `docs`, `style`, `refactor`, `test`, `build`, `ci`, `chore`, `revert`.
+  - Scopes (required): `models`, `website`, `media`, `admin`, `sandbox`, `starter`, `monorepo`, `ci`, `deps`, `deps-dev`, `release`. Use the app or package name when the change is limited to it.
+- Pull request titles follow the same format (validated in CI). PRs are squash-merged; the PR title becomes the commit on `main`.
+- `CHANGELOG.md` is generated by semantic-release when a release runs. **Do not edit it by hand** and do not add changelog entries in PRs; write a clear Conventional Commit title instead, since it feeds the changelog.
+- Keep `README.md` instructions accurate if setup steps change. Package and app READMEs keep their "read-only split" notice.
+
+### Releases, splits and publishing
+
+- Releases are manual (`.github/workflows/release.yml`, `workflow_dispatch`, optional `dry_run`). Agents must never trigger or emulate a release or create tags.
+- Versions follow Laravel: `13.x.y`. `feat` → minor, `fix`/`perf` → patch, breaking (`!`/`BREAKING CHANGE`) → minor only. `.github/release/guard-major.cjs` aborts a release whose major differs from `laravelMajor` in `monorepo.json`.
+- Every push to `main` splits projects with `split: true` (`.github/workflows/split.yml`). Releases tag only projects with `publish: true`.
+- Other workflows: `ci.yml` (validate, audit, Pint, Larastan, package tests, sandbox tests, starter smoke test), `commitlint.yml`, `pr-title.yml`, `security.yml` (dependency review, CodeQL for actions, OpenSSF Scorecard). Dependabot is configured in `.github/dependabot.yml`.
+- Split repositories are read-only: `packages/*/.github/workflows/close-pull-request.yml` and `apps/starter/.github/workflows/close-pull-request.yml` close PRs there. Do not add other workflows under those folders unless they should ship to the split repository.
 
 ---
 

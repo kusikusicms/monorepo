@@ -1,0 +1,157 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$field\.$#'
+			identifier: property.notFound
+			count: 5
+			path: packages/models/src/Entity.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$lang\.$#'
+			identifier: property.notFound
+			count: 4
+			path: packages/models/src/Entity.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$text\.$#'
+			identifier: property.notFound
+			count: 3
+			path: packages/models/src/Entity.php
+
+		-
+			message: '#^Access to an undefined property KusikusiCMS\\Models\\Entity\:\:\$parent_entity_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/models/src/Entity.php
+
+		-
+			message: '#^Access to an undefined property KusikusiCMS\\Models\\Entity\:\:\$props\.$#'
+			identifier: property.notFound
+			count: 3
+			path: packages/models/src/Entity.php
+
+		-
+			message: '#^Access to an undefined property KusikusiCMS\\Models\\Entity\|KusikusiCMS\\Models\\Support\\EntityCollection\:\:\$parent_entity_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/models/src/Entity.php
+
+		-
+			message: '#^If condition is always true\.$#'
+			identifier: if.alwaysTrue
+			count: 1
+			path: packages/models/src/Entity.php
+
+		-
+			message: '#^PHPDoc type array of property KusikusiCMS\\Models\\Entity\:\:\$dispatchesEvents is not covariant with PHPDoc type array\<string, class\-string\> of overridden property Illuminate\\Database\\Eloquent\\Model\:\:\$dispatchesEvents\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: packages/models/src/Entity.php
+
+		-
+			message: '#^Return type \(KusikusiCMS\\Models\\Support\\EntityCollection\) of method KusikusiCMS\\Models\\Entity\:\:newCollection\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Collection\<\(int\|string\), static\(Illuminate\\Database\\Eloquent\\Model\)\>\) of method Illuminate\\Database\\Eloquent\\Model\:\:newCollection\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: packages/models/src/Entity.php
+
+		-
+			message: '#^PHPDoc type array\<int, string\> of property KusikusiCMS\\Models\\EntityArchive\:\:\$fillable is not covariant with PHPDoc type list\<string\> of overridden property Illuminate\\Database\\Eloquent\\Model\:\:\$fillable\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: packages/models/src/EntityArchive.php
+
+		-
+			message: '#^PHPDoc tag @return contains unresolvable type\.$#'
+			identifier: return.unresolvableType
+			count: 1
+			path: packages/models/src/EntityContent.php
+
+		-
+			message: '#^PHPDoc type array of property KusikusiCMS\\Models\\EntityContent\:\:\$hidden is not covariant with PHPDoc type list\<string\> of overridden property Illuminate\\Database\\Eloquent\\Model\:\:\$hidden\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: packages/models/src/EntityContent.php
+
+		-
+			message: '#^PHPDoc type array\<int, string\> of property KusikusiCMS\\Models\\EntityContent\:\:\$fillable is not covariant with PHPDoc type list\<string\> of overridden property Illuminate\\Database\\Eloquent\\Model\:\:\$fillable\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: packages/models/src/EntityContent.php
+
+		-
+			message: '#^Return type \(KusikusiCMS\\Models\\Support\\EntityContentsCollection\) of method KusikusiCMS\\Models\\EntityContent\:\:newCollection\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Collection\<\(int\|string\), static\(Illuminate\\Database\\Eloquent\\Model\)\>\) of method Illuminate\\Database\\Eloquent\\Model\:\:newCollection\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: packages/models/src/EntityContent.php
+
+		-
+			message: '#^PHPDoc type array of property KusikusiCMS\\Models\\EntityRelation\:\:\$hidden is not covariant with PHPDoc type list\<string\> of overridden property Illuminate\\Database\\Eloquent\\Model\:\:\$hidden\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: packages/models/src/EntityRelation.php
+
+		-
+			message: '#^PHPDoc type array\<int, string\> of property KusikusiCMS\\Models\\EntityRelation\:\:\$fillable is not covariant with PHPDoc type list\<string\> of overridden property Illuminate\\Database\\Eloquent\\Model\:\:\$fillable\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: packages/models/src/EntityRelation.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Factories\\Factory\<Illuminate\\Database\\Eloquent\\Model\>\:\:afterCreating\(\) expects Closure\(Illuminate\\Database\\Eloquent\\Model\)\: mixed, Closure\(KusikusiCMS\\Models\\Entity\)\: void given\.$#'
+			identifier: argument.type
+			count: 1
+			path: packages/models/src/Factories/EntityFactory.php
+
+		-
+			message: '#^Access to an undefined property KusikusiCMS\\Models\\Entity\:\:\$model\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/models/src/Observers/EntityObserver.php
+
+		-
+			message: '#^Access to an undefined property KusikusiCMS\\Models\\Entity\:\:\$props\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/models/src/Observers/EntityObserver.php
+
+		-
+			message: '#^Access to an undefined property KusikusiCMS\\Models\\Entity\:\:\$publish_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/models/src/Observers/EntityObserver.php
+
+		-
+			message: '#^Access to an undefined property KusikusiCMS\\Models\\Entity\:\:\$published\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/models/src/Observers/EntityObserver.php
+
+		-
+			message: '#^Access to an undefined property KusikusiCMS\\Models\\Entity\:\:\$view\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/models/src/Observers/EntityObserver.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 2
+			path: packages/models/src/Support/EntityCollection.php
+
+		-
+			message: '#^Access to an undefined property KusikusiCMS\\Models\\EntityContent\:\:\$field\.$#'
+			identifier: property.notFound
+			count: 5
+			path: packages/models/src/Support/EntityContentsCollection.php
+
+		-
+			message: '#^Access to an undefined property KusikusiCMS\\Models\\EntityContent\:\:\$lang\.$#'
+			identifier: property.notFound
+			count: 4
+			path: packages/models/src/Support/EntityContentsCollection.php
+
+		-
+			message: '#^Access to an undefined property KusikusiCMS\\Models\\EntityContent\:\:\$text\.$#'
+			identifier: property.notFound
+			count: 3
+			path: packages/models/src/Support/EntityContentsCollection.php

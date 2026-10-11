@@ -1,0 +1,36 @@
+name: Feature request
+description: Suggest an improvement or a new feature
+title: "feat(scope): "
+labels: [enhancement]
+body:
+  - type: dropdown
+    id: project
+    attributes:
+      label: Package or app
+      options:
+        - models
+        - website
+        - media
+        - admin
+        - starter
+        - sandbox
+        - monorepo / tooling
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: What are you trying to achieve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered

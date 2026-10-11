@@ -1,5 +1,8 @@
 # kusikusicms/admin
 
+> **Read-only split.** This repository is automatically split from [`packages/admin`](https://github.com/kusikusicms/monorepo/tree/main/packages/admin) in the [kusikusicms/monorepo](https://github.com/kusikusicms/monorepo). Please open issues and pull requests in the monorepo; pull requests sent here are closed automatically.
+> Install it with `composer require kusikusicms/admin`.
+
 Admin UI for managing content in KusikusiCMS.
 
 - Namespace: `KusikusiCMS\Admin`

@@ -1,5 +1,8 @@
 # KusikusiCMS Models (Laravel 13)
 
+> **Read-only split.** This repository is automatically split from [`packages/models`](https://github.com/kusikusicms/monorepo/tree/main/packages/models) in the [kusikusicms/monorepo](https://github.com/kusikusicms/monorepo). Please open issues and pull requests in the monorepo; pull requests sent here are closed automatically.
+> Install it with `composer require kusikusicms/models`.
+
 This package provides the core Eloquent models and helpers for KusikusiCMS on Laravel, including:
 - `Entity` with short string IDs, lifecycle events, scopes, and content helpers
 - `EntityContent`, `EntityRelation`, and `EntityArchive`

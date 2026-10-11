@@ -56,11 +56,11 @@ apps/
   starter/  Template published as kusikusicms/starter (packages from Packagist)
 ```
 
-Each package is split to its own read-only repository (`kusikusicms/<package>`) on every release, and published to Packagist from there.
+Every merge to `main` splits each project listed with `"split": true` in [`monorepo.json`](monorepo.json) (packages and apps) to its own read-only repository (`kusikusicms/<name>`). Releases are triggered manually; only projects with `"publish": true` are tagged there and picked up by Packagist, so you decide when a package or app (for example `kusikusicms/starter`) is ready to be installed with Composer. Issues and pull requests go to this monorepo, not to the split repositories.
 
 ## Versioning
 
-Versions are aligned with Laravel major versions: `12.x` supported Laravel 12, `13.x` supports Laravel 13, `14.x` will support Laravel 14, and so on. Within a Laravel major, releases follow semver (`feat:` → minor, `fix:` → patch). `BREAKING CHANGE` commits are reserved for moving to the next Laravel major. All packages share the same version number.
+Versions are aligned with Laravel major versions: `12.x` supported Laravel 12, `13.x` supports Laravel 13, `14.x` will support Laravel 14, and so on. Within a Laravel major, releases follow semver (`feat:` → minor, `fix:`/`perf:` → patch). The major version is locked to `laravelMajor` in `monorepo.json`: breaking changes (`!` or `BREAKING CHANGE`) only bump the minor, and the release aborts if the next version would leave the Laravel major. All published projects share the same version number. Releases are created manually from **Actions → Release → Run workflow** (see [CONTRIBUTING.md](CONTRIBUTING.md#releases)).
 
 ## Development
 
@@ -68,6 +68,7 @@ Versions are aligned with Laravel major versions: `12.x` supported Laravel 12, `
 composer install        # root workspace: autoloads and tests all packages
 composer test           # run every package test suite
 composer lint           # format code with Pint
+composer analyse        # static analysis with Larastan (PHPStan)
 
 cd apps/sandbox
 cp .env.example .env && composer install
@@ -75,7 +76,7 @@ php artisan key:generate && php artisan migrate
 php artisan serve
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the full workflow, conventional commits and the release process.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full workflow, conventional commits and the release process, and [docs/repository-setup.md](docs/repository-setup.md) for the GitHub and Packagist setup checklist. Security issues: see [SECURITY.md](SECURITY.md).
 
 ## License
 

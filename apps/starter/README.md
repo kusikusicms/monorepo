@@ -1,3 +1,6 @@
+> **Read-only split.** This repository is automatically split from [`apps/starter`](https://github.com/kusikusicms/monorepo/tree/main/apps/starter) in the [kusikusicms/monorepo](https://github.com/kusikusicms/monorepo). Please open issues and pull requests in the monorepo; pull requests sent here are closed automatically.
+> Create a new project with `composer create-project kusikusicms/starter my-site`.
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">

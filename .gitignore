@@ -14,3 +14,4 @@ packages/**/vendor
 **/.phpunit*apps/sandbox/composer.lock
 /.junie/plans/**
 .phpunit.result.cache
+.phpstan.cache

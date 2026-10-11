@@ -1,5 +1,8 @@
 # kusikusicms/website
 
+> **Read-only split.** This repository is automatically split from [`packages/website`](https://github.com/kusikusicms/monorepo/tree/main/packages/website) in the [kusikusicms/monorepo](https://github.com/kusikusicms/monorepo). Please open issues and pull requests in the monorepo; pull requests sent here are closed automatically.
+> Install it with `composer require kusikusicms/website`.
+
 Website/router manager for KusikusiCMS.
 
 - Namespace: `KusikusiCMS\Website`
