@@ -1,4 +1,4 @@
-# KusikusiCMS Models (Laravel 12)
+# KusikusiCMS Models (Laravel 13)
 
 This package provides the core Eloquent models and helpers for KusikusiCMS on Laravel, including:
 - `Entity` with short string IDs, lifecycle events, scopes, and content helpers
@@ -6,7 +6,7 @@ This package provides the core Eloquent models and helpers for KusikusiCMS on La
 - Collections helpers for transforming related contents
 - Factory states for realistic testing/seed data
 
-Version: 12.0.0-alpha.2
+Version: 13.x
 
 ## Installation
 

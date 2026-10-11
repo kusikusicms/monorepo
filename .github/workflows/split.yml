@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Existing tag to split and publish (e.g. v12.0.1). Leave empty to only update main.'
+        description: 'Existing tag to split and publish (e.g. v13.0.1). Leave empty to only update main.'
         required: false
         default: ''
 

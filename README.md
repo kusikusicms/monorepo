@@ -11,7 +11,7 @@ KusikusiCMS brings CMS features to Laravel projects the standard Laravel way: Co
 
 ## Installation
 
-### In an existing Laravel 12 application
+### In an existing Laravel 13 application
 
 ```bash
 composer require kusikusicms/models kusikusicms/website kusikusicms/media kusikusicms/admin
@@ -60,7 +60,7 @@ Each package is split to its own read-only repository (`kusikusicms/<package>`) 
 
 ## Versioning
 
-Versions are aligned with Laravel major versions: `12.x` supports Laravel 12, `13.x` will support Laravel 13, and so on. Within a Laravel major, releases follow semver (`feat:` → minor, `fix:` → patch). `BREAKING CHANGE` commits are reserved for moving to the next Laravel major. All packages share the same version number.
+Versions are aligned with Laravel major versions: `12.x` supported Laravel 12, `13.x` supports Laravel 13, `14.x` will support Laravel 14, and so on. Within a Laravel major, releases follow semver (`feat:` → minor, `fix:` → patch). `BREAKING CHANGE` commits are reserved for moving to the next Laravel major. All packages share the same version number.
 
 ## Development
 

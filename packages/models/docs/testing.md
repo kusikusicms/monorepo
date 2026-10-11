@@ -28,7 +28,7 @@ php artisan test
 ```
 
 What this does:
-- Boots a full Laravel 12 application
+- Boots a full Laravel 13 application
 - Registers package providers (directly or via discovery)
 - Verifies end-to-end behaviors: config merge, migrations, factories, events, and scopes
 

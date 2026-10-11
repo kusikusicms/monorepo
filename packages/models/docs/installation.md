@@ -1,9 +1,9 @@
 # Installation
 
-This document explains how to install and start using the KusikusiCMS Models package with Laravel 12.
+This document explains how to install and start using the KusikusiCMS Models package with Laravel 13.
 
 ## Requirements
-- Laravel 12
+- Laravel 13
 - PHP compatible with your Laravel version
 - Composer
 

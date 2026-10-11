@@ -52,17 +52,17 @@ Please make sure all suites are green and Pint passes before opening a PR.
 
 Use [Conventional Commits](https://www.conventionalcommits.org/): `feat:` (minor), `fix:`/`perf:` (patch), `docs:`, `test:`, `refactor:`, `chore:`.
 
-Versions follow Laravel majors (`12.x` ↔ Laravel 12). Reserve `BREAKING CHANGE` / `!` commits for the move to the next Laravel major.
+Versions follow Laravel majors (`13.x` ↔ Laravel 13). Reserve `BREAKING CHANGE` / `!` commits for the move to the next Laravel major.
 
 ## Releases and package splits
 
-- Pushing to `main` runs `.github/workflows/release.yml`: semantic-release creates a `v12.x.y` tag, GitHub release and `CHANGELOG.md` entry.
+- Pushing to `main` runs `.github/workflows/release.yml`: semantic-release creates a `v13.x.y` tag, GitHub release and `CHANGELOG.md` entry.
 - When a release is created, the same workflow splits each `packages/<name>` to `kusikusicms/<name>` with that tag (secret `SPLIT_TOKEN`: a PAT with push access to the split repositories). Each split repository is connected to Packagist.
 - `.github/workflows/split.yml` is a manual fallback to re-split an existing tag.
 - One-time baseline: before the first release on the Laravel-aligned numbering, create and push an annotated baseline tag on `main` so semantic-release continues from it (the old `v1.0.0` tag is left untouched):
 
   ```bash
-  git tag -a v12.0.0 -m "Baseline for Laravel 12" && git push origin v12.0.0
+  git tag -a v13.0.0 -m "Baseline for Laravel 13" && git push origin v13.0.0
   ```
 
 ## Submitting changes
