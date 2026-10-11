@@ -1,0 +1,83 @@
+name: Dependabot lockfile fix
+
+# dependabot-core has a known limitation (dependabot/dependabot-core#14110) where its npm
+# updater can leave package-lock.json out of sync with package.json, especially for
+# transitive dependencies shared by several packages (e.g. conventional-commits-parser,
+# pulled in by both @commitlint/* and semantic-release). That breaks `npm ci` with an
+# EUSAGE error in both commitlint.yml and ci.yml. This workflow regenerates the lock file
+# on Dependabot's own npm PRs so those checks can pass without manual intervention.
+#
+# Security notes:
+# - This uses pull_request, not pull_request_target. pull_request_target runs with the base
+#   repository's secrets, so checking out the PR head there is flagged by CodeQL as
+#   "checkout of untrusted code in a privileged context". With pull_request, runs triggered
+#   by dependabot[bot] only receive *Dependabot* secrets, so RELEASE_APP_ID and
+#   RELEASE_APP_PRIVATE_KEY must also be stored under Settings -> Secrets and variables ->
+#   Dependabot (see docs/repository-setup.md).
+# - The job only runs for PRs opened by dependabot[bot] from a branch of this repository.
+# - PR-controlled values (the branch name) are never interpolated into `run:` scripts; they
+#   are passed through environment variables to avoid code injection.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dependabot-lockfile-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  fix-lockfile:
+    name: Regenerate package-lock.json
+    if: >-
+      github.actor == 'dependabot[bot]' &&
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      # Token of a GitHub App that is allowed to bypass the main ruleset, reused here so the
+      # fix-up commit is pushed with a token that (unlike GITHUB_TOKEN) re-triggers the
+      # other checks on the pull request. Read from the Dependabot secrets store.
+      - name: Create release app token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+
+      - name: Checkout pull request branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Regenerate the lock file if it is out of sync
+        id: lock
+        run: |
+          cp package-lock.json "$RUNNER_TEMP/package-lock.json.before"
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          if cmp -s package-lock.json "$RUNNER_TEMP/package-lock.json.before"; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit the regenerated lock file
+        if: steps.lock.outputs.changed == 'true'
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+        run: |
+          git add package-lock.json
+          git commit -m "chore(deps): sync package-lock.json"
+          git push origin "HEAD:refs/heads/${HEAD_REF}"
