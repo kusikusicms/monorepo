@@ -29,6 +29,7 @@ Everything that cannot live in the repository files and must be configured on Gi
 
    Then run **Actions → Monorepo Split → Run workflow** with `tag: v13.0.0` so Packagist gets `13.0.0` for the packages. Future versions are created by the manual **Release** workflow.
 9. **Dependabot lock file fix-ups**: `.github/workflows/dependabot-lockfile.yml` reuses the release GitHub App token to push a corrected `package-lock.json` on Dependabot's own npm pull requests, working around a known `dependabot-core` limitation (dependabot/dependabot-core#14110) that otherwise fails `commitlint` and `CI` with an `npm ci` "lock file out of sync" error. No extra setup beyond the App from step 3 is needed. For pull requests opened before this workflow existed, comment `@dependabot recreate` on them so they pick it up.
+   - It must trigger on `pull_request_target`, not `pull_request`: GitHub treats `pull_request` runs whose actor is `dependabot[bot]` as if they came from a fork, giving them a read-only `GITHUB_TOKEN` and no access to Actions secrets (only Dependabot secrets), so the step that mints the App token would be unable to authenticate and the check would appear skipped or fail. `pull_request_target` runs in the base repository's context, so the App credentials are available; this is safe here because Dependabot branches live in this repository, not a fork.
 
 ## 2. GitHub — split repositories
 

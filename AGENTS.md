@@ -169,7 +169,7 @@ Before changing classes under `packages/`:
 - Versions follow Laravel: `13.x.y`. `feat` → minor, `fix`/`perf` → patch, breaking (`!`/`BREAKING CHANGE`) → minor only. `.github/release/guard-major.cjs` aborts a release whose major differs from `laravelMajor` in `monorepo.json`.
 - Every push to `main` splits projects with `split: true` (`.github/workflows/split.yml`). Releases tag only projects with `publish: true`.
 - Other workflows: `ci.yml` (validate, audit, Pint, Larastan, package tests, sandbox tests, starter smoke test), `commitlint.yml`, `pr-title.yml`, `security.yml` (dependency review, CodeQL for actions, OpenSSF Scorecard). Dependabot is configured in `.github/dependabot.yml`.
-- `dependabot-lockfile.yml` auto-regenerates `package-lock.json` on Dependabot's npm pull requests, working around a `dependabot-core` bug that otherwise leaves the lock file out of sync and fails `commitlint`/`CI` with `npm ci`'s EUSAGE error.
+- `dependabot-lockfile.yml` auto-regenerates `package-lock.json` on Dependabot's npm pull requests, working around a `dependabot-core` bug that otherwise leaves the lock file out of sync and fails `commitlint`/`CI` with `npm ci`'s EUSAGE error. It runs on `pull_request_target` (not `pull_request`), since GitHub strips Actions secrets and write access from `pull_request` runs triggered by `dependabot[bot]`.
 - Split repositories are read-only: `packages/*/.github/workflows/close-pull-request.yml` and `apps/starter/.github/workflows/close-pull-request.yml` close PRs there. Do not add other workflows under those folders unless they should ship to the split repository.
 
 ---

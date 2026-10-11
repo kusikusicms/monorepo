@@ -6,8 +6,17 @@ name: Dependabot lockfile fix
 # pulled in by both @commitlint/* and semantic-release). That breaks `npm ci` with an
 # EUSAGE error in both commitlint.yml and ci.yml. This workflow regenerates the lock file
 # on Dependabot's own npm PRs so those checks can pass without manual intervention.
+#
+# This must use pull_request_target rather than pull_request: GitHub treats pull_request
+# runs triggered by dependabot[bot] as if they came from a fork, giving them a read-only
+# GITHUB_TOKEN and no access to Actions secrets (only Dependabot secrets), which made the
+# "Create release app token" step unable to authenticate and the job show as skipped/failed
+# instead of fixing the lock file. pull_request_target runs in the base repository's
+# context, so RELEASE_APP_ID/RELEASE_APP_PRIVATE_KEY are available. Dependabot branches
+# live in this repository (not a fork), so checking out the head ref here is safe, and the
+# job is still gated to the dependabot[bot] actor.
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize]
 
 permissions:
@@ -36,7 +45,7 @@ jobs:
       - name: Checkout pull request branch
         uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: ${{ github.event.pull_request.head.sha }}
           token: ${{ steps.app-token.outputs.token }}
 
       - name: Setup Node
