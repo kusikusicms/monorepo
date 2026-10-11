@@ -17,7 +17,7 @@ Everything that cannot live in the repository files and must be configured on Gi
 3. **Create a GitHub App** (for example `kusikusicms-release`) with *Contents: write*. Install it on the monorepo and store its credentials as repository secrets:
    - `RELEASE_APP_ID`
    - `RELEASE_APP_PRIVATE_KEY`
-4. **`SPLIT_TOKEN` secret**: a fine-grained personal access token with *Contents: write* on the split repositories only (`models`, `website`, `media`, `admin`, `starter`), or an App token with the same scope. The default `GITHUB_TOKEN` cannot push to other repositories.
+4. **`SPLIT_TOKEN` secret**: a fine-grained personal access token with *Contents: write* and *Workflows: write* on the split repositories only (`models`, `website`, `media`, `admin`, `starter`), or an App token with the same scope. *Workflows: write* (classic PATs: the `workflow` scope) is required because the split repositories ship `.github/workflows/close-pull-request.yml`; without it GitHub rejects the push with `refusing to allow a Personal Access Token to create or update workflow ... without workflow scope`. The default `GITHUB_TOKEN` cannot push to other repositories.
 5. Optional secrets `PACKAGIST_USERNAME` and `PACKAGIST_TOKEN` (API token from your Packagist profile) so the release workflow explicitly notifies Packagist. Without them, the Packagist GitHub hook is enough.
 6. **Settings → Code security**: enable Dependabot alerts and security updates, secret scanning with push protection, private vulnerability reporting, and the dependency graph. CodeQL is managed by `.github/workflows/security.yml`.
 7. **Settings → Actions → General**: default workflow permissions *Read repository contents*; do not allow GitHub Actions to create pull requests.
