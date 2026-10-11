@@ -1,0 +1,68 @@
+name: Dependabot lockfile fix
+
+# dependabot-core has a known limitation (dependabot/dependabot-core#14110) where its npm
+# updater can leave package-lock.json out of sync with package.json, especially for
+# transitive dependencies shared by several packages (e.g. conventional-commits-parser,
+# pulled in by both @commitlint/* and semantic-release). That breaks `npm ci` with an
+# EUSAGE error in both commitlint.yml and ci.yml. This workflow regenerates the lock file
+# on Dependabot's own npm PRs so those checks can pass without manual intervention.
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dependabot-lockfile-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  fix-lockfile:
+    name: Regenerate package-lock.json
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      # Token of a GitHub App that is allowed to bypass the main ruleset, reused here so the
+      # fix-up commit is pushed with a token that (unlike GITHUB_TOKEN) re-triggers the
+      # other checks on the pull request.
+      - name: Create release app token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+
+      - name: Checkout pull request branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Regenerate the lock file if it is out of sync
+        id: lock
+        run: |
+          cp package-lock.json "$RUNNER_TEMP/package-lock.json.before"
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          if cmp -s package-lock.json "$RUNNER_TEMP/package-lock.json.before"; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit the regenerated lock file
+        if: steps.lock.outputs.changed == 'true'
+        env:
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+        run: |
+          git add package-lock.json
+          git commit -m "chore(deps): sync package-lock.json"
+          git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
