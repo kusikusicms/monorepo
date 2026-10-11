@@ -1,4 +1,5 @@
 name: Dependabot lockfile fix
+run-name: "Dependabot lockfile fix: ${{ github.event.pull_request.title }}"
 
 # dependabot-core has a known limitation (dependabot/dependabot-core#14110) where its npm
 # updater can leave package-lock.json out of sync with package.json, especially for
