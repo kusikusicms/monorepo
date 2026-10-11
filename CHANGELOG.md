@@ -1,3 +1,9 @@
+## [13.0.1](https://github.com/kusikusicms/monorepo/compare/v13.0.0...v13.0.1) (2026-10-11)
+
+### Bug Fixes
+
+* **ci:** use pull_request_target in Dependabot lockfile workflow for proper token access ([#13](https://github.com/kusikusicms/monorepo/issues/13)) ([5c93d6b](https://github.com/kusikusicms/monorepo/commit/5c93d6b6fb9146bf4d952c5dd41a16ef3a38f254))
+
 ## Unreleased
 
 ### Chores
