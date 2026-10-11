@@ -1,3 +1,9 @@
+## Unreleased
+
+### Chores
+
+* restructure the monorepo: flatten `packages/kusikusicms/*` to `packages/*`, add a committed `apps/sandbox` and a clean `apps/starter` template, root Composer workspace with `composer test`/`composer lint`, per-package publish tags and configurable routes, fixed CI/release/split workflows and Laravel-aligned (`12.x`) versioning.
+
 ## 1.0.0 (2026-01-04)
 
 ### Features

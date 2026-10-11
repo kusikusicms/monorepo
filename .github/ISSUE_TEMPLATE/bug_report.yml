@@ -1,0 +1,52 @@
+name: Bug report
+description: Something does not work as expected
+title: "fix(scope): "
+labels: [bug]
+body:
+  - type: dropdown
+    id: project
+    attributes:
+      label: Package or app
+      options:
+        - models
+        - website
+        - media
+        - admin
+        - starter
+        - sandbox
+        - monorepo / tooling
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: KusikusiCMS version
+      placeholder: "13.0.0"
+    validations:
+      required: true
+  - type: input
+    id: laravel
+    attributes:
+      label: Laravel and PHP versions
+      placeholder: "Laravel 13.x, PHP 8.4"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the problem and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: A minimal example or a failing test is the most helpful.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      render: shell

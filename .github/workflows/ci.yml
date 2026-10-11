@@ -6,15 +6,24 @@ on:
   pull_request:
     branches: [ main, master ]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   test:
+    name: PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        php: [ '8.3' ]
+        php: [ '8.4' ]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -23,24 +32,108 @@ jobs:
           extensions: mbstring, intl, pdo_sqlite
           coverage: none
 
-      - name: Validate composer.json
-        run: composer validate --no-interaction
+      - name: Validate composer.json files
+        run: |
+          composer validate --strict --no-check-lock --no-check-publish
+          for project in packages/* apps/starter; do
+            composer validate --strict --no-check-lock --no-check-publish --working-dir="$project"
+          done
+          # The sandbox uses unbound "*@dev" constraints on purpose (symlinked path repositories).
+          composer validate --no-check-lock --no-check-publish --working-dir=apps/sandbox
 
-      - name: Install root dependencies (for Testbench)
+      - name: Install root dependencies
         run: composer install --no-interaction --no-progress --prefer-dist
 
-      - name: Run package tests (kusikusicms/models)
-        working-directory: packages/kusikusicms/models
-        run: ../../../vendor/bin/phpunit -c phpunit.xml --colors=always
+      - name: Audit Composer dependencies
+        run: composer audit
 
-      # - name: Install starter app dependencies
-        # working-directory: apps/starter
-        # run: composer install --no-interaction --no-progress --prefer-dist
+      - name: Check code style (Pint)
+        run: composer lint -- --test
 
-      # - name: Run starter app tests (integration)
-        # working-directory: apps/starter
-        # env:
-          # APP_ENV: testing
-          # DB_CONNECTION: sqlite
-          # DB_DATABASE: ':memory:'
-        # run: php artisan test --colors=always
+      - name: Static analysis (Larastan)
+        run: composer analyse -- --no-progress
+
+      - name: Run package tests
+        run: composer test
+
+      - name: Install sandbox app dependencies
+        working-directory: apps/sandbox
+        run: |
+          cp -n .env.example .env
+          composer install --no-interaction --no-progress --prefer-dist
+          php artisan key:generate
+
+      - name: Run sandbox app tests (integration)
+        working-directory: apps/sandbox
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+        run: php artisan test --colors=always
+
+  starter:
+    name: Starter smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, intl, pdo_sqlite
+          coverage: none
+
+      # The starter requires kusikusicms/* ^13.0 from Packagist. To test it against the
+      # packages of this commit, a temporary composer.ci.json adds a path repository that
+      # reports version 13.99.0. Nothing is committed to apps/starter.
+      - name: Install starter against the local packages
+        working-directory: apps/starter
+        env:
+          COMPOSER: composer.ci.json
+        run: |
+          jq '.repositories = [{
+            "type": "path",
+            "url": "../../packages/*",
+            "options": {
+              "symlink": false,
+              "versions": {
+                "kusikusicms/models": "13.99.0",
+                "kusikusicms/website": "13.99.0",
+                "kusikusicms/media": "13.99.0",
+                "kusikusicms/admin": "13.99.0"
+              }
+            }
+          }]' composer.json > composer.ci.json
+          composer update --no-interaction --no-progress --prefer-dist
+
+      - name: Run starter tests
+        working-directory: apps/starter
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+        run: |
+          cp -n .env.example .env
+          php artisan key:generate
+          php artisan test --colors=always
+
+  npm-audit:
+    name: npm audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts --no-fund
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev

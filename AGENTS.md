@@ -1,6 +1,6 @@
 # AGENTS.md — Project‑specific guidelines for coding agents
 
-Updated: 2026-01-03 20:09 (local)
+Updated: 2026-10-10 (local)
 
 This document describes how autonomous coding agents should operate in this repository. It provides context, constraints, commands, file layout, and quality gates so agents can make safe, effective changes with minimal human intervention.
 
@@ -12,15 +12,18 @@ This document describes how autonomous coding agents should operate in this repo
 - Language/stack: PHP (Laravel ecosystem), Composer packages, Blade templates, Node tooling for frontend assets.
 - Monorepo layout:
   - `apps/` — Application(s) built with/around the packages.
-    - `apps/starter/` — Development/demo Laravel app (controllers, routes, views).
-  - `packages/` — Reusable packages for the CMS.
-    - `packages/kusikusicms/models/` — Core models and domain entities (e.g., `Entity`), events, collections, etc.
-  - Root files: `README.md`, `CHANGELOG.md`, `composer.json`, `package.json`, etc.
+    - `apps/sandbox/` — Development Laravel app wired to the local `packages/*` through symlinked path repositories.
+    - `apps/starter/` — Clean end-user template (`kusikusicms/starter`), installs the packages from Packagist; do not add path repositories here.
+  - `packages/` — Reusable packages for the CMS (`models`, `website`, `media`, `admin`).
+    - `packages/models/` — Core models and domain entities (e.g., `Entity`), events, collections, etc.
+  - Root files: `README.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, `SECURITY.md`, `composer.json`, `package.json`, etc.
+  - `monorepo.json` — source of truth for which projects (packages and apps) are split to read-only repositories (`split`) and published to Packagist on release (`publish`), and for the Laravel major (`laravelMajor`, currently 13) the versions are locked to. Do not hardcode project lists in workflows; read this file.
+  - `docs/repository-setup.md` — checklist of GitHub/Packagist settings that live outside the repository.
 
 Primary domain concepts visible in recent work:
 - `Entity` model and related domain events (`EntityCreating`, `EntitySaving`, `EntityDeleted`, etc.).
 - `EntityCollection` support utilities.
-- MVC via Laravel: Controllers under `apps/starter/app/Http/Controllers/`, views under `apps/starter/resources/views/`.
+- MVC via Laravel: Controllers under `apps/sandbox/app/Http/Controllers/`, views under `apps/sandbox/resources/views/`.
 
 ---
 
@@ -38,8 +41,8 @@ Primary domain concepts visible in recent work:
 - Do not edit files under `vendor/` or generated artifacts.
 - Do not introduce breaking changes to public classes/functions in `packages/` unless explicitly approved by the user.
 - Follow PSR-12 coding style and Laravel naming/location conventions.
-- Keep business logic inside packages; keep app-specific glue in `apps/starter/` unless instructed otherwise.
-- Do not commit secrets or environment-specific credentials; `.env` values must be documented, not committed.
+- Keep business logic inside packages; keep app-specific glue in `apps/sandbox/` unless instructed otherwise.
+- Do not commit secrets or environment-specific credentials; `.env` values must be documented, not committed. Workflow secrets (`SPLIT_TOKEN`, `RELEASE_APP_ID`, `RELEASE_APP_PRIVATE_KEY`, `PACKAGIST_*`) are configured in GitHub only.
 - Keep database migrations idempotent and backward compatible when possible.
 - Respect domain events: if changing `Entity` lifecycle, confirm correct event dispatch order and payload.
 
@@ -48,30 +51,35 @@ Primary domain concepts visible in recent work:
 ## 4) Common commands
 
 PHP/Composer:
-- Install deps: `composer install`
-- Code style (if configured): `composer cs` or `composer lint` (check `composer.json` scripts)
-- Tests (if present): `vendor/bin/phpunit`
+- Install deps (repo root): `composer install`
+- Code style: `composer lint` (Pint); CI runs `composer lint -- --test`
+- Static analysis: `composer analyse` (Larastan/PHPStan level 5, `phpstan.neon` + `phpstan-baseline.neon`). New code must not add errors; do not grow the baseline.
+- Tests for all packages: `composer test`
+- Dependency audit: `composer audit` and `npm audit --omit=dev`
+- Validate a composer file: `composer validate --strict --no-check-lock --no-check-publish --working-dir=<dir>`
 
-Laravel app (in `apps/starter/`):
+Laravel app (in `apps/sandbox/`):
 - Migrate DB: `php artisan migrate`
 - Serve app: `php artisan serve`
 
-Node (when working on assets):
-- Install deps: `npm install`
-- Build: `npm run build`
-- Dev: `npm run dev`
+Node:
+- Install deps (root, also installs the husky git hook): `npm install`
+- Check a commit message: `echo "feat(models): x" | npx commitlint`
+- Check a range: `npx commitlint --from origin/main --to HEAD`
+- Release preview (needs the right branch/remote state): `npx semantic-release --dry-run --no-ci`
+- Assets in apps (when working on them): `npm run build`, `npm run dev`
 
-Note: Paths may require `cd apps/starter` before artisan commands.
+Note: Paths may require `cd apps/sandbox` before artisan commands.
 
 ---
 
 ## 5) Repository conventions
 
 - PHP version: follow `composer.json` `php` constraint.
-- Namespaces: match folder structure (PSR-4). For packages under `packages/kusikusicms/*`, ensure `composer.json` `autoload` maps are honored.
-- Events: Classes under `packages/kusikusicms/models/src/Events/` represent domain lifecycle hooks. Prefer dispatching them via Laravel’s model/events system rather than manual calls.
+- Namespaces: match folder structure (PSR-4). For packages under `packages/*`, ensure `composer.json` `autoload` maps are honored.
+- Events: Classes under `packages/models/src/Events/` represent domain lifecycle hooks. Prefer dispatching them via Laravel’s model/events system rather than manual calls.
 - Collections: Domain-specific collections (e.g., `EntityCollection`) should extend Laravel collections appropriately and be type-safe where possible.
-- Controllers/Views: App-layer endpoints live under `apps/starter/app/Http/Controllers` with Blade views under `apps/starter/resources/views`.
+- Controllers/Views: App-layer endpoints live under `apps/sandbox/app/Http/Controllers` with Blade views under `apps/sandbox/resources/views`.
 
 ---
 
@@ -109,19 +117,19 @@ Note: Paths may require `cd apps/starter` before artisan commands.
 
 ## 8) File/location guidance
 
-- New domain classes (entities, value objects, services): place under relevant package, e.g., `packages/kusikusicms/models/src/` with proper namespace.
-- New events: `packages/kusikusicms/models/src/Events/`.
-- App controllers: `apps/starter/app/Http/Controllers/`.
-- Blade views: `apps/starter/resources/views/`.
-- Config published to app: under `apps/starter/config/` if required.
-- Database migrations (for the app): `apps/starter/database/migrations/`.
+- New domain classes (entities, value objects, services): place under relevant package, e.g., `packages/models/src/` with proper namespace.
+- New events: `packages/models/src/Events/`.
+- App controllers: `apps/sandbox/app/Http/Controllers/`.
+- Blade views: `apps/sandbox/resources/views/`.
+- Config published to app: under `apps/sandbox/config/` if required.
+- Database migrations (for the app): `apps/sandbox/database/migrations/`.
 
 ---
 
 ## 9) Backward compatibility checklist (packages)
 
 Before changing classes under `packages/`:
-- Public API unchanged? If changed, document migration and update `CHANGELOG.md`.
+- Public API unchanged? If changed, document the migration in the README and the PR (the changelog is generated at release time).
 - Events still dispatched with same payloads and order?
 - Default behavior preserved for existing consumers?
 - Are there deprecation paths where possible?
@@ -148,9 +156,20 @@ Before changing classes under `packages/`:
 
 ## 12) Git and documentation
 
-- Commit messages: Conventional style preferred (feat:, fix:, refactor:, docs:, test:, chore:).
-- Update `CHANGELOG.md` for user-facing changes in packages.
-- Keep `README.md` instructions accurate if setup steps change.
+- Commit messages: Conventional Commits are **enforced** (commitlint via the husky `commit-msg` hook and in CI). Format `type(scope): description`.
+  - Types: `feat`, `fix`, `perf`, `docs`, `style`, `refactor`, `test`, `build`, `ci`, `chore`, `revert`.
+  - Scopes (required): `models`, `website`, `media`, `admin`, `sandbox`, `starter`, `monorepo`, `ci`, `deps`, `deps-dev`, `release`. Use the app or package name when the change is limited to it.
+- Pull request titles follow the same format (validated in CI). PRs are squash-merged; the PR title becomes the commit on `main`.
+- `CHANGELOG.md` is generated by semantic-release when a release runs. **Do not edit it by hand** and do not add changelog entries in PRs; write a clear Conventional Commit title instead, since it feeds the changelog.
+- Keep `README.md` instructions accurate if setup steps change. Package and app READMEs keep their "read-only split" notice.
+
+### Releases, splits and publishing
+
+- Releases are manual (`.github/workflows/release.yml`, `workflow_dispatch`, optional `dry_run`). Agents must never trigger or emulate a release or create tags.
+- Versions follow Laravel: `13.x.y`. `feat` → minor, `fix`/`perf` → patch, breaking (`!`/`BREAKING CHANGE`) → minor only. `.github/release/guard-major.cjs` aborts a release whose major differs from `laravelMajor` in `monorepo.json`.
+- Every push to `main` splits projects with `split: true` (`.github/workflows/split.yml`). Releases tag only projects with `publish: true`.
+- Other workflows: `ci.yml` (validate, audit, Pint, Larastan, package tests, sandbox tests, starter smoke test), `commitlint.yml`, `pr-title.yml`, `security.yml` (dependency review, CodeQL for actions, OpenSSF Scorecard). Dependabot is configured in `.github/dependabot.yml`.
+- Split repositories are read-only: `packages/*/.github/workflows/close-pull-request.yml` and `apps/starter/.github/workflows/close-pull-request.yml` close PRs there. Do not add other workflows under those folders unless they should ship to the split repository.
 
 ---
 
@@ -159,17 +178,17 @@ Before changing classes under `packages/`:
 - If requirements are ambiguous or risky (e.g., potential breaking changes), ask for clarification.
 - Prefer minimal diff; avoid mass auto-formatting unrelated code.
 - Preserve existing license headers and file docblocks.
-- When touching critical files (e.g., `packages/kusikusicms/models/src/Entity.php`), double-check event flows and collection types.
+- When touching critical files (e.g., `packages/models/src/Entity.php`), double-check event flows and collection types.
 
 ---
 
 ## 14) Quick reference: frequently touched files
 
-- `packages/kusikusicms/models/src/Entity.php` — Core entity model; changes may affect multiple events and collections.
-- `packages/kusikusicms/models/src/Support/EntityCollection.php` — Collection semantics for entities.
-- `packages/kusikusicms/models/src/Events/*.php` — Lifecycle events.
-- `apps/dev/app/Http/Controllers/EntityController.php` — App-level endpoints for entities.
-- `apps/dev/resources/views/entity-show.blade.php` — Rendering layer for entity details.
+- `packages/models/src/Entity.php` — Core entity model; changes may affect multiple events and collections.
+- `packages/models/src/Support/EntityCollection.php` — Collection semantics for entities.
+- `packages/models/src/Events/*.php` — Lifecycle events.
+- `apps/sandbox/app/Http/Controllers/EntityController.php` — App-level endpoints for entities.
+- `apps/sandbox/resources/views/entity-show.blade.php` — Rendering layer for entity details.
 
 ---
 

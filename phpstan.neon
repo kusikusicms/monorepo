@@ -1,0 +1,14 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+    - phpstan-baseline.neon
+
+parameters:
+    level: 5
+    paths:
+        - packages/models/src
+        - packages/website/src
+        - packages/media/src
+        - packages/admin/src
+    excludePaths:
+        - packages/*/vendor
+    tmpDir: .phpstan.cache

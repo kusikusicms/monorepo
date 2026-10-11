@@ -1,24 +1,47 @@
 {
   "name": "kusikusicms/monorepo",
-  "description": "Monorepo for KusikusiCMS packages and starter app.",
-  "type": "metapackage",
+  "description": "Monorepo for KusikusiCMS packages and apps.",
+  "type": "project",
   "license": "MIT",
   "require": {
+    "php": "^8.4",
+    "illuminate/database": "^13.0",
+    "illuminate/filesystem": "^13.0",
+    "illuminate/routing": "^13.0",
+    "illuminate/support": "^13.0",
+    "illuminate/view": "^13.0",
     "pugx/shortid-php": "^1.3"
   },
   "require-dev": {
-    "orchestra/testbench": "^9.0"
+    "larastan/larastan": "^3.13",
+    "laravel/pint": "^1.0",
+    "orchestra/testbench": "^11.0",
+    "phpunit/phpunit": "^13.0"
   },
   "autoload": {
     "psr-4": {
-      "KusikusiCMS\\Models\\": "packages/kusikusicms/models/src/"
+      "KusikusiCMS\\Models\\": "packages/models/src/",
+      "KusikusiCMS\\Website\\": "packages/website/src/",
+      "KusikusiCMS\\Media\\": "packages/media/src/",
+      "KusikusiCMS\\Admin\\": "packages/admin/src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Tests\\": "packages/kusikusicms/models/tests/"
+      "KusikusiCMS\\Models\\Tests\\": "packages/models/tests/",
+      "KusikusiCMS\\Website\\Tests\\": "packages/website/tests/",
+      "KusikusiCMS\\Media\\Tests\\": "packages/media/tests/",
+      "KusikusiCMS\\Admin\\Tests\\": "packages/admin/tests/"
     }
   },
-  "minimum-stability": "dev",
+  "scripts": {
+    "test": "phpunit",
+    "lint": "pint",
+    "analyse": "phpstan analyse --memory-limit=1G"
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "minimum-stability": "stable",
   "prefer-stable": true
 }

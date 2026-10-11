@@ -1,33 +1,85 @@
 name: Monorepo Split
 
+# Every push to main splits each project with "split": true in monorepo.json
+# into the main branch of its read-only repository. No tags are created here.
+# Run it manually with a tag to (re)publish an existing tag, e.g. the v13.0.0 baseline.
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to split and push (e.g. v13.0.0). Leave empty to only update main.'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: monorepo-split
+  cancel-in-progress: false
 
 jobs:
-  split_packages:
-    name: Split Packages
+  matrix:
+    name: Build split matrix
     runs-on: ubuntu-latest
+    outputs:
+      projects: ${{ steps.matrix.outputs.projects }}
+      organization: ${{ steps.matrix.outputs.organization }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Monorepo Split
-        uses: symplify/monorepo-split-github-action@v2.4.0
+        uses: actions/checkout@v7
         with:
-          # GitHub token with repo permissions
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          # Directory to start from (root)
-          package_directory: 'packages/kusikusicms'
-          # mapping: "local_directory::remote_repository"
-          directories_to_repositories: |
-            models::git@github.com:kusikusicms/models.git
-            # website::git@github.com:kusikusicms/website.git
-            # media::git@github.com:kusikusicms/media.git
-            # admin::git@github.com:kusikusicms/admin.git
-          tag: false
-          user_email: 'ramses@cuatromedios.com'
-          user_name: 'ramsesmoreno'
-          repository_organization: 'KusikusiCMS'
+          ref: ${{ inputs.tag || github.ref }}
+
+      - name: Read monorepo.json
+        id: matrix
+        run: |
+          echo "projects=$(jq -c '[.projects[] | select(.split)]' monorepo.json)" >> "$GITHUB_OUTPUT"
+          echo "organization=$(jq -r '.organization' monorepo.json)" >> "$GITHUB_OUTPUT"
+
+  split:
+    name: Split ${{ matrix.project.name }}
+    needs: matrix
+    if: ${{ needs.matrix.outputs.projects != '[]' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: ${{ fromJSON(needs.matrix.outputs.projects) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          fetch-depth: 0
+
+      - name: Split project (with tag)
+        if: ${{ inputs.tag != '' }}
+        uses: danharrin/monorepo-split-github-action@v2.4.5
+        env:
+          # Token with push access to the split repositories (GITHUB_TOKEN cannot push to other repos)
+          GITHUB_TOKEN: ${{ secrets.SPLIT_TOKEN }}
+        with:
+          package_directory: ${{ matrix.project.path }}
+          repository_organization: ${{ needs.matrix.outputs.organization }}
+          repository_name: ${{ matrix.project.repository }}
+          branch: main
+          tag: ${{ inputs.tag }}
+          user_name: github-actions[bot]
+          user_email: 41898282+github-actions[bot]@users.noreply.github.com
+
+      - name: Split project (branch only)
+        if: ${{ inputs.tag == '' }}
+        uses: danharrin/monorepo-split-github-action@v2.4.5
+        env:
+          GITHUB_TOKEN: ${{ secrets.SPLIT_TOKEN }}
+        with:
+          package_directory: ${{ matrix.project.path }}
+          repository_organization: ${{ needs.matrix.outputs.organization }}
+          repository_name: ${{ matrix.project.repository }}
+          branch: main
+          user_name: github-actions[bot]
+          user_email: 41898282+github-actions[bot]@users.noreply.github.com
