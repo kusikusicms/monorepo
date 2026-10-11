@@ -1,4 +1,5 @@
 name: Release
+run-name: "Release${{ inputs.dry_run && ' (dry run)' || '' }}: ${{ github.ref_name }}"
 
 # Manual release. semantic-release computes the next v13.x.y from the squashed PR titles
 # (feat = minor, fix/perf = patch, breaking = minor, never major), commits CHANGELOG.md,

@@ -1,4 +1,5 @@
 name: Monorepo Split
+run-name: "Monorepo Split: ${{ github.event.head_commit.message || (inputs.tag && format('tag {0}', inputs.tag)) || format('manual on {0}', github.ref_name) }}"
 
 # Every push to main splits each project with "split": true in monorepo.json
 # into the main branch of its read-only repository. No tags are created here.

@@ -1,4 +1,5 @@
 name: PR Title
+run-name: "PR Title: ${{ github.event.pull_request.title }}"
 
 on:
   pull_request_target:
