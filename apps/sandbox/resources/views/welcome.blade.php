@@ -26,7 +26,7 @@
             <h3>Create</h3>
             <form action="/entity" method="POST">
                 @csrf
-                <input type="text" name="id" placeholder="ID" required><br>
+                <input type="text" name="id" placeholder="ID but not devil"><br>
                 <input type="text" name="title" placeholder="Title" required><br>
                 <input type="text" name="parent_entity_id" placeholder="Parent" value="home ">
                 <button type="submit">Create</button>
