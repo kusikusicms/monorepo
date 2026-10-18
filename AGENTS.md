@@ -177,6 +177,8 @@ Before changing classes under `packages/`:
 ## 13) Agent guardrails and etiquette
 
 - If requirements are ambiguous or risky (e.g., potential breaking changes), ask for clarification.
+- Knowledge Graph: Consult `graphify-out/GRAPH_REPORT.md` or query `graphify-out/graph.json` for component relationships if these files exist
+  and dependency blast radiuses before modifying core models or lifecycle events.
 - Prefer minimal diff; avoid mass auto-formatting unrelated code.
 - Preserve existing license headers and file docblocks.
 - When touching critical files (e.g., `packages/models/src/Entity.php`), double-check event flows and collection types.
