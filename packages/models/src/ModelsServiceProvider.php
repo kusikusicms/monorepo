@@ -30,7 +30,6 @@ class ModelsServiceProvider extends ServiceProvider
     public function boot(): void
     {
         AboutCommand::add('KusikusiCMS core models package', fn () => ['Version' => $this->packageVersion()]);
-        Entity::observe(EntityObserver::class);
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         if ($this->app->runningInConsole()) {
             $this->publishes([

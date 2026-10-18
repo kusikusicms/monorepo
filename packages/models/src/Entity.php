@@ -29,6 +29,7 @@ use KusikusiCMS\Models\Events\EntityTrashed;
 use KusikusiCMS\Models\Events\EntityUpdated;
 use KusikusiCMS\Models\Events\EntityUpdating;
 use KusikusiCMS\Models\Factories\EntityFactory;
+use KusikusiCMS\Models\Observers\EntityObserver;
 use KusikusiCMS\Models\Support\ContentsClass;
 use KusikusiCMS\Models\Support\EntityCollection;
 use KusikusiCMS\Models\Traits\UsesShortId;
@@ -48,8 +49,18 @@ class Entity extends Model
      * Eloquent expects string IDs and non-incrementing for short IDs
      */
     public $incrementing = false;
-
     public $keyType = 'string';
+
+    /**
+     * Ensure all sub-classes inherit the observer
+     * @return void
+     */
+    protected static function booted(): void
+    {
+        self::observe(EntityObserver::class);
+    }
+
+
 
     /**
      * Create a new factory instance for the Entity model.
