@@ -27,7 +27,11 @@ class EntityObserver
         }
     }
 
-    // The following methods are defined for future extension and clarity.
+    /**
+     * Handle the Entity "creating" event.
+     *
+     * Check if the id is already in use and set default values.
+     */
     public function creating(Entity $entity): void
     {
         // Check if the id is already in use
@@ -36,7 +40,12 @@ class EntityObserver
         }
         // Setting default values, some of them cannot be set as default attributes.
         if (! isset($entity->model)) {
-            $entity->model = 'Entity';
+            $className = class_basename($entity);
+            if ($className !== 'Entity') {
+                $entity->model = $className;
+            } else {
+                $entity->model = 'Entity';
+            }
         }
         if (! isset($entity->publish_at)) {
             $entity->publish_at = Carbon::now();
@@ -51,6 +60,8 @@ class EntityObserver
             $entity->published = true;
         }
     }
+
+    // The following methods are defined for future extension and clarity.
 
     public function created(Entity $entity): void {}
 
