@@ -5,7 +5,6 @@ namespace KusikusiCMS\Models;
 use Composer\InstalledVersions;
 use Illuminate\Foundation\Console\AboutCommand;
 use Illuminate\Support\ServiceProvider;
-use KusikusiCMS\Models\Observers\EntityObserver;
 use KusikusiCMS\Models\Support\IdGenerator;
 use KusikusiCMS\Models\Support\ShortIdGenerator;
 
