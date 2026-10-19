@@ -49,18 +49,16 @@ class Entity extends Model
      * Eloquent expects string IDs and non-incrementing for short IDs
      */
     public $incrementing = false;
+
     public $keyType = 'string';
 
     /**
      * Ensure all sub-classes inherit the observer
-     * @return void
      */
     protected static function booted(): void
     {
         self::observe(EntityObserver::class);
     }
-
-
 
     /**
      * Create a new factory instance for the Entity model.
