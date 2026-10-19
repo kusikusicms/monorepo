@@ -1,38 +1,21 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+<x-layout>
+    <x-slot:title>
+        Entity: {{ $entity1->contents->title }}
+    </x-slot:title>
+    <pre>{{ $entity1->toJSON(JSON_PRETTY_PRINT) }}</pre>
+    <x-create :parent-entity-id="$entity1->id"></x-create>
+    <hr>
+    <h2>Children</h2>
+    <ol>
+        @foreach($children as $e)
+            <li><x-entity :entity="$e"></x-entity></li>
+        @endforeach
+    </ol>
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
-
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
-
-        <style>
-            body {
-                font-family: 'instrument-sans', sans-serif;
-            }
-        </style>
-
-    </head>
-    <body class="">
-        <header class="">
-            <h1>Entity {{ $entity1->id }}</h1>
-            <pre>{{ $entity1->toJSON(JSON_PRETTY_PRINT) }}</pre>
-
-            <hr>
-            <h2>Children</h2>
-            <pre>@foreach($children as $e){{ $e->id }}<br>{{ json_encode($e->contentsByLang ?? []) }}<br><br>@endforeach</pre>
-
-            <h2>Descendants</h2>
-            <pre>{{ $descendants->toJSON(JSON_PRETTY_PRINT) }}</pre>
-
-            <h2>Ancestors</h2>
-            <pre>{{ $ancestors->toJSON(JSON_PRETTY_PRINT) }}</pre>
-        </header>
-        <main>
-        </main>
-    </body>
-</html>
+    <h2>Ancestors</h2>
+    <ol>
+        @foreach($ancestors as $e)
+            <li><x-entity :entity="$e"></x-entity></li>
+        @endforeach
+    </ol>
+</x-layout>

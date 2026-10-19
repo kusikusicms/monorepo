@@ -18,15 +18,9 @@ class EntityController extends Controller
         $children = Entity::query()
             ->select('id', 'model')
             ->childrenOf($id)
-            ->with('rawContents')
-            ->orderByContent('title', 'desc')
-            ->get();
-        $descendants = Entity::query()
-            ->select('id', 'model')
-            ->descendantsOf($id, ['includeRelationMeta' => false, 'includeSelf' => false])
             ->withContents()
-            ->get()
-            ->toTree();
+            ->orderByContent('title', 'asc')
+            ->get();
         $ancestors = Entity::query()
             ->select('id', 'model')
             ->ancestorsOf($id, ['includeRelationMeta' => false, 'includeSelf' => false])
@@ -36,7 +30,6 @@ class EntityController extends Controller
         return view('entity-show', [
             'entity1' => $entity1,
             'children' => $children,
-            'descendants' => $descendants,
             'ancestors' => $ancestors,
         ]);
     }
@@ -57,7 +50,12 @@ class EntityController extends Controller
             ->withContents(['title' => $request->input('title')])
             ->create();
 
-        return redirect()->route('home', $entity->id)
-            ->with('status', 'Entity created successfully!');
+        if ($request->input('parent_entity_id')) {
+            return redirect()->route('entity.show', $request->input('parent_entity_id'))
+                ->with('status', 'Entity created successfully!');
+        } else {
+            return redirect()->route('home', $entity->id)
+                ->with('status', 'Entity created successfully!');
+        }
     }
 }
