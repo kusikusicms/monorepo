@@ -119,6 +119,7 @@ Note: Paths may require `cd apps/sandbox` before artisan commands.
 
 - New domain classes (entities, value objects, services): place under relevant package, e.g., `packages/models/src/` with proper namespace.
 - New events: `packages/models/src/Events/`.
+- New Artisan commands: `packages/models/src/Console/`, registered in `ModelsServiceProvider::boot()` inside the `runningInConsole()` block. Document them in `packages/models/README.md` under "Artisan commands" (e.g., `kusikusicms:make:model`, alias `k:make:model`).
 - App controllers: `apps/sandbox/app/Http/Controllers/`.
 - Blade views: `apps/sandbox/resources/views/`.
 - Config published to app: under `apps/sandbox/config/` if required.
