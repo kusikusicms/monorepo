@@ -40,12 +40,7 @@ class EntityObserver
         }
         // Setting default values, some of them cannot be set as default attributes.
         if (! isset($entity->model)) {
-            $className = class_basename($entity);
-            if ($className !== 'Entity') {
-                $entity->model = $className;
-            } else {
-                $entity->model = 'Entity';
-            }
+            $entity->model = class_basename($entity);
         }
         if (! isset($entity->publish_at)) {
             $entity->publish_at = Carbon::now();
