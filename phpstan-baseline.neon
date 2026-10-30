@@ -1,48 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$field\.$#'
-			identifier: property.notFound
-			count: 5
-			path: packages/models/src/Entity.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$lang\.$#'
-			identifier: property.notFound
-			count: 4
-			path: packages/models/src/Entity.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$text\.$#'
-			identifier: property.notFound
-			count: 3
-			path: packages/models/src/Entity.php
-
-		-
-			message: '#^Access to an undefined property KusikusiCMS\\Models\\Entity\:\:\$parent_entity_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: packages/models/src/Entity.php
-
-		-
-			message: '#^Access to an undefined property KusikusiCMS\\Models\\Entity\:\:\$props\.$#'
-			identifier: property.notFound
-			count: 3
-			path: packages/models/src/Entity.php
-
-		-
-			message: '#^Access to an undefined property KusikusiCMS\\Models\\Entity\|KusikusiCMS\\Models\\Support\\EntityCollection\:\:\$parent_entity_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: packages/models/src/Entity.php
-
-		-
-			message: '#^If condition is always true\.$#'
-			identifier: if.alwaysTrue
-			count: 1
-			path: packages/models/src/Entity.php
-
-		-
 			message: '#^PHPDoc type array of property KusikusiCMS\\Models\\Entity\:\:\$dispatchesEvents is not covariant with PHPDoc type array\<string, class\-string\> of overridden property Illuminate\\Database\\Eloquent\\Model\:\:\$dispatchesEvents\.$#'
 			identifier: property.phpDocType
 			count: 1
@@ -103,30 +61,6 @@ parameters:
 			path: packages/models/src/Factories/EntityFactory.php
 
 		-
-			message: '#^Access to an undefined property KusikusiCMS\\Models\\Entity\:\:\$model\.$#'
-			identifier: property.notFound
-			count: 1
-			path: packages/models/src/Observers/EntityObserver.php
-
-		-
-			message: '#^Access to an undefined property KusikusiCMS\\Models\\Entity\:\:\$props\.$#'
-			identifier: property.notFound
-			count: 1
-			path: packages/models/src/Observers/EntityObserver.php
-
-		-
-			message: '#^Access to an undefined property KusikusiCMS\\Models\\Entity\:\:\$publish_at\.$#'
-			identifier: property.notFound
-			count: 1
-			path: packages/models/src/Observers/EntityObserver.php
-
-		-
-			message: '#^Access to an undefined property KusikusiCMS\\Models\\Entity\:\:\$published\.$#'
-			identifier: property.notFound
-			count: 1
-			path: packages/models/src/Observers/EntityObserver.php
-
-		-
 			message: '#^Access to an undefined property KusikusiCMS\\Models\\Entity\:\:\$view\.$#'
 			identifier: property.notFound
 			count: 1
@@ -137,21 +71,3 @@ parameters:
 			identifier: new.static
 			count: 2
 			path: packages/models/src/Support/EntityCollection.php
-
-		-
-			message: '#^Access to an undefined property KusikusiCMS\\Models\\EntityContent\:\:\$field\.$#'
-			identifier: property.notFound
-			count: 5
-			path: packages/models/src/Support/EntityContentsCollection.php
-
-		-
-			message: '#^Access to an undefined property KusikusiCMS\\Models\\EntityContent\:\:\$lang\.$#'
-			identifier: property.notFound
-			count: 4
-			path: packages/models/src/Support/EntityContentsCollection.php
-
-		-
-			message: '#^Access to an undefined property KusikusiCMS\\Models\\EntityContent\:\:\$text\.$#'
-			identifier: property.notFound
-			count: 3
-			path: packages/models/src/Support/EntityContentsCollection.php

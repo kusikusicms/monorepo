@@ -23,6 +23,12 @@ This document describes how autonomous coding agents should operate in this repo
 Primary domain concepts visible in recent work:
 - `Entity` model and related domain events (`EntityCreating`, `EntitySaving`, `EntityDeleted`, etc.).
 - `EntityCollection` support utilities.
+- `EntityBuilder` (`packages/models/src/Builders/`): a custom Eloquent builder holding all the Entity query filters (`childrenOf`, `descendantsOf`, `relatedBy`, `withContents`, `orderByContent`, ...). Design decisions:
+  - `Entity` registers it with `#[UseEloquentBuilder(EntityBuilder::class)]`; the old `scopeXxx` model methods were removed (deliberate break, kept on 13.x as the version is not yet used in any project).
+  - The builder is split into traits in `Builders/Concerns/` (`FiltersHierarchy`, `FiltersRelations`, `FiltersContents`); it stays one class so subclasses just extend `EntityBuilder`.
+  - `lastUsedLang` lives on the builder (per query), not on the model. Use `$this->getModel()` instead of `Entity::` inside the builder.
+  - Subclasses add filters with normal `scopeXxx` model methods (resolved via `Builder::__call`), but must override built-in filters by extending `EntityBuilder` (a model scope with a builder method's name is ignored). A subclass with its own builder must extend `EntityBuilder`.
+  - Keep the `@method static` / `@property` PHPDoc on `Entity` in sync with the builder methods (needed for Larastan).
 - MVC via Laravel: Controllers under `apps/sandbox/app/Http/Controllers/`, views under `apps/sandbox/resources/views/`.
 
 ---
@@ -98,8 +104,10 @@ Note: Paths may require `cd apps/sandbox` before artisan commands.
    - For app changes, consider feature tests in the app if a testing skeleton exists.
 5. Validate locally
    - `composer install`, run tests, smoke test the dev app if changes affect runtime behavior.
+   - **Quality gate (mandatory for every plan):** before a plan is considered done, the changes must pass the tests, including the package unit tests and mono repo unit tests (`composer test`), and the monorepo must pass `composer lint -- --test`, `composer audit` and `composer analyse -- --no-progress`. Include these checks as a final step of every plan and fix any failure caused by the changes.
 6. Document
    - Update `README.md` (or package-level docs) if public behavior changes.
+   - Update `AGENTS.md` with the new design decisions and implementation details.
    - Add inline PHPDoc for new/complex methods.
 
 ---
