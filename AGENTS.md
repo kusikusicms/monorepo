@@ -104,6 +104,7 @@ Note: Paths may require `cd apps/sandbox` before artisan commands.
    - For app changes, consider feature tests in the app if a testing skeleton exists.
 5. Validate locally
    - `composer install`, run tests, smoke test the dev app if changes affect runtime behavior.
+   - **Quality gate (mandatory for every plan):** before a plan is considered done, the changes must pass the tests, including the package unit tests and mono repo unit tests (`composer test`), and the monorepo must pass `composer lint -- --test`, `composer audit` and `composer analyse -- --no-progress`. Include these checks as a final step of every plan and fix any failure caused by the changes.
 6. Document
    - Update `README.md` (or package-level docs) if public behavior changes.
    - Update `AGENTS.md` with the new design decisions and implementation details.
