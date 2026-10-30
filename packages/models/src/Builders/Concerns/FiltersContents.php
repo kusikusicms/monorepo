@@ -38,6 +38,7 @@ trait FiltersContents
                 if (is_string($fields)) {
                     return $q->where('field', $fields);
                 }
+
                 return $q;
             });
         }]);

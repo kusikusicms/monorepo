@@ -56,7 +56,6 @@ class EntityContent extends Model
      * Create a new Eloquent Collection instance.
      *
      * @param  array<int, EntityContent>  $models
-     *
      * @return EntityContentsCollection<int, Entity>
      */
     public function newCollection(array $models = []): EntityContentsCollection
