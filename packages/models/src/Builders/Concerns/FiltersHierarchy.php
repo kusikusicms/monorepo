@@ -7,13 +7,16 @@ use KusikusiCMS\Models\EntityRelation;
 trait FiltersHierarchy
 {
     /**
-     * Only include entities of a given model id.
+     * Only include entities of a given model id, or of any of the given model ids.
      *
-     * @param  string  $model  The id of the model
+     * @param  string|array<int, string>  $model  The id of the model, or a list of model ids
      */
-    public function ofModel(string $model): static
+    public function ofModel(string|array $model): static
     {
-        // TODO: Accept array of model ids
+        if (is_array($model)) {
+            return $this->whereIn('model', $model);
+        }
+
         return $this->where('model', $model);
     }
 

@@ -58,7 +58,7 @@ use KusikusiCMS\Models\Traits\UsesShortId;
  * @method static EntityBuilder rootOf(string $entityId)
  * @method static EntityBuilder relatedBy(string $entityId, array $options = [])
  * @method static EntityBuilder relating(string $entityId, array $options = [])
- * @method static EntityBuilder ofModel(string $model)
+ * @method static EntityBuilder ofModel(string|array $model)
  * @method static EntityBuilder currentlyLive()
  * @method static EntityBuilder withContents(?array $options = null)
  * @method static EntityBuilder orderByContent(string $field, string $order = 'asc', ?string $lang = null)
