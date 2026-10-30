@@ -25,6 +25,8 @@ $e->createContents(['title' => 'Hello', 'body' => 'World'], 'en');
 
 ## Scopes (Entity)
 
+> These filters are methods of `KusikusiCMS\Models\Builders\EntityBuilder` (registered on `Entity` with `#[UseEloquentBuilder]`), not `scopeXxx` model methods. Usage is unchanged. See the "Query builder" section of the package README for how to add or override a filter.
+
 ### `ofModel(string $model): Builder`
 Filter by model ID string.
 ```
