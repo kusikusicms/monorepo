@@ -13,12 +13,6 @@ parameters:
 			path: packages/models/src/Entity.php
 
 		-
-			message: '#^PHPDoc type array\<int, string\> of property KusikusiCMS\\Models\\EntityArchive\:\:\$fillable is not covariant with PHPDoc type list\<string\> of overridden property Illuminate\\Database\\Eloquent\\Model\:\:\$fillable\.$#'
-			identifier: property.phpDocType
-			count: 1
-			path: packages/models/src/EntityArchive.php
-
-		-
 			message: '#^PHPDoc tag @return contains unresolvable type\.$#'
 			identifier: return.unresolvableType
 			count: 1
