@@ -1,14 +1,14 @@
 <h3>Edit</h3>
-<form action="/entity/{{$id}}" method="POST">
+<form action="/entity/{{$entity->id}}" method="POST">
     @csrf
     @method('PATCH')
     <label>
         <span>Title</span>
-        <input type="text" name="title" placeholder="Title" required><br>
+        <input type="text" name="title" placeholder="Title" required value="{{$entity->contents->title}}"><br>
     </label>
     <label>
         <span>Description</span>
-        <textarea name="description" placeholder="Description"></textarea>
+        <textarea name="description" placeholder="Description">{{$entity->contents->description}}</textarea>
     </label>
     <button type="submit">Edit</button>
 </form>
