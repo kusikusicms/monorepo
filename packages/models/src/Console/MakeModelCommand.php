@@ -14,6 +14,7 @@ class MakeModelCommand extends Command
      * @var string
      */
     protected $signature = 'kusikusicms:make:model';
+
     protected $aliases = ['k:make:model'];
 
     /**
