@@ -58,4 +58,33 @@ class EntityController extends Controller
                 ->with('status', 'Entity created successfully!');
         }
     }
+
+    public function update(Request $request, string $id): RedirectResponse
+    {
+        $entity = Entity::findOrFail($id);
+        $description = $request->input('description') ?? '';
+
+        $entity->createContents([
+            'title' => $request->input('title'),
+            'description' => $description,
+        ]);
+
+        return redirect()->route('entity.show', $entity->id)
+            ->with('status', 'Entity updated successfully!');
+    }
+
+    public function destroy(string $id): RedirectResponse
+    {
+        $entity = Entity::findOrFail($id);
+        $parent_entity_id = $entity->parent_entity_id;
+        $entity->delete();
+
+        if ($parent_entity_id) {
+            return redirect()->route('entity.show', $parent_entity_id)
+                ->with('status', 'Entity deleted successfully!');
+        } else {
+            return redirect()->route('home')
+                ->with('status', 'Entity deleted successfully!');
+        }
+    }
 }
