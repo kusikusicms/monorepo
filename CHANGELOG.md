@@ -1,3 +1,9 @@
+## [13.1.0](https://github.com/kusikusicms/monorepo/compare/v13.0.1...v13.1.0) (2026-11-01)
+
+### Features
+
+* **sandbox:** enriching sandbox with models usages ([#25](https://github.com/kusikusicms/monorepo/issues/25)) ([bb361f3](https://github.com/kusikusicms/monorepo/commit/bb361f3270dafb3776e46d2c161253906f10c5de))
+
 ## [13.0.1](https://github.com/kusikusicms/monorepo/compare/v13.0.0...v13.0.1) (2026-10-11)
 
 ### Bug Fixes
