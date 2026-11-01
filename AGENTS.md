@@ -127,6 +127,7 @@ Note: Paths may require `cd apps/sandbox` before artisan commands.
 
 - New domain classes (entities, value objects, services): place under relevant package, e.g., `packages/models/src/` with proper namespace.
 - New events: `packages/models/src/Events/`.
+- New Artisan commands: `packages/models/src/Console/`, registered in `ModelsServiceProvider::boot()` inside the `runningInConsole()` block. Document them in `packages/models/README.md` under "Artisan commands" (e.g., `kusikusicms:make:model`, alias `k:make:model`).
 - App controllers: `apps/sandbox/app/Http/Controllers/`.
 - Blade views: `apps/sandbox/resources/views/`.
 - Config published to app: under `apps/sandbox/config/` if required.
@@ -185,6 +186,8 @@ Before changing classes under `packages/`:
 ## 13) Agent guardrails and etiquette
 
 - If requirements are ambiguous or risky (e.g., potential breaking changes), ask for clarification.
+- Knowledge Graph: Consult `graphify-out/GRAPH_REPORT.md` or query `graphify-out/graph.json` for component relationships if these files exist
+  and dependency blast radiuses before modifying core models or lifecycle events.
 - Prefer minimal diff; avoid mass auto-formatting unrelated code.
 - Preserve existing license headers and file docblocks.
 - When touching critical files (e.g., `packages/models/src/Entity.php`), double-check event flows and collection types.

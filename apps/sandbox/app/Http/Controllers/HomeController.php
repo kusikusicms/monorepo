@@ -12,7 +12,9 @@ class HomeController extends Controller
      */
     public function index(): View
     {
-        $entities = Entity::withContents(['lang' => 'en'])->currentlyLive()->get();
+        $entities = Entity::withContents(['lang' => 'en'])
+            ->where('parent_entity_id', null)
+            ->currentlyLive()->get();
 
         return view('welcome', ['entities' => $entities]);
     }
