@@ -11,7 +11,7 @@ class EntityController extends Controller
 {
     public function show(string $id): View
     {
-        $entity1 = Entity::query()
+        $entity = Entity::query()
             ->select(['id', 'parent_entity_id', 'model', 'props', 'publish_at', 'unpublish_at'])
             ->withContents()
             ->find($id);
@@ -28,7 +28,7 @@ class EntityController extends Controller
             ->get();
 
         return view('entity-show', [
-            'entity1' => $entity1,
+            'entity' => $entity,
             'children' => $children,
             'ancestors' => $ancestors,
         ]);
