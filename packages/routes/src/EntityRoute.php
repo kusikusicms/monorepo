@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 use KusikusiCMS\Models\Entity;
 use KusikusiCMS\Routes\Enums\RouteKind;
+use KusikusiCMS\Routes\Exceptions\RoutePathConflictException;
+use KusikusiCMS\Routes\Services\RouteManager;
 
 /**
  * A run-time URL path of an Entity.
@@ -82,6 +84,18 @@ class EntityRoute extends Model
     public static function findByPath(string $path): ?self
     {
         return static::query()->where('path', static::normalizePath($path))->first();
+    }
+
+    /**
+     * Manually create (or convert) a route of an entity, e.g. an alias or a redirect.
+     * The entity's model and view are denormalised. A new primary route demotes the current
+     * primary of that entity and language to a permanent redirect. Delegates to RouteManager.
+     *
+     * @throws RoutePathConflictException When another entity (or another language) uses the path as primary or alias
+     */
+    public static function createFor(string $entityId, string $lang, string $path, RouteKind $kind = RouteKind::Primary): self
+    {
+        return app(RouteManager::class)->createRoute($entityId, $lang, $path, $kind);
     }
 
     /**
