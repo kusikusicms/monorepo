@@ -1258,14 +1258,17 @@
             "dist": {
                 "type": "path",
                 "url": "../../packages/routes",
-                "reference": "838195091e5e8b40c8062b0ad5b6e8ea5a35b18e"
+                "reference": "abe863892066c4e35cbc229f69705b6d0b946fc4"
             },
             "require": {
+                "illuminate/console": "^13.0",
                 "illuminate/database": "^13.0",
+                "illuminate/filesystem": "^13.0",
                 "illuminate/http": "^13.0",
                 "illuminate/routing": "^13.0",
                 "illuminate/support": "^13.0",
                 "kusikusicms/models": "^13.0",
+                "laravel/prompts": "^0.3.25",
                 "php": "^8.4"
             },
             "require-dev": {
