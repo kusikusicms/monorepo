@@ -3,7 +3,7 @@
   "laravelMajor": 13,
   "projects": [
     {"name": "models",  "path": "packages/models",  "repository": "models",  "split": true,  "publish": true},
-    {"name": "website", "path": "packages/website", "repository": "website", "split": true,  "publish": true},
+    {"name": "routes",  "path": "packages/routes",  "repository": "routes",  "split": true,  "publish": true},
     {"name": "media",   "path": "packages/media",   "repository": "media",   "split": true,  "publish": true},
     {"name": "admin",   "path": "packages/admin",   "repository": "admin",   "split": true,  "publish": true},
     {"name": "starter", "path": "apps/starter",     "repository": "starter", "split": true,  "publish": false},

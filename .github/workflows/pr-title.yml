@@ -40,7 +40,7 @@ jobs:
             revert
           scopes: |
             models
-            website
+            routes
             media
             admin
             sandbox
