@@ -15,8 +15,11 @@ KusikusiCMS brings CMS features to Laravel projects the standard Laravel way: Co
 
 ```bash
 composer require kusikusicms/models kusikusicms/routes kusikusicms/media kusikusicms/admin
+php artisan kusikusicms:routes:install
 php artisan migrate
 ```
+
+`kusikusicms:routes:install` asks for the site domain, language and root entity, and publishes the routes config, an `App\Http\Controllers\WebsiteController` and a sample `html/home` view. Entity paths are served by a fallback route, so remove any `/` route of your app that would hide the CMS home (see [packages/routes](packages/routes)).
 
 Service providers are registered through Laravel package auto-discovery. Publish configuration when you need to customize it:
 
