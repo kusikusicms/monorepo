@@ -11,6 +11,7 @@ use KusikusiCMS\Models\Events\EntityContentSaved;
 use KusikusiCMS\Models\Events\EntityContentSaving;
 use KusikusiCMS\Models\Events\EntitySaved;
 use KusikusiCMS\Models\Events\EntitySaving;
+use KusikusiCMS\Routes\Console\InstallCommand;
 use KusikusiCMS\Routes\Listeners\SyncEntityRoutes;
 use KusikusiCMS\Routes\Listeners\SyncSlugRoutes;
 use KusikusiCMS\Routes\Listeners\ValidateSlugRoutes;
@@ -52,6 +53,15 @@ class RoutesServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__.'/../database/migrations' => database_path('migrations'),
             ], 'kusikusicms-routes-migrations');
+
+            $this->publishes([
+                InstallCommand::stubPath('WebsiteController.stub') => app_path('Http/Controllers/WebsiteController.php'),
+                InstallCommand::stubPath('views/html/home.blade.stub') => resource_path('views/html/home.blade.php'),
+            ], 'kusikusicms-routes-stubs');
+
+            $this->commands([
+                InstallCommand::class,
+            ]);
         }
     }
 
