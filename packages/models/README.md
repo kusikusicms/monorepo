@@ -91,6 +91,8 @@ $entity->createContents([
 ]); // defaults to config('kusikusicms.models.default_language')
 ```
 
+`createContents()` saves each field as its own `EntityContent` model (`updateOrCreate`) inside a database transaction and returns the number of fields saved. This makes the `EntityContent*` events fire once per field, and if one save fails (for example, a listener throws) no field is stored. It runs about two queries per field, so for very large batches consider writing the rows yourself.
+
 ### Query with content-aware scopes
 - Load related contents with optional filters:
 ```PHP
@@ -188,6 +190,8 @@ use KusikusiCMS\Models\Events\EntityCreated;
 Event::listen(EntityCreated::class, fn ($event) => logger('Entity created', ['id' => $event->entity->id]));
 ```
 
+`EntityContent` dispatches `EntityContentCreating`, `EntityContentCreated`, `EntityContentUpdating`, `EntityContentUpdated`, `EntityContentSaving`, `EntityContentSaved`, `EntityContentDeleting` and `EntityContentDeleted`, with the model in `$event->content`. They fire for every write path: `createContents()`, `EntityContent::create()`, `$content->save()`, `$entity->rawContents()->create()` and `$content->delete()`. Mass query updates or deletes (`EntityContent::where(...)->update()`) skip model events, as in any Eloquent model.
+
 See docs/events.md for the full list.
 
 ### Collections helpers
@@ -213,17 +217,17 @@ cd packages/models
 ### Replace the ID generator
 Bind your own generator to `KusikusiCMS\Models\Support\IdGenerator` in the host app container to control short ID generation.
 
-See docs/id-generator.md for an example.
+See [docs/id-generator.md](docs/factories-and-seeding.md) for an example.
 
 ## Documentation
-- docs/installation.md
-- docs/configuration.md
-- docs/models-and-scopes.md
-- docs/events.md
-- docs/factories-and-seeding.md
-- docs/testing.md
-- docs/id-generator.md
-- docs/design-decisions.md
+- [docs/installation.md](docs/installation.md)
+- [docs/configuration.md](docs/configuration.md)
+- [docs/models-and-scopes.md](docs/models-and-scopes.md)
+- [docs/events.md](docs/events.md)
+- [docs/factories-and-seeding.md](docs/factories-and-seeding.md)
+- [docs/testing.md](docs/factories-and-seeding.md)
+- [docs/id-generator.md](docs/factories-and-seeding.md)
+- [docs/design-decisions.md](docs/factories-and-seeding.md)
 
 ## License
 MIT

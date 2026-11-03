@@ -3,13 +3,25 @@
 namespace KusikusiCMS\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
+use KusikusiCMS\Models\Events\EntityContentCreated;
+use KusikusiCMS\Models\Events\EntityContentCreating;
+use KusikusiCMS\Models\Events\EntityContentDeleted;
+use KusikusiCMS\Models\Events\EntityContentDeleting;
+use KusikusiCMS\Models\Events\EntityContentSaved;
+use KusikusiCMS\Models\Events\EntityContentSaving;
+use KusikusiCMS\Models\Events\EntityContentUpdated;
+use KusikusiCMS\Models\Events\EntityContentUpdating;
 use KusikusiCMS\Models\Support\EntityContentsCollection;
 
 /**
+ * @property int $content_id
  * @property string $entity_id
  * @property string $lang
  * @property string $field
  * @property string|null $text
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  */
 class EntityContent extends Model
 {
@@ -40,6 +52,22 @@ class EntityContent extends Model
     protected $hidden = [
         'created_at',
         'updated_at',
+    ];
+
+    /**
+     * The event map for the model, so other packages (e.g. routes) can react to content changes.
+     *
+     * @var array<string, class-string>
+     */
+    protected $dispatchesEvents = [
+        'creating' => EntityContentCreating::class,
+        'created' => EntityContentCreated::class,
+        'updating' => EntityContentUpdating::class,
+        'updated' => EntityContentUpdated::class,
+        'saving' => EntityContentSaving::class,
+        'saved' => EntityContentSaved::class,
+        'deleting' => EntityContentDeleting::class,
+        'deleted' => EntityContentDeleted::class,
     ];
 
     /**

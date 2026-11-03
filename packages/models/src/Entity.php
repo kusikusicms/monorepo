@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use KusikusiCMS\Models\Builders\EntityBuilder;
 use KusikusiCMS\Models\Events\EntityCreated;
@@ -357,23 +358,34 @@ class Entity extends Model
      ***************/
 
     /**
-     * Create rawContents for the current Entity.
+     * Create or update rawContents for the current Entity.
      *
-     * @param  array  $fieldsAndValues  An associative array of fields and their value
+     * Each field is saved as an individual EntityContent model inside a database transaction,
+     * so the EntityContent* model events are dispatched once per field. If any save fails
+     * (for example, a listener throws), no field is persisted.
+     *
+     * @param  array<string, string|null>  $fieldsAndValues  An associative array of fields and their value
      * @param  string|null  $language  The id of the language of the rawContents
+     * @return int The number of fields saved
      *
-     * @throws \Exception
+     * @throws \Throwable
      */
     public function createContents(array $fieldsAndValues, ?string $language = null): int
     {
-        return EntityContent::upsert(Arr::map($fieldsAndValues, function (string $value, string $key) use ($language) {
-            return [
-                'entity_id' => $this->id,
-                'field' => $key,
-                'text' => $value,
-                'lang' => $language ?? Config::get('kusikusicms.models.default_language', 'en'),
-            ];
-        }), uniqueBy: ['entity_id', 'field', 'lang'], update: ['text']);
+        $lang = $language ?? Config::get('kusikusicms.models.default_language', 'en');
+
+        return DB::transaction(function () use ($fieldsAndValues, $lang) {
+            $count = 0;
+            foreach ($fieldsAndValues as $field => $value) {
+                EntityContent::updateOrCreate(
+                    ['entity_id' => $this->id, 'field' => $field, 'lang' => $lang],
+                    ['text' => $value],
+                );
+                $count++;
+            }
+
+            return $count;
+        });
     }
 
     /**
