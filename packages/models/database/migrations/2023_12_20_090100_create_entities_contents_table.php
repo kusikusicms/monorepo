@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('entities_contents', function (Blueprint $table) {
             $table->id('content_id');
             $table->string('entity_id', 26)->index();
-            $table->char('lang', 5)->index();
+            $table->char('lang', 6)->index();
             $table->string('field', 32)->index();
             $table->text('text')->nullable();
             $table->timestampsTz();

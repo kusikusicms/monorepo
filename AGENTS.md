@@ -29,6 +29,9 @@ Primary domain concepts visible in recent work:
   - `lastUsedLang` lives on the builder (per query), not on the model. Use `$this->getModel()` instead of `Entity::` inside the builder.
   - Subclasses add filters with normal `scopeXxx` model methods (resolved via `Builder::__call`), but must override built-in filters by extending `EntityBuilder` (a model scope with a builder method's name is ignored). A subclass with its own builder must extend `EntityBuilder`.
   - Keep the `@method static` / `@property` PHPDoc on `Entity` in sync with the builder methods (needed for Larastan).
+- `EntityContent` events: `EntityContent` maps `creating/created/updating/updated/saving/saved/deleting/deleted` to `EntityContent*` events in `packages/models/src/Events/` (payload `public EntityContent $content`). Design decisions:
+  - `Entity::createContents()` no longer uses a bulk `upsert()`. It runs `EntityContent::updateOrCreate()` per field inside `DB::transaction()`, so events fire for every write path and a throwing listener rolls back the whole call. It keeps its signature and returns the number of fields saved.
+  - Mass query writes (`where()->update()`, `upsert()`) still skip model events; do not use them in package code for contents that other packages (e.g. `routes`) need to observe.
 - MVC via Laravel: Controllers under `apps/sandbox/app/Http/Controllers/`, views under `apps/sandbox/resources/views/`.
 
 ---
