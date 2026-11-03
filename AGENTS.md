@@ -16,6 +16,7 @@ This document describes how autonomous coding agents should operate in this repo
     - `apps/starter/` — Clean end-user template (`kusikusicms/starter`), installs the packages from Packagist; do not add path repositories here.
   - `packages/` — Reusable packages for the CMS (`models`, `routes`, `media`, `admin`).
     - `packages/models/` — Core models and domain entities (e.g., `Entity`), events, collections, etc.
+    - `packages/routes/` — Run-time entity routes (`EntityRoute`, `RouteManager`), the catch-all fallback route and the install command.
   - Root files: `README.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, `SECURITY.md`, `composer.json`, `package.json`, etc.
   - `monorepo.json` — source of truth for which projects (packages and apps) are split to read-only repositories (`split`) and published to Packagist on release (`publish`), and for the Laravel major (`laravelMajor`, currently 13) the versions are locked to. Do not hardcode project lists in workflows; read this file.
   - `docs/repository-setup.md` — checklist of GitHub/Packagist settings that live outside the repository.
@@ -32,6 +33,14 @@ Primary domain concepts visible in recent work:
 - `EntityContent` events: `EntityContent` maps `creating/created/updating/updated/saving/saved/deleting/deleted` to `EntityContent*` events in `packages/models/src/Events/` (payload `public EntityContent $content`). Design decisions:
   - `Entity::createContents()` no longer uses a bulk `upsert()`. It runs `EntityContent::updateOrCreate()` per field inside `DB::transaction()`, so events fire for every write path and a throwing listener rolls back the whole call. It keeps its signature and returns the number of fields saved.
   - Mass query writes (`where()->update()`, `upsert()`) still skip model events; do not use them in package code for contents that other packages (e.g. `routes`) need to observe.
+- `routes` package (`packages/routes`, `KusikusiCMS\Routes`): `entities_routes` stores run-time paths per entity and language (`RouteKind`: `primary`, `alias`, `permanent-redirect`, `temporary-redirect`). Design decisions:
+  - Syncing is synchronous: thin listeners call the `RouteManager` singleton. `plan()` (read-only, throws `RoutePathConflictException`) runs on `EntityContentSaving`/`EntitySaving`; `apply()` (transaction) runs on `EntityContentSaved`/`EntityContentDeleted`/`EntitySaved`. A conflict therefore aborts the content or parent write.
+  - Event order: the custom `EntitySaved` event fires before `EntityObserver::saved` refreshes `entities_relations`, so `PathBuilder` walks `parent_entity_id` and never the ancestor relations.
+  - Paths are globally unique (unique `path` index): one language owns `/`, other language roots use explicit slugs (`/es`). Other entities' old redirects are reclaimed, not conflicts. One site per database in 13.x (`domains` reads the first entry).
+  - Slug changes demote the old primary to `permanent-redirect` (or promote an own redirect back) and cascade to all descendants; a parent move re-syncs every language; `model`/`view` changes refresh the denormalized `entity_model`/`entity_view`.
+  - The catch-all is a named fallback route (`kusikusicms.routes.catch-all`), so app routes always win; `catch_all.enabled=false` disables it. `RoutesController` parses `{path, format}` with `ParsedPath`, redirects 301/302 keeping format and query, 404s via `abort()`, and calls the configured host controller.
+  - The host controller (published `App\Http\Controllers\WebsiteController`) extends the abstract `EntityRouteController`, whose `handle()` calls the public method named `Str::camel(model)` with `(Request, ResolvedRoute)` or `fallback()` (404). Views follow `{format}.{view}` (`ResolvedRoute::viewName()`).
+  - `kusikusicms:routes:install` (alias `k:routes:install`) rewrites the `domains` lines of the package config with the answers; keep the `env('KUSIKUSICMS_DOMAIN', ...)`, `'root_entity_id' =>` and `env('KUSIKUSICMS_LANG', ...)` lines in `config/routes.php` (the command throws if they no longer match).
 - MVC via Laravel: Controllers under `apps/sandbox/app/Http/Controllers/`, views under `apps/sandbox/resources/views/`.
 
 ---
