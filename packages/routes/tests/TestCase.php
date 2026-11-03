@@ -22,12 +22,14 @@ class TestCase extends BaseTestCase
     }
 
     /**
-     * Enforce foreign keys on SQLite so FK cascades behave as in production.
+     * Enforce foreign keys on SQLite so FK cascades behave as in production,
+     * and set an app key for the "web" middleware (cookie encryption).
      */
     protected function defineEnvironment($app): void
     {
         $connection = $app['config']->get('database.default');
         $app['config']->set("database.connections.{$connection}.foreign_key_constraints", true);
+        $app['config']->set('app.key', 'base64:'.base64_encode(str_repeat('k', 32)));
     }
 
     /**

@@ -40,6 +40,9 @@ class RoutesServiceProvider extends ServiceProvider
         Event::listen(EntitySaved::class, [SyncEntityRoutes::class, 'handle']);
         AboutCommand::add('KusikusiCMS routes package', fn () => ['Version' => $this->packageVersion()]);
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        if (config('kusikusicms.routes.catch_all.enabled', true)) {
+            $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
+        }
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
