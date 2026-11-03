@@ -2,7 +2,7 @@
 
 > **Read-only split.** This repository is automatically split from [`apps/starter`](https://github.com/kusikusicms/monorepo/tree/main/apps/starter) in the [kusikusicms/monorepo](https://github.com/kusikusicms/monorepo). Please open issues and pull requests in the monorepo; pull requests sent here are closed automatically.
 
-The starter template for [KusikusiCMS](https://github.com/kusikusicms/monorepo): a ready-to-run Laravel 13 application with the [`kusikusicms/models`](https://github.com/kusikusicms/models), [`kusikusicms/website`](https://github.com/kusikusicms/website), [`kusikusicms/media`](https://github.com/kusikusicms/media) and [`kusikusicms/admin`](https://github.com/kusikusicms/admin) packages already installed and wired together, so you can start managing content right away instead of assembling the packages yourself.
+The starter template for [KusikusiCMS](https://github.com/kusikusicms/monorepo): a ready-to-run Laravel 13 application with the [`kusikusicms/models`](https://github.com/kusikusicms/models), [`kusikusicms/routes`](https://github.com/kusikusicms/routes), [`kusikusicms/media`](https://github.com/kusikusicms/media) and [`kusikusicms/admin`](https://github.com/kusikusicms/admin) packages already installed and wired together, so you can start managing content right away instead of assembling the packages yourself.
 
 ## Creating a new project
 
@@ -28,7 +28,7 @@ Open `http://localhost:8000` and sign in to `/admin` to start creating content.
 | Package | Purpose |
 | --- | --- |
 | [`kusikusicms/models`](https://github.com/kusikusicms/models) | Core Eloquent models (`Entity`, contents, relations) and domain events |
-| [`kusikusicms/website`](https://github.com/kusikusicms/website) | Public-facing website/router manager |
+| [`kusikusicms/routes`](https://github.com/kusikusicms/routes) | Run-time entity routes: slug paths, redirects and a catch-all resolver |
 | [`kusikusicms/media`](https://github.com/kusikusicms/media) | Media library and file management |
 | [`kusikusicms/admin`](https://github.com/kusikusicms/admin) | Admin UI for managing content |
 
@@ -70,7 +70,7 @@ npm run dev     # Vite dev server with hot reload
 New versions of the packages are released independently from this starter. Once published, update them like any other Composer dependency:
 
 ```bash
-composer update kusikusicms/models kusikusicms/website kusikusicms/media kusikusicms/admin
+composer update kusikusicms/models kusikusicms/routes kusikusicms/media kusikusicms/admin
 php artisan migrate
 ```
 

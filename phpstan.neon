@@ -6,7 +6,7 @@ parameters:
     level: 5
     paths:
         - packages/models/src
-        - packages/website/src
+        - packages/routes/src
         - packages/media/src
         - packages/admin/src
     excludePaths:

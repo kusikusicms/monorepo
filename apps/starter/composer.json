@@ -14,7 +14,7 @@
         "kusikusicms/admin": "^13.0",
         "kusikusicms/media": "^13.0",
         "kusikusicms/models": "^13.0",
-        "kusikusicms/website": "^13.0",
+        "kusikusicms/routes": "^13.0",
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0"
     },

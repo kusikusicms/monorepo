@@ -13,7 +13,7 @@ Only the latest `13.x` release (aligned with Laravel 13) receives security fixes
 
 **Please do not open a public issue for security vulnerabilities.**
 
-Report them privately through GitHub: go to the [Security tab](https://github.com/kusikusicms/monorepo/security/advisories/new) of the [kusikusicms/monorepo](https://github.com/kusikusicms/monorepo) repository and choose **Report a vulnerability**. The split repositories (`kusikusicms/models`, `website`, `media`, `admin`, `starter`) are read-only; always report in the monorepo.
+Report them privately through GitHub: go to the [Security tab](https://github.com/kusikusicms/monorepo/security/advisories/new) of the [kusikusicms/monorepo](https://github.com/kusikusicms/monorepo) repository and choose **Report a vulnerability**. The split repositories (`kusikusicms/models`, `routes`, `media`, `admin`, `starter`) are read-only; always report in the monorepo.
 
 Please include:
 

@@ -5,7 +5,7 @@ KusikusiCMS brings CMS features to Laravel projects the standard Laravel way: Co
 | Package | Description |
 | --- | --- |
 | [`kusikusicms/models`](packages/models) | Core Eloquent models (`Entity`, contents, relations) and domain events |
-| [`kusikusicms/website`](packages/website) | Website/router manager |
+| [`kusikusicms/routes`](packages/routes) | Run-time entity routes: slug paths, redirects and a catch-all resolver |
 | [`kusikusicms/media`](packages/media) | Media manager |
 | [`kusikusicms/admin`](packages/admin) | Admin UI for managing content |
 
@@ -14,7 +14,7 @@ KusikusiCMS brings CMS features to Laravel projects the standard Laravel way: Co
 ### In an existing Laravel 13 application
 
 ```bash
-composer require kusikusicms/models kusikusicms/website kusikusicms/media kusikusicms/admin
+composer require kusikusicms/models kusikusicms/routes kusikusicms/media kusikusicms/admin
 php artisan migrate
 ```
 
@@ -29,7 +29,7 @@ php artisan vendor:publish --tag=kusikusicms-models-config
 php artisan vendor:publish --tag=kusikusicms-models-migrations
 ```
 
-Package routes (`admin`, `website`, `media`) can be configured or disabled in `config/kusikusicms/<package>.php`:
+Package routes (`admin`, `media`) can be configured or disabled in `config/kusikusicms/<package>.php`:
 
 ```php
 'routes' => [
@@ -50,7 +50,7 @@ php artisan serve
 ## Repository layout
 
 ```
-packages/   models, website, media, admin  (each one a Composer library)
+packages/   models, routes, media, admin  (each one a Composer library)
 apps/
   sandbox/  Laravel app wired to the local packages (symlinked path repositories)
   starter/  Template published as kusikusicms/starter (packages from Packagist)

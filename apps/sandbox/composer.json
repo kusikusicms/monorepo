@@ -13,7 +13,7 @@
         "kusikusicms/admin": "*@dev",
         "kusikusicms/media": "*@dev",
         "kusikusicms/models": "*@dev",
-        "kusikusicms/website": "*@dev",
+        "kusikusicms/routes": "*@dev",
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0"
     },
@@ -100,7 +100,7 @@
         },
         {
             "type": "path",
-            "url": "../../packages/website",
+            "url": "../../packages/routes",
             "options": {
                 "symlink": true
             }

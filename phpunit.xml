@@ -8,8 +8,8 @@
         <testsuite name="models">
             <directory>packages/models/tests</directory>
         </testsuite>
-        <testsuite name="website">
-            <directory>packages/website/tests</directory>
+        <testsuite name="routes">
+            <directory>packages/routes/tests</directory>
         </testsuite>
         <testsuite name="media">
             <directory>packages/media/tests</directory>
