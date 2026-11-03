@@ -22,11 +22,16 @@ class RoutesServiceProvider extends ServiceProvider
     public function boot(): void
     {
         AboutCommand::add('KusikusiCMS routes package', fn () => ['Version' => $this->packageVersion()]);
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__.'/../config/routes.php' => config_path('kusikusicms/routes.php'),
             ], ['kusikusicms-config', 'kusikusicms-routes-config']);
+
+            $this->publishes([
+                __DIR__.'/../database/migrations' => database_path('migrations'),
+            ], 'kusikusicms-routes-migrations');
         }
     }
 
