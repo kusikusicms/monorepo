@@ -42,12 +42,15 @@ class EntityController extends Controller
                 return $q->id($request->input('id'));
             })
             ->when($request->input('model'), function ($q) use ($request) {
-                return $q->ofModel($request->input('model'));
+                return $q->model($request->input('model'));
             })
             ->when($request->input('parent_entity_id'), function ($q) use ($request) {
                 return $q->childOf($request->input('parent_entity_id'));
             })
-            ->withContents(['title' => $request->input('title')])
+            ->withContents([
+                'title' => $request->input('title'),
+                'slug' => $request->input('slug')
+            ])
             ->create();
 
         if ($request->input('parent_entity_id')) {
@@ -63,10 +66,12 @@ class EntityController extends Controller
     {
         $entity = Entity::findOrFail($id);
         $description = $request->input('description') ?? '';
+        $slug = $request->input('slug') ?? '';
 
         $entity->createContents([
             'title' => $request->input('title'),
             'description' => $description,
+            'slug' => $slug,
         ]);
 
         return redirect()->route('entity.show', $entity->id)

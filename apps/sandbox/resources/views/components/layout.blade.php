@@ -34,7 +34,7 @@
 </head>
 <body class="">
 <header class="">
-    <a href="/">Root</a>
+    <a href="/entities">Root</a>
     <h1>{{ $title }}</h1>
 </header>
 <main>
