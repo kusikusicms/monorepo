@@ -4,7 +4,11 @@
     @method('PATCH')
     <label>
         <span>Title</span>
-        <input type="text" name="title" placeholder="Title" required value="{{$entity->contents->title}}"><br>
+        <input type="text" name="title" placeholder="Title" required value="{{$entity->contents->title}}">
+    </label>
+    <label>
+        <span>Slug</span>
+        <input type="text" name="slug" placeholder="slug" value="{{$entity->contents->slug}}">
     </label>
     <label>
         <span>Description</span>
