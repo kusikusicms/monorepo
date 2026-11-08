@@ -27,6 +27,29 @@ class PathBuilder
     }
 
     /**
+     * The language served at the root path when the root entity has no slug (the configured domain language).
+     */
+    public function domainLang(): ?string
+    {
+        $domains = (array) config('kusikusicms.routes.domains', []);
+        $site = reset($domains);
+        $lang = is_array($site) ? ($site['lang'] ?? null) : null;
+
+        return $lang === null || $lang === '' ? null : (string) $lang;
+    }
+
+    /**
+     * Whether the entity is the configured root entity and the language is the domain language:
+     * there a missing slug counts as empty, so the root always gets "/".
+     */
+    public function isDefaultRoot(Entity $entity, string $lang): bool
+    {
+        $root = $this->rootEntityId();
+
+        return $root !== null && (string) $entity->id === $root && $this->domainLang() === $lang;
+    }
+
+    /**
      * The EntityContent field holding the slug.
      */
     public function slugField(): string
@@ -102,7 +125,10 @@ class PathBuilder
             $slugs[(string) $entity->id] = $slugOverride;
         }
         if (! array_key_exists((string) $entity->id, $slugs)) {
-            return null;
+            if (! $this->isDefaultRoot($entity, $lang)) {
+                return null;
+            }
+            $slugs[(string) $entity->id] = '';
         }
 
         $path = null;

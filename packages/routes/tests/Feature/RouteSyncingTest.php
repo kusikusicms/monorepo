@@ -81,8 +81,9 @@ class RouteSyncingTest extends TestCase
     public function test_non_slug_fields_are_ignored(): void
     {
         $this->entity('home', model: 'Home')->createContents(['title' => 'Home', 'body' => 'Text']);
+        $this->entity('p1', 'home')->createContents(['title' => 'Page', 'body' => 'Text']);
 
-        $this->assertSame(0, EntityRoute::query()->count());
+        $this->assertSame(['home'], EntityRoute::query()->pluck('entity_id')->all());
     }
 
     public function test_excepted_models_get_no_routes_but_their_slug_still_builds_child_paths(): void
@@ -108,7 +109,7 @@ class RouteSyncingTest extends TestCase
         $this->entity('drafts', model: 'Folder')->createContents(['slug' => '']);
         $this->entity('d1', 'drafts')->createContents(['slug' => 'draft']);
 
-        $this->assertSame(0, EntityRoute::query()->count());
+        $this->assertSame(['home'], EntityRoute::query()->pluck('entity_id')->all());
     }
 
     public function test_multi_language_contents_create_one_primary_per_language(): void
@@ -211,5 +212,32 @@ class RouteSyncingTest extends TestCase
         Entity::query()->findOrFail('p1')->delete();
 
         $this->assertSame('/section1/page1', $this->primaryPath('p1'));
+    }
+
+    public function test_the_root_gets_a_slash_route_without_slug_content(): void
+    {
+        $this->entity('home', model: 'Home');
+        $this->entity('s1', 'home', 'Section')->createContents(['slug' => 'section1']);
+
+        $this->assertSame('/', $this->primaryPath('home'));
+        $this->assertSame('/section1', $this->primaryPath('s1'));
+    }
+
+    public function test_the_root_without_slug_only_gets_a_route_in_the_domain_language(): void
+    {
+        $this->entity('home', model: 'Home')->createContents(['title' => 'Inicio'], 'es');
+
+        $this->assertSame('/', $this->primaryPath('home', 'en'));
+        $this->assertNull($this->primaryPath('home', 'es'));
+    }
+
+    public function test_deleting_the_root_slug_keeps_the_slash_route(): void
+    {
+        $this->entity('home', model: 'Home')->createContents(['slug' => 'start']);
+        $this->assertSame('/start', $this->primaryPath('home'));
+
+        EntityContent::query()->where('entity_id', 'home')->where('field', 'slug')->get()->each->delete();
+
+        $this->assertSame('/', $this->primaryPath('home'));
     }
 }

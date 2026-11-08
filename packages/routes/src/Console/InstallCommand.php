@@ -3,7 +3,10 @@
 namespace KusikusiCMS\Routes\Console;
 
 use Illuminate\Console\Command;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\File;
+use KusikusiCMS\Models\Entity;
+use KusikusiCMS\Routes\Services\RouteManager;
 use RuntimeException;
 
 use function Laravel\Prompts\text;
@@ -49,9 +52,32 @@ class InstallCommand extends Command
         $this->write(app_path('Http/Controllers/WebsiteController.php'), (string) File::get(static::stubPath('WebsiteController.stub')));
         $this->write(resource_path('views/html/home.blade.php'), (string) File::get(static::stubPath('views/html/home.blade.stub')));
 
+        $this->syncRoot($domain, $lang, $root === '' ? null : $root);
+
         $this->components->info('KusikusiCMS routes installed. Remove any "/" route of your app that would shadow the CMS home.');
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Create the "/" route when the root entity already exists (it needs no slug content).
+     */
+    protected function syncRoot(string $domain, string $lang, ?string $root): void
+    {
+        if ($root === null) {
+            return;
+        }
+
+        try {
+            // The published config is not loaded yet, so use the answers for this run
+            config(['kusikusicms.routes.domains' => [$domain => ['root_entity_id' => $root, 'lang' => $lang]]]);
+            if (Entity::query()->whereKey($root)->exists()) {
+                app(RouteManager::class)->syncEntity($root, $lang);
+                $this->components->info("Synced the routes of the root entity [{$root}].");
+            }
+        } catch (QueryException) {
+            $this->components->warn('Could not sync the root entity route (run the migrations first).');
+        }
     }
 
     /**

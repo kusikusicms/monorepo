@@ -77,7 +77,6 @@ class EntityRouteTest extends TestCase
     public function test_find_by_path_matches_the_root_path(): void
     {
         Entity::create(['id' => 'home', 'model' => 'Home']);
-        $this->makeRoute('home', '/');
 
         $this->assertSame('home', EntityRoute::findByPath('/')?->entity_id);
         $this->assertSame('home', EntityRoute::findByPath('')?->entity_id);

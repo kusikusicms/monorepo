@@ -68,7 +68,9 @@ class RouteManager
             return new RoutePlan($lang);
         }
 
-        $path = $deleted ? null : $this->paths->build($entity, $lang, $slugOverride);
+        $path = $deleted
+            ? ($this->paths->isDefaultRoot($entity, $lang) ? '/' : null)
+            : $this->paths->build($entity, $lang, $slugOverride);
         // Entities outside the root tree are ignored, unless they still own routes (e.g. moved out of the tree)
         if ($path === null && ! $this->paths->inScope($entity) && ! $this->hasRoutes((string) $entity->id, $lang)) {
             return new RoutePlan($lang);
