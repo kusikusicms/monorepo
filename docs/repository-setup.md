@@ -42,7 +42,7 @@ Everything that cannot live in the repository files and must be configured on Gi
 1. Submit each repository: `kusikusicms/models`, `routes`, `media`, `admin` and, when ready, `starter`.
 2. Enable the GitHub integration (webhook) so Packagist updates automatically when tags are pushed. `type: project` packages such as the starter work with `composer create-project`.
 3. Clean up or abandon old `v1.x` versions if needed. No `12.x` line was ever published.
-4. Publish the four packages first (baseline `v13.0.0`). Only then set `"publish": true` for `starter` in `monorepo.json`, because the starter requires `kusikusicms/* ^13.0`.
+4. Publish `models`, `media` and `admin` with the baseline (`v13.0.0`). `routes` is not part of the baseline because `packages/routes` did not exist in `v13.0.0`, so `kusikusicms/routes` is first published with the next regular release (`v13.2.0`, see section 5). `routes` requires `kusikusicms/models ^13.0`, so the models package must already be published at `13.0.0` before the routes release. Only then set `"publish": true` for `starter` in `monorepo.json`, because the starter requires `kusikusicms/* ^13.0`.
 
 ## 4. AI code review (optional)
 
@@ -55,3 +55,61 @@ Everything that cannot live in the repository files and must be configured on Gi
 2. Run **Release** with `dry_run` enabled and check the computed version and notes in the log.
 3. Run **Release** without `dry_run`.
 4. Confirm the new tag and versions on the split repositories and Packagist.
+5. First release only: this release publishes `kusikusicms/routes` for the first time. Check that the `routes` split repository exists with a `main` branch, that its `SPLIT_TOKEN` access is in place, and that `kusikusicms/routes` is registered on Packagist. Then confirm the `routes` 13.2.0 version and that it resolves `kusikusicms/models` from Packagist. If the `routes` split fails, fix the external setup and re-run **Monorepo Split** with `tag: v13.2.0`.
+
+
+## 6. Publishing a new package (reference for future packages)
+
+Step-by-step guide for the manual actions outside the repository when a new package (or app) is added to the monorepo. Examples use a package called `<name>` (for instance `routes`). Do the external steps **before** merging anything that makes the split workflow run for it, otherwise the split job fails.
+
+### 6.1 In the repository
+
+1. Create `packages/<name>` with a valid `composer.json`: name `kusikusicms/<name>`, license, `php` constraint, `kusikusicms/* ^13.0` dependencies only on **published** packages, and the service provider under `extra.laravel.providers`.
+2. Add `.gitattributes` (export-ignore `/tests`, `/docs`, `/phpunit.xml`, `/.gitattributes`), a `README.md` with an installation section and the "read-only split" notice, and `.github/workflows/close-pull-request.yml` (copy it from another package).
+3. Register it in `monorepo.json` with `"split": true`. Use `"publish": true` only when its dependencies are already published (`publish` requires `split`). Keep `"publish": false` for apps such as the starter until their packages are on Packagist.
+4. Validate: `composer validate --strict --no-check-lock --no-check-publish --working-dir=packages/<name>`, then the quality gate (`composer test`, `composer lint -- --test`, `composer analyse -- --no-progress`, `composer audit`).
+5. Do not edit `split.yml` or `release.yml`: they read `monorepo.json`.
+
+### 6.2 GitHub: create the split repository
+
+1. Go to **github.com/organizations/kusikusicms/repositories/new** (or **New repository** in the organization).
+2. Name: `<name>` (must equal `repository` in `monorepo.json`). Visibility: public. Description: `Read-only split of kusikusicms/monorepo`.
+3. Create it **with an initial commit on `main`** (tick *Add a README file*, or push an empty commit). The split action pushes to `main` and needs the branch to exist. The first split replaces the content with the package files, so `composer.json` ends up at the repository root.
+4. **Settings → General → Features**: disable *Issues*, *Wiki* and *Projects*. Do not enable Discussions.
+5. Do not add branch protection that blocks pushes from the split token, and do not add workflows to this repository by hand; they ship from the monorepo.
+
+### 6.3 GitHub: give `SPLIT_TOKEN` access
+
+1. If `SPLIT_TOKEN` is a fine-grained PAT scoped to selected repositories: **github.com/settings/personal-access-tokens** → open the token → **Repository access** → add `kusikusicms/<name>`. Permissions must include *Contents: write* and *Workflows: write*. If the token is owned by an organization, an organization owner may need to approve the change.
+2. If it is a GitHub App token: **Organization settings → GitHub Apps → Configure** the app and add the repository.
+3. If the token expires, rotate it and update the secret in **monorepo → Settings → Secrets and variables → Actions → `SPLIT_TOKEN`**.
+4. Nothing else changes in the monorepo secrets: `RELEASE_APP_ID`, `RELEASE_APP_PRIVATE_KEY` and the optional `PACKAGIST_*` secrets are shared by all projects.
+
+### 6.4 Packagist: register the package
+
+1. Sign in at **packagist.org** with the account that owns the `kusikusicms` vendor and click **Submit**.
+2. Enter the repository URL `https://github.com/kusikusicms/<name>` and submit. Packagist reads the name (`kusikusicms/<name>`) from `composer.json`, so the split repository must already contain it (run the **Monorepo Split** workflow, or push to `main`, first).
+3. Make sure updates are automatic, with one of these:
+   - The GitHub integration/webhook (**packagist.org → Profile → Connect with GitHub**, then enable the hook for the package). Check **Settings → Webhooks** of the split repository.
+   - The `PACKAGIST_USERNAME` and `PACKAGIST_TOKEN` secrets in the monorepo (already used by the release workflow for every `publish` project).
+4. If the package has several maintainers, add them in the package page → **Maintainers**.
+5. Packagist only shows versions created by tags. Until the first release, only `dev-main` exists.
+
+### 6.5 First release and verification
+
+1. Run **Actions → Release → Run workflow** with `dry_run` enabled. Check that the computed version is the expected one and that the new project appears in the *Publish* matrix (only `"publish": true` projects).
+2. Run **Release** without `dry_run` from `main`.
+3. Verify:
+   - The split repository has the new tag, and `composer.json` is at its root.
+   - Packagist shows the new version (use **Update** on the package page if it lags).
+   - In an empty folder: `composer require kusikusicms/<name>` resolves its `kusikusicms/*` dependencies from Packagist.
+4. Add the package name to the `SPLIT_TOKEN` scope list and the split repository list in sections 1 and 2 of this document, and to the Packagist list in section 3.
+
+### 6.6 Troubleshooting
+
+- **Split fails with `Repository not found` or `Permission denied`**: the repository does not exist, or `SPLIT_TOKEN` has no access to it (section 6.3).
+- **`refusing to allow a Personal Access Token to create or update workflow`**: the token lacks *Workflows: write* (classic PAT: `workflow` scope).
+- **Split fails because the `main` branch does not exist**: initialize the repository with a commit (section 6.2).
+- **Release tagged the monorepo but the split failed**: fix the external setup, then run **Monorepo Split** manually with `tag: <vX.Y.Z>` to republish.
+- **Packagist does not show the version**: check the webhook deliveries on the split repository, or trigger **Update** manually on Packagist.
+- **`composer install` of a published package fails on a missing sibling**: the sibling is not published. The release workflow warns about this; publish it first.
