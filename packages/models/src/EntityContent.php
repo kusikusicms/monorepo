@@ -2,6 +2,7 @@
 
 namespace KusikusiCMS\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use KusikusiCMS\Models\Events\EntityContentCreated;
@@ -69,6 +70,18 @@ class EntityContent extends Model
         'deleting' => EntityContentDeleting::class,
         'deleted' => EntityContentDeleted::class,
     ];
+
+    /**
+     * The text is never stored as NULL: an empty or missing value is saved as an empty string.
+     *
+     * @return Attribute<string|null, string|null>
+     */
+    protected function text(): Attribute
+    {
+        return Attribute::make(
+            set: fn (mixed $value) => $value === null ? '' : $value,
+        );
+    }
 
     /**
      * To avoid "ambiguous" SQL errors Change the primary key for the model.

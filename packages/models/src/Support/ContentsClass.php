@@ -11,7 +11,7 @@ class ContentsClass extends stdClass
     /**
      * Magic method to set fields dynamically
      */
-    public function __set(string $name, string $value)
+    public function __set(string $name, ?string $value = '')
     {
         $this->fields[$name] = true;
         $this->$name = $value;
