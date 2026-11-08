@@ -1,3 +1,13 @@
+## [13.2.0](https://github.com/kusikusicms/monorepo/compare/v13.1.0...v13.2.0) (2026-11-08)
+
+### Features
+
+* **website:** new routes package that handles website routing ([#29](https://github.com/kusikusicms/monorepo/issues/29)) ([36a7cc3](https://github.com/kusikusicms/monorepo/commit/36a7cc30fb35d33ac8390e22d010fd3347507f1b))
+
+### Bug Fixes
+
+* **sandbox:** rename entity1 to entity and populate edit form with existing data ([#26](https://github.com/kusikusicms/monorepo/issues/26)) ([41e8d65](https://github.com/kusikusicms/monorepo/commit/41e8d65cebaa132b08368791aab75456315edeb0))
+
 ## [13.1.0](https://github.com/kusikusicms/monorepo/compare/v13.0.1...v13.1.0) (2026-11-01)
 
 ### Features
