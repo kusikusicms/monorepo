@@ -4,6 +4,7 @@ namespace KusikusiCMS\Routes\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use KusikusiCMS\Routes\Exceptions\ModelMethodNotFoundException;
 use KusikusiCMS\Routes\Support\ResolvedRoute;
 use ReflectionMethod;
 
@@ -24,7 +25,9 @@ abstract class EntityRouteController
     {
         $method = $this->methodFor($route);
         if ($method === null) {
-            return $this->fallback($request, $route);
+            $methodName = self::methodNameFor($route);
+
+            return $this->fallback($request, $route, $methodName);
         }
 
         return $this->{$method}($request, $route);
@@ -34,9 +37,9 @@ abstract class EntityRouteController
      * Called when the controller has no method for the entity model. Responds 404 by default;
      * override it to render a generic view.
      */
-    public function fallback(Request $request, ResolvedRoute $route): mixed
+    public function fallback(Request $request, ResolvedRoute $route, string $method): mixed
     {
-        abort(404);
+        throw new ModelMethodNotFoundException($method);
     }
 
     /**
@@ -44,15 +47,25 @@ abstract class EntityRouteController
      */
     protected function methodFor(ResolvedRoute $route): ?string
     {
-        $method = Str::camel($route->entityModel);
-        if ($method === '' || in_array(strtolower($method), ['handle', 'fallback', 'methodfor'], true)) {
-            return null;
-        }
+        $method = self::methodNameFor($route);
         if (! method_exists($this, $method)) {
             return null;
         }
         $reflection = new ReflectionMethod($this, $method);
 
         return $reflection->isPublic() && ! $reflection->isStatic() ? $method : null;
+    }
+
+    /**
+     * The name of the public method that should handle an entity model.
+     */
+    protected function methodNameFor(ResolvedRoute $route): ?string
+    {
+        $method = Str::camel($route->entityModel);
+        if ($method === '' || in_array(strtolower($method), ['handle', 'fallback', 'methodfor'], true)) {
+            return null;
+        }
+
+        return $method;
     }
 }
