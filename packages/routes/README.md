@@ -122,6 +122,10 @@ $page->routes->where('lang', 'es')->where('kind', RouteKind::Primary)->first()?-
 
 `withRoute()` loads the paths after the query, so it never changes the selected columns and works with `paginate()`. Its attribute is not dirty, so `save()` never writes it. Calling it on a non-entity query throws a `LogicException`.
 
+### IDE support
+
+`withRoute()` is added to `EntityBuilder` at run time (mixed in from `KusikusiCMS\Routes\Builders\EntityRouteQueries`, where Cmd+click lands). To silence the "method not found" warnings in PhpStorm and the Laravel IDE plugin, the package ships `vendor/kusikusicms/routes/stubs/ide-helper.php`. It is never autoloaded: it only declares `@method`, `@property` and `@mixin` docblocks for `EntityBuilder` and `Entity`. PhpStorm indexes the vendor folder by itself; if you use PHPStan/Larastan, do not add the stub to its `paths`.
+
 ## Host controller
 
 The catch-all route parses the URL (`/blog/hello.rss` gives the path `/blog/hello` and the format `rss`), finds the route, checks that the entity is live and calls `handle()` on the configured controller. `handle()`, inherited from `KusikusiCMS\Routes\Http\Controllers\EntityRouteController`, calls the public method named after the model in camelCase (`Home` → `home()`, `BlogPost` → `blogPost()`) or `fallback()` (404 by default).
