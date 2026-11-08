@@ -21,7 +21,7 @@
   "autoload": {
     "psr-4": {
       "KusikusiCMS\\Models\\": "packages/models/src/",
-      "KusikusiCMS\\Website\\": "packages/website/src/",
+      "KusikusiCMS\\Routes\\": "packages/routes/src/",
       "KusikusiCMS\\Media\\": "packages/media/src/",
       "KusikusiCMS\\Admin\\": "packages/admin/src/"
     }
@@ -29,7 +29,7 @@
   "autoload-dev": {
     "psr-4": {
       "KusikusiCMS\\Models\\Tests\\": "packages/models/tests/",
-      "KusikusiCMS\\Website\\Tests\\": "packages/website/tests/",
+      "KusikusiCMS\\Routes\\Tests\\": "packages/routes/tests/",
       "KusikusiCMS\\Media\\Tests\\": "packages/media/tests/",
       "KusikusiCMS\\Admin\\Tests\\": "packages/admin/tests/"
     }

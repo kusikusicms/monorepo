@@ -2,7 +2,7 @@
 The PR title becomes the squashed commit message on `main` and drives the next release.
 Use Conventional Commits with a scope: `type(scope): description`
 Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
-Scopes: models, website, media, admin, sandbox, starter, monorepo, ci, deps, deps-dev, release
+Scopes: models, routes, media, admin, sandbox, starter, monorepo, ci, deps, deps-dev, release
 Example: feat(models): add rootOf scope
 -->
 

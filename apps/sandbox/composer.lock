@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ddf6aa5add4e10eedc550137459ef96e",
+    "content-hash": "17adae2ea23a95abf9e3ba5368df4aff",
     "packages": [
         {
             "name": "brick/math",
@@ -1253,16 +1253,22 @@
             }
         },
         {
-            "name": "kusikusicms/website",
+            "name": "kusikusicms/routes",
             "version": "dev-main",
             "dist": {
                 "type": "path",
-                "url": "../../packages/website",
-                "reference": "71a0ae41593721d03bc00f20689f72ae7cee61e5"
+                "url": "../../packages/routes",
+                "reference": "abe863892066c4e35cbc229f69705b6d0b946fc4"
             },
             "require": {
+                "illuminate/console": "^13.0",
+                "illuminate/database": "^13.0",
+                "illuminate/filesystem": "^13.0",
+                "illuminate/http": "^13.0",
                 "illuminate/routing": "^13.0",
                 "illuminate/support": "^13.0",
+                "kusikusicms/models": "^13.0",
+                "laravel/prompts": "^0.3.25",
                 "php": "^8.4"
             },
             "require-dev": {
@@ -1273,7 +1279,7 @@
             "extra": {
                 "laravel": {
                     "providers": [
-                        "KusikusiCMS\\Website\\WebsiteServiceProvider"
+                        "KusikusiCMS\\Routes\\RoutesServiceProvider"
                     ]
                 },
                 "branch-alias": {
@@ -1282,18 +1288,18 @@
             },
             "autoload": {
                 "psr-4": {
-                    "KusikusiCMS\\Website\\": "src/"
+                    "KusikusiCMS\\Routes\\": "src/"
                 }
             },
             "autoload-dev": {
                 "psr-4": {
-                    "KusikusiCMS\\Website\\Tests\\": "tests/"
+                    "KusikusiCMS\\Routes\\Tests\\": "tests/"
                 }
             },
             "license": [
                 "MIT"
             ],
-            "description": "Website/router manager for KusikusiCMS.",
+            "description": "Run-time routes for KusikusiCMS entities: slug-based paths, redirects and a catch-all resolver.",
             "transport-options": {
                 "symlink": true,
                 "relative": true
@@ -9122,7 +9128,7 @@
         "kusikusicms/admin": 20,
         "kusikusicms/media": 20,
         "kusikusicms/models": 20,
-        "kusikusicms/website": 20
+        "kusikusicms/routes": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,

@@ -9,7 +9,7 @@ body:
       label: Package or app
       options:
         - models
-        - website
+        - routes
         - media
         - admin
         - starter

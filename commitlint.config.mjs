@@ -7,7 +7,7 @@ export default {
       'always',
       [
         'models',
-        'website',
+        'routes',
         'media',
         'admin',
         'sandbox',

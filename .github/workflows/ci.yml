@@ -101,7 +101,7 @@ jobs:
               "symlink": false,
               "versions": {
                 "kusikusicms/models": "13.99.0",
-                "kusikusicms/website": "13.99.0",
+                "kusikusicms/routes": "13.99.0",
                 "kusikusicms/media": "13.99.0",
                 "kusikusicms/admin": "13.99.0"
               }

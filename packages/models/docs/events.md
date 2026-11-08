@@ -21,6 +21,36 @@ The following events are mapped to model lifecycle hooks:
 - `restored` → `KusikusiCMS\Models\Events\EntityRestored`
 - `replicating` → `KusikusiCMS\Models\Events\EntityReplicating`
 
+## EntityContent events
+
+`KusikusiCMS\Models\EntityContent` (a single field value of an entity in one language) dispatches these events. Each one carries the model as `$event->content`:
+- `creating` → `KusikusiCMS\Models\Events\EntityContentCreating`
+- `created` → `KusikusiCMS\Models\Events\EntityContentCreated`
+- `updating` → `KusikusiCMS\Models\Events\EntityContentUpdating`
+- `updated` → `KusikusiCMS\Models\Events\EntityContentUpdated`
+- `saving` → `KusikusiCMS\Models\Events\EntityContentSaving`
+- `saved` → `KusikusiCMS\Models\Events\EntityContentSaved`
+- `deleting` → `KusikusiCMS\Models\Events\EntityContentDeleting`
+- `deleted` → `KusikusiCMS\Models\Events\EntityContentDeleted`
+
+They fire for every model-level write: `Entity::createContents()`, `EntityContent::create()`, `$content->save()`, `$entity->rawContents()->create()` and `$content->delete()`.
+
+Notes:
+- `createContents()` saves one model per field inside a `DB::transaction()`, so a listener that throws (for example in `EntityContentSaving`) rolls back every field of that call.
+- In `saving`/`updating` listeners, `$event->content->getOriginal('text')` holds the previous value and `isDirty('text')` tells whether it changed.
+- Mass query writes (`EntityContent::where(...)->update()` / `->delete()`, `upsert()`) do not fire model events.
+
+```
+use Illuminate\Support\Facades\Event;
+use KusikusiCMS\Models\Events\EntityContentSaved;
+
+Event::listen(EntityContentSaved::class, function (EntityContentSaved $event) {
+    if ($event->content->field === 'slug' && $event->content->wasChanged('text')) {
+        // react to the new slug
+    }
+});
+```
+
 ## Listening in a host application
 
 ### Inline listener

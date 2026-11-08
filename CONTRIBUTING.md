@@ -2,11 +2,11 @@
 
 Thank you for considering contributing! This document explains how to set up your environment, run tests, and propose changes. By participating you agree to follow our [Code of Conduct](CODE_OF_CONDUCT.md). Please report security issues privately, as described in [SECURITY.md](SECURITY.md).
 
-All development happens in this monorepo (`kusikusicms/monorepo`). The repositories `kusikusicms/models`, `website`, `media`, `admin` and `starter` are **read-only splits**: pull requests sent there are closed automatically.
+All development happens in this monorepo (`kusikusicms/monorepo`). The repositories `kusikusicms/models`, `routes`, `media`, `admin` and `starter` are **read-only splits**: pull requests sent there are closed automatically.
 
 ## Repository layout
 
-- `packages/*` — the libraries (`models`, `website`, `media`, `admin`). Namespaces are `KusikusiCMS\<Package>\`, tests live in `KusikusiCMS\<Package>\Tests\`.
+- `packages/*` — the libraries (`models`, `routes`, `media`, `admin`). Namespaces are `KusikusiCMS\<Package>\`, tests live in `KusikusiCMS\<Package>\Tests\`.
 - `apps/sandbox` — Laravel app that uses the local packages through symlinked path repositories. Your package edits show up immediately.
 - `apps/starter` — end-user template (`kusikusicms/starter`); it installs packages from Packagist and must not use path repositories.
 - `monorepo.json` — the list of projects (packages and apps) with their `split` and `publish` switches, and the Laravel major the versions are locked to.
@@ -74,7 +74,7 @@ Every commit must follow [Conventional Commits](https://www.conventionalcommits.
 ```
 
 - Types: `feat` (minor release), `fix` and `perf` (patch release), `docs`, `style`, `refactor`, `test`, `build`, `ci`, `chore`, `revert`.
-- Scopes: `models`, `website`, `media`, `admin`, `sandbox`, `starter`, `monorepo`, `ci`, `deps`, `deps-dev`, `release`.
+- Scopes: `models`, `routes`, `media`, `admin`, `sandbox`, `starter`, `monorepo`, `ci`, `deps`, `deps-dev`, `release`.
 - Examples: `feat(models): add rootOf scope`, `fix(admin): escape entity titles`, `chore(deps): bump actions/checkout`.
 
 [commitlint](commitlint.config.mjs) enforces this locally through a husky `commit-msg` hook (installed by `npm install`) and in CI for every commit of a pull request. To check a message manually: `echo "feat(models): x" | npx commitlint`.

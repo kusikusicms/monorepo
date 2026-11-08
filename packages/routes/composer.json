@@ -1,0 +1,44 @@
+{
+  "name": "kusikusicms/routes",
+  "description": "Run-time routes for KusikusiCMS entities: slug-based paths, redirects and a catch-all resolver.",
+  "type": "library",
+  "license": "MIT",
+  "require": {
+    "php": "^8.4",
+    "illuminate/console": "^13.0",
+    "illuminate/database": "^13.0",
+    "illuminate/filesystem": "^13.0",
+    "illuminate/http": "^13.0",
+    "illuminate/routing": "^13.0",
+    "illuminate/support": "^13.0",
+    "kusikusicms/models": "^13.0",
+    "laravel/prompts": "^0.3.25"
+  },
+  "autoload": {
+    "psr-4": {
+      "KusikusiCMS\\Routes\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "KusikusiCMS\\Routes\\Tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "KusikusiCMS\\Routes\\RoutesServiceProvider"
+      ]
+    },
+    "branch-alias": {
+      "dev-main": "13.x-dev"
+    }
+  },
+  "require-dev": {
+    "orchestra/testbench": "^11.0",
+    "phpunit/phpunit": "^13.0"
+  },
+  "config": {
+    "sort-packages": true
+  }
+}
