@@ -11,6 +11,7 @@ use KusikusiCMS\Models\Events\EntityContentSaved;
 use KusikusiCMS\Models\Events\EntityContentSaving;
 use KusikusiCMS\Models\Events\EntitySaved;
 use KusikusiCMS\Models\Events\EntitySaving;
+use KusikusiCMS\Routes\Builders\EntityRouteMacros;
 use KusikusiCMS\Routes\Console\InstallCommand;
 use KusikusiCMS\Routes\Listeners\SyncEntityRoutes;
 use KusikusiCMS\Routes\Listeners\SyncSlugRoutes;
@@ -35,6 +36,7 @@ class RoutesServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        EntityRouteMacros::register();
         Event::listen(EntityContentSaving::class, ValidateSlugRoutes::class);
         Event::listen([EntityContentSaved::class, EntityContentDeleted::class], SyncSlugRoutes::class);
         Event::listen(EntitySaving::class, [SyncEntityRoutes::class, 'validate']);

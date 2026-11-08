@@ -2,7 +2,6 @@
 
 namespace KusikusiCMS\Routes\Exceptions;
 
-use KusikusiCMS\Routes\Support\ResolvedRoute;
 use RuntimeException;
 
 /**

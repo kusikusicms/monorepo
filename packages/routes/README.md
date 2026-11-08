@@ -107,6 +107,21 @@ $route?->lang;      // "en"
 
 `createFor()` denormalizes the entity model and view, and throws `RoutePathConflictException` when another entity (or another language) already uses the path as primary or alias. The service behind it, `KusikusiCMS\Routes\Services\RouteManager`, is a container singleton you can extend and rebind.
 
+## Querying routes
+
+The routes package adds a `routes` relationship to `Entity` (a `hasMany` of `EntityRoute`, registered when the package boots) and a `withRoute()` macro to the `Entity` query builder:
+
+- `with('routes')` eager loads every `EntityRoute` of the entity (all languages and kinds, each with `path`, `lang` and `kind`). Constrain it as usual: `with(['routes' => fn ($q) => $q->where('lang', 'es')])`.
+- `withRoute(string|array|null $lang = null)` adds a `route` attribute with the primary path of the entity in the language (or `null`). It accepts an options array such as `['lang' => 'es']`, like `withContents()`. When `$lang` is null, `kusikusicms.models.default_language` is used.
+
+```PHP
+$pages = Entity::query()->childrenOf('home')->withRoute('en')->get();
+$page = Entity::query()->with('routes')->findOrFail('page-1');
+$page->routes->where('lang', 'es')->where('kind', RouteKind::Primary)->first()?->path;
+```
+
+`withRoute()` loads the paths after the query, so it never changes the selected columns and works with `paginate()`. Its attribute is not dirty, so `save()` never writes it. Calling it on a non-entity query throws a `LogicException`.
+
 ## Host controller
 
 The catch-all route parses the URL (`/blog/hello.rss` gives the path `/blog/hello` and the format `rss`), finds the route, checks that the entity is live and calls `handle()` on the configured controller. `handle()`, inherited from `KusikusiCMS\Routes\Http\Controllers\EntityRouteController`, calls the public method named after the model in camelCase (`Home` → `home()`, `BlogPost` → `blogPost()`) or `fallback()` (404 by default).

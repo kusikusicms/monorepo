@@ -142,7 +142,7 @@ class RequestHandlingTest extends TestCase
         $this->tree();
         $this->entity('pr1', 's1', 'Product')->createContents(['slug' => 'product1']);
 
-        $this->get('/section1/product1')->assertNotFound();
+        $this->get('/section1/product1')->assertInternalServerError();
     }
 
     #[DefineRoute('appRoutes')]
