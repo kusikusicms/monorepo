@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Home;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use KusikusiCMS\Models\Entity;
@@ -37,25 +38,53 @@ use KusikusiCMS\Routes\Support\ResolvedRoute;
 class WebsiteController extends EntityRouteController
 {
     /**
-     * The home page: the entity, its live children and their primary paths (for links).
+     * The home page: the entity, its live children.
      */
     public function home(Request $request, ResolvedRoute $route): View
     {
-        $entity = Entity::withContents(['lang' => $route->lang])->findOrFail($route->entityId);
-        $children = Entity::withContents(['lang' => $route->lang])
+        $entity = Home::withContents(['lang' => $route->lang])->findOrFail($route->entityId);
+        $children = Home::query()
+            ->withContents(['lang' => $route->lang])
+            ->withRoute(['lang' => $route->lang])
             ->childrenOf($route->entityId)
             ->currentlyLive()
             ->get();
-        $paths = EntityRoute::query()
-            ->whereIn('entity_id', $children->pluck('id'))
-            ->where('lang', $route->lang)
-            ->where('kind', RouteKind::Primary->value)
-            ->pluck('path', 'entity_id');
 
         return view($route->viewName(), [
             'entity' => $entity,
             'children' => $children,
-            'paths' => $paths,
+            'lang' => $route->lang,
+        ]);
+    }
+
+    /**
+     * The section page: the entity, its live children.
+     */
+    public function section(Request $request, ResolvedRoute $route): View
+    {
+        $entity = Entity::withContents(['lang' => $route->lang])->findOrFail($route->entityId);
+        $children = Entity::withContents(['lang' => $route->lang])
+            ->childrenOf($route->entityId)
+            ->withRoute(['lang' => $route->lang])
+            ->currentlyLive()
+            ->get();
+
+        return view($route->viewName(), [
+            'entity' => $entity,
+            'children' => $children,
+            'lang' => $route->lang,
+        ]);
+    }
+
+    /**
+     * A single page: the entity contents.
+     */
+    public function page(Request $request, ResolvedRoute $route): View
+    {
+        $entity = Entity::withContents(['lang' => $route->lang])->findOrFail($route->entityId);
+
+        return view($route->viewName(), [
+            'entity' => $entity,
             'lang' => $route->lang,
         ]);
     }

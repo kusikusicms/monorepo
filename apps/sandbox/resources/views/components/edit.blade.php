@@ -11,8 +11,8 @@
         <input type="text" name="slug" placeholder="slug" value="{{$entity->contents->slug}}">
     </label>
     <label>
-        <span>Description</span>
-        <textarea name="description" placeholder="Description">{{$entity->contents->description}}</textarea>
+        <span>Body</span>
+        <textarea name="body" placeholder="Body">{{$entity->contents->body}}</textarea>
     </label>
     <button type="submit">Edit</button>
 </form>

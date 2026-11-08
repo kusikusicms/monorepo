@@ -65,12 +65,12 @@ class EntityController extends Controller
     public function update(Request $request, string $id): RedirectResponse
     {
         $entity = Entity::findOrFail($id);
-        $description = $request->input('description') ?? '';
+        $body = $request->input('body') ?? '';
         $slug = $request->input('slug') ?? '';
 
         $entity->createContents([
             'title' => $request->input('title'),
-            'description' => $description,
+            'body' => $body,
             'slug' => $slug,
         ]);
 

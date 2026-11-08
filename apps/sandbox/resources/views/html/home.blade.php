@@ -24,11 +24,7 @@
                 <ul>
                     @foreach ($children as $child)
                         <li>
-                            @if (isset($paths[$child->id]))
-                                <a href="{{ url($paths[$child->id]) }}">{{ $child->contents->title ?: $child->id }}</a>
-                            @else
-                                {{ $child->contents->title ?: $child->id }}
-                            @endif
+                            <a href="{{ $child->route }}">{{ $child->contents->title ?: $child->id }}</a>
                         </li>
                     @endforeach
                 </ul>
