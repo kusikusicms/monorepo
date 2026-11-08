@@ -6,8 +6,6 @@ use App\Models\Home;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use KusikusiCMS\Models\Entity;
-use KusikusiCMS\Routes\EntityRoute;
-use KusikusiCMS\Routes\Enums\RouteKind;
 use KusikusiCMS\Routes\Http\Controllers\EntityRouteController;
 use KusikusiCMS\Routes\Support\ResolvedRoute;
 
@@ -16,7 +14,7 @@ use KusikusiCMS\Routes\Support\ResolvedRoute;
  *
  * How a request gets here:
  * 1. The kusikusicms/routes catch-all route finds the stored path (e.g. "/section/my-page")
- *    and checks that the entity is live (published, not trashed, within its publish dates).
+ *    and checks that the entity is live (published, not trashed, within its publishing dates).
  * 2. handle() (inherited from EntityRouteController) calls the public method of this class named
  *    after the entity model in camelCase: "Home" → home(), "Section" → section(),
  *    "BlogPost" → blogPost(). Models without a method go to fallback(), which responds 404.
@@ -39,6 +37,12 @@ class WebsiteController extends EntityRouteController
 {
     /**
      * The home page: the entity, its live children.
+     *
+     * @param  Request  $request
+     * @param  ResolvedRoute  $route
+     * @noinspection PhpUnusedParameterInspection
+     *
+     * @return View
      */
     public function home(Request $request, ResolvedRoute $route): View
     {
@@ -59,6 +63,12 @@ class WebsiteController extends EntityRouteController
 
     /**
      * The section page: the entity, its live children.
+     *
+     * @param  Request  $request
+     * @param  ResolvedRoute  $route
+     * @noinspection PhpUnusedParameterInspection
+     *
+     * @return View
      */
     public function section(Request $request, ResolvedRoute $route): View
     {
@@ -78,6 +88,12 @@ class WebsiteController extends EntityRouteController
 
     /**
      * A single page: the entity contents.
+     *
+     * @param  Request  $request
+     * @param  ResolvedRoute  $route
+     * @noinspection PhpUnusedParameterInspection
+     *
+     * @return View
      */
     public function page(Request $request, ResolvedRoute $route): View
     {
