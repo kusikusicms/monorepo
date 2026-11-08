@@ -25,6 +25,7 @@ Ignored writes:
 `PathBuilder` walks up `parent_entity_id` from the entity to the root entity and joins the slugs of the same language:
 
 - The root entity (or an entity without parent when no root is configured) contributes its slug, or nothing when the slug is empty or missing: `""` gives `/`, `es` gives `/es`.
+- The configured root entity needs no slug content in the domain language (`domains.*.lang`): a missing slug counts as empty, so it always gets `/`. The route is created when the root entity is created (or its model or view changes), and by `kusikusicms:routes:install` when the root already exists. Deleting its slug content keeps `/`. Other languages need an explicit slug (for example `es`).
 - Every other entity in the chain needs a non-empty slug. Otherwise no path can be built, and the entity has no primary route in that language.
 - Slugs are trimmed of whitespace and `/`. A slug containing `/` in the middle throws `InvalidArgumentException`.
 

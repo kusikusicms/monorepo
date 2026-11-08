@@ -89,7 +89,7 @@ The `kind` column is the `KusikusiCMS\Routes\Enums\RouteKind` enum:
 | `PermanentRedirect` | `permanent-redirect` | 301 to the primary path of the same entity and language. Created automatically when a slug changes. |
 | `TemporaryRedirect` | `temporary-redirect` | 302 to the primary path of the same entity and language. |
 
-Paths are globally unique: only one entity and one language can use a path. Use an explicit slug for other language roots (for example the home slug `es` gives `/es`, `/es/blog`, ...).
+The root entity always gets `/` in the site language, with no slug content needed. Paths are globally unique: only one entity and one language can use a path. Use an explicit slug for other language roots (for example the home slug `es` gives `/es`, `/es/blog`, ...).
 
 ## Manual API
 
