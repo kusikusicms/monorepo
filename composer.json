@@ -37,7 +37,8 @@
   "scripts": {
     "test": "phpunit",
     "lint": "pint",
-    "analyse": "phpstan analyse --memory-limit=1G"
+    "analyse": "phpstan analyse --memory-limit=1G",
+    "composer:audit": "composer audit"
   },
   "config": {
     "sort-packages": true
