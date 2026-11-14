@@ -5,6 +5,7 @@ namespace KusikusiCMS\Acl;
 use Composer\InstalledVersions;
 use Illuminate\Foundation\Console\AboutCommand;
 use Illuminate\Support\ServiceProvider;
+use KusikusiCMS\Acl\Services\PermissionResolver;
 
 class AclServiceProvider extends ServiceProvider
 {
@@ -14,6 +15,7 @@ class AclServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__.'/../config/acl.php', 'kusikusicms.acl');
+        $this->app->singleton(PermissionResolver::class);
     }
 
     /**

@@ -8,4 +8,6 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     use HasRoles;
+
+    protected string $guard_name = 'web';
 }

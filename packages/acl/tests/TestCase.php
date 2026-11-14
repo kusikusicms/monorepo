@@ -40,5 +40,6 @@ class TestCase extends BaseTestCase
     protected function defineDatabaseMigrations(): void
     {
         $this->loadMigrationsFrom(default_migration_path());
+        $this->loadMigrationsFrom(__DIR__.'/Fixtures/Migrations');
     }
 }
