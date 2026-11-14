@@ -28,16 +28,22 @@ class PermissionResolver
 
     public function allowsCreate(?Authenticatable $user, Entity|string|null $parent): bool
     {
-        if ($parent === null) {
-            $candidate = $this->permissionName(EntityAction::Create, '*', '*');
+        return $this->matchingCreatePermission($user, $parent) !== null;
+    }
 
-            return $this->subjectCan($user, $candidate) || $this->subjectCan($this->guestRole(), $candidate);
+    /**
+     * Return the permission candidate that allows creating a child of the parent (null parent = a root entity).
+     */
+    public function matchingCreatePermission(?Authenticatable $user, Entity|string|null $parent): ?string
+    {
+        if ($parent === null) {
+            return $this->matchingCandidate($user, [$this->permissionName(EntityAction::Create, '*', '*')]);
         }
 
         $parentEntity = $parent instanceof Entity ? $parent : $this->findEntity($parent);
 
         if ($parentEntity === null) {
-            return false;
+            return null;
         }
 
         $parentId = (string) $parentEntity->getKey();
@@ -54,7 +60,7 @@ class PermissionResolver
             $candidates[] = $this->permissionName(EntityAction::Create, $ancestorId, EntityScope::Descendants->value);
         }
 
-        return $this->matchingCandidate($user, $candidates) !== null;
+        return $this->matchingCandidate($user, $candidates);
     }
 
     /**
@@ -84,7 +90,8 @@ class PermissionResolver
         $guardName = $this->guardName();
         $cacheKey = $guardName.'|'.$roleName;
 
-        if (! array_key_exists($cacheKey, $this->guestRoleCache)) {
+        // Only a found role is memoized, so a guest role created later in the process is picked up.
+        if (! isset($this->guestRoleCache[$cacheKey])) {
             $this->guestRoleCache[$cacheKey] = Role::query()
                 ->where('name', $roleName)
                 ->where('guard_name', $guardName)

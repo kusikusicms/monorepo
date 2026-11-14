@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use KusikusiCMS\Acl\Builders\EntityAclMacros;
+use KusikusiCMS\Acl\Console\CheckCommand;
+use KusikusiCMS\Acl\Console\CreatePermissionCommand;
+use KusikusiCMS\Acl\Console\InstallCommand;
 use KusikusiCMS\Acl\Listeners\AuthorizeEntityWrites;
 use KusikusiCMS\Acl\Policies\EntityPolicy;
 use KusikusiCMS\Acl\Services\PermissionResolver;
@@ -51,9 +54,19 @@ class AclServiceProvider extends ServiceProvider
             Event::listen(EntityContentDeleting::class, [AuthorizeEntityWrites::class, 'contentDeleting']);
         }
 
-        AboutCommand::add('KusikusiCMS ACL package', fn () => ['Version' => $this->packageVersion()]);
+        AboutCommand::add('KusikusiCMS ACL package', fn () => [
+            'Version' => $this->packageVersion(),
+            'Wildcard permissions' => config('permission.enable_wildcard_permission') ? 'enabled' : '<fg=red;options=bold>DISABLED</>',
+            'Guest role' => config('kusikusicms.acl.guest_role') ?? 'none',
+            'Event guard' => config('kusikusicms.acl.guard.enabled') ? 'enabled' : 'disabled',
+        ]);
 
         if ($this->app->runningInConsole()) {
+            $this->commands([
+                InstallCommand::class,
+                CreatePermissionCommand::class,
+                CheckCommand::class,
+            ]);
             $this->publishes([
                 __DIR__.'/../config/acl.php' => config_path('kusikusicms/acl.php'),
             ], ['kusikusicms-config', 'kusikusicms-acl-config']);
