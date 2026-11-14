@@ -17,6 +17,9 @@
         <testsuite name="admin">
             <directory>packages/admin/tests</directory>
         </testsuite>
+        <testsuite name="acl">
+            <directory>packages/acl/tests</directory>
+        </testsuite>
     </testsuites>
     <php>
         <env name="APP_ENV" value="testing"/>

@@ -17,7 +17,7 @@ Everything that cannot live in the repository files and must be configured on Gi
 3. **Create a GitHub App** (for example `kusikusicms-release`) with *Contents: write*. Install it on the monorepo and store its credentials as repository secrets:
    - `RELEASE_APP_ID`
    - `RELEASE_APP_PRIVATE_KEY`
-4. **`SPLIT_TOKEN` secret**: a fine-grained personal access token with *Contents: write* and *Workflows: write* on the split repositories only (`models`, `routes`, `media`, `admin`, `starter`), or an App token with the same scope. *Workflows: write* (classic PATs: the `workflow` scope) is required because the split repositories ship `.github/workflows/close-pull-request.yml`; without it GitHub rejects the push with `refusing to allow a Personal Access Token to create or update workflow ... without workflow scope`. The default `GITHUB_TOKEN` cannot push to other repositories.
+4. **`SPLIT_TOKEN` secret**: a fine-grained personal access token with *Contents: write* and *Workflows: write* on the split repositories only (`models`, `routes`, `media`, `admin`, `acl`, `starter`), or an App token with the same scope. *Workflows: write* (classic PATs: the `workflow` scope) is required because the split repositories ship `.github/workflows/close-pull-request.yml`; without it GitHub rejects the push with `refusing to allow a Personal Access Token to create or update workflow ... without workflow scope`. The default `GITHUB_TOKEN` cannot push to other repositories.
 5. Optional secrets `PACKAGIST_USERNAME` and `PACKAGIST_TOKEN` (API token from your Packagist profile) so the release workflow explicitly notifies Packagist. Without them, the Packagist GitHub hook is enough.
 6. **Settings → Code security**: enable Dependabot alerts and security updates, secret scanning with push protection, private vulnerability reporting, and the dependency graph. CodeQL is managed by `.github/workflows/security.yml`.
 7. **Settings → Actions → General**: default workflow permissions *Read repository contents*; do not allow GitHub Actions to create pull requests.
@@ -34,15 +34,15 @@ Everything that cannot live in the repository files and must be configured on Gi
 
 ## 2. GitHub — split repositories
 
-1. Create `kusikusicms/starter` (and any future app repository). Make sure `models`, `routes`, `media` and `admin` exist, each with a `main` branch.
+1. Create `kusikusicms/starter` (and any future app repository). Make sure `models`, `routes`, `media`, `admin` and `acl` exist, each with a `main` branch.
 2. In each split repository: set the description to "Read-only split of kusikusicms/monorepo", disable Issues, Wiki and Projects. Pull requests are closed automatically by the `close-pull-request.yml` workflow shipped from the monorepo.
 
 ## 3. Packagist
 
-1. Submit each repository: `kusikusicms/models`, `routes`, `media`, `admin` and, when ready, `starter`.
+1. Submit each repository: `kusikusicms/models`, `routes`, `media`, `admin`, `acl` and, when ready, `starter`.
 2. Enable the GitHub integration (webhook) so Packagist updates automatically when tags are pushed. `type: project` packages such as the starter work with `composer create-project`.
 3. Clean up or abandon old `v1.x` versions if needed. No `12.x` line was ever published.
-4. Publish `models`, `media` and `admin` with the baseline (`v13.0.0`). `routes` is not part of the baseline because `packages/routes` did not exist in `v13.0.0`, so `kusikusicms/routes` is first published with the next regular release (`v13.2.0`, see section 5). `routes` requires `kusikusicms/models ^13.0`, so the models package must already be published at `13.0.0` before the routes release. Only then set `"publish": true` for `starter` in `monorepo.json`, because the starter requires `kusikusicms/* ^13.0`.
+4. Publish `models`, `media` and `admin` with the baseline (`v13.0.0`). `routes` and `acl` are not part of the baseline because their package directories did not exist in `v13.0.0`; `routes` is first published with the next regular release (`v13.2.0`, see section 5), and ACL is published with the first regular release after its split repository is set up. Both require `kusikusicms/models ^13.0`, so the models package must already be published at `13.0.0`. Only then set `"publish": true` for `starter` in `monorepo.json`, because the starter requires `kusikusicms/* ^13.0`.
 
 ## 4. AI code review (optional)
 
@@ -56,6 +56,7 @@ Everything that cannot live in the repository files and must be configured on Gi
 3. Run **Release** without `dry_run`.
 4. Confirm the new tag and versions on the split repositories and Packagist.
 5. First release only: this release publishes `kusikusicms/routes` for the first time. Check that the `routes` split repository exists with a `main` branch, that its `SPLIT_TOKEN` access is in place, and that `kusikusicms/routes` is registered on Packagist. Then confirm the `routes` 13.2.0 version and that it resolves `kusikusicms/models` from Packagist. If the `routes` split fails, fix the external setup and re-run **Monorepo Split** with `tag: v13.2.0`.
+6. ACL first release: before the first release that includes `kusikusicms/acl`, create its split repository, grant `SPLIT_TOKEN` access, and register it on Packagist. Verify that ACL resolves `kusikusicms/models ^13.0` and `spatie/laravel-permission ^8.0` from Packagist.
 
 
 ## 6. Publishing a new package (reference for future packages)
