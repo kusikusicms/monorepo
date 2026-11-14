@@ -8,6 +8,7 @@ KusikusiCMS brings CMS features to Laravel projects the standard Laravel way: Co
 | [`kusikusicms/routes`](packages/routes) | Run-time entity routes: slug paths, redirects and a catch-all resolver |
 | [`kusikusicms/media`](packages/media) | Media manager |
 | [`kusikusicms/admin`](packages/admin) | Admin UI for managing content |
+| [`kusikusicms/acl`](packages/acl) | Entity permissions (view, create, update, delete per branch) on Spatie Laravel Permission |
 
 ## Installation
 
