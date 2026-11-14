@@ -7,6 +7,7 @@ use Illuminate\Foundation\Console\AboutCommand;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use KusikusiCMS\Acl\Builders\EntityAclMacros;
 use KusikusiCMS\Acl\Listeners\AuthorizeEntityWrites;
 use KusikusiCMS\Acl\Policies\EntityPolicy;
 use KusikusiCMS\Acl\Services\PermissionResolver;
@@ -35,6 +36,7 @@ class AclServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        EntityAclMacros::register();
         Gate::policy(Entity::class, EntityPolicy::class);
         Event::listen(EntitySaved::class, function (): void {
             $this->app->make(PermissionResolver::class)->clearCache();
