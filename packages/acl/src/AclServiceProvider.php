@@ -4,8 +4,20 @@ namespace KusikusiCMS\Acl;
 
 use Composer\InstalledVersions;
 use Illuminate\Foundation\Console\AboutCommand;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use KusikusiCMS\Acl\Listeners\AuthorizeEntityWrites;
+use KusikusiCMS\Acl\Policies\EntityPolicy;
 use KusikusiCMS\Acl\Services\PermissionResolver;
+use KusikusiCMS\Models\Entity;
+use KusikusiCMS\Models\Events\EntityContentDeleting;
+use KusikusiCMS\Models\Events\EntityContentSaving;
+use KusikusiCMS\Models\Events\EntityCreating;
+use KusikusiCMS\Models\Events\EntityDeleting;
+use KusikusiCMS\Models\Events\EntityRestoring;
+use KusikusiCMS\Models\Events\EntitySaved;
+use KusikusiCMS\Models\Events\EntityUpdating;
 
 class AclServiceProvider extends ServiceProvider
 {
@@ -23,6 +35,20 @@ class AclServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::policy(Entity::class, EntityPolicy::class);
+        Event::listen(EntitySaved::class, function (): void {
+            $this->app->make(PermissionResolver::class)->clearCache();
+        });
+
+        if (config('kusikusicms.acl.guard.enabled', false)) {
+            Event::listen(EntityCreating::class, [AuthorizeEntityWrites::class, 'creating']);
+            Event::listen(EntityUpdating::class, [AuthorizeEntityWrites::class, 'updating']);
+            Event::listen(EntityDeleting::class, [AuthorizeEntityWrites::class, 'deleting']);
+            Event::listen(EntityRestoring::class, [AuthorizeEntityWrites::class, 'restoring']);
+            Event::listen(EntityContentSaving::class, [AuthorizeEntityWrites::class, 'contentSaving']);
+            Event::listen(EntityContentDeleting::class, [AuthorizeEntityWrites::class, 'contentDeleting']);
+        }
+
         AboutCommand::add('KusikusiCMS ACL package', fn () => ['Version' => $this->packageVersion()]);
 
         if ($this->app->runningInConsole()) {

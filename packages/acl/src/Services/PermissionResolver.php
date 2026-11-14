@@ -94,6 +94,35 @@ class PermissionResolver
         return $this->guestRoleCache[$cacheKey];
     }
 
+    public function hasAnyPermission(?Authenticatable $user, EntityAction $action): bool
+    {
+        foreach ([$user, $this->guestRole()] as $subject) {
+            if ($subject === null || ! method_exists($subject, 'getAllPermissions')) {
+                continue;
+            }
+
+            foreach ($subject->getAllPermissions() as $permission) {
+                if (data_get($permission, 'guard_name') !== $this->guardName()) {
+                    continue;
+                }
+
+                $name = data_get($permission, 'name');
+
+                if (is_string($name) && EntityPermission::parse($name)?->allows($action)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public function clearCache(): void
+    {
+        $this->ancestorCache = [];
+        $this->entityCache = [];
+    }
+
     /**
      * @return list<string>
      */
