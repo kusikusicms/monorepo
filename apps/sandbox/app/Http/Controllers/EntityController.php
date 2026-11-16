@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 use KusikusiCMS\Models\Entity;
 
@@ -14,9 +15,12 @@ class EntityController extends Controller
         $entity = Entity::query()
             ->select(['id', 'parent_entity_id', 'model', 'props', 'publish_at', 'unpublish_at'])
             ->withContents()
-            ->find($id);
+            ->findOrFail($id);
+        Gate::authorize('view', $entity);
+
         $children = Entity::query()
             ->select('id', 'model')
+            ->whereUserCan('view')
             ->childrenOf($id)
             ->withContents()
             ->orderByContent('title', 'asc')
@@ -36,6 +40,10 @@ class EntityController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $parentId = $request->input('parent_entity_id') ?: null;
+        // Creating is checked on the parent; without a parent it needs the full wildcard.
+        Gate::authorize('create', $parentId ? [Entity::class, $parentId] : Entity::class);
+
         $entity = Entity::factory()
             ->live()
             ->when($request->input('id'), function ($q) use ($request) {
@@ -65,6 +73,7 @@ class EntityController extends Controller
     public function update(Request $request, string $id): RedirectResponse
     {
         $entity = Entity::findOrFail($id);
+        Gate::authorize('update', $entity);
         $body = $request->input('body') ?? '';
         $slug = $request->input('slug') ?? '';
 
@@ -81,6 +90,7 @@ class EntityController extends Controller
     public function destroy(string $id): RedirectResponse
     {
         $entity = Entity::findOrFail($id);
+        Gate::authorize('delete', $entity);
         $parent_entity_id = $entity->parent_entity_id;
         $entity->delete();
 
