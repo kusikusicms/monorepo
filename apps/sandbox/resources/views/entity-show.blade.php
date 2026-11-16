@@ -2,6 +2,10 @@
     <x-slot:title>
         Entity: {{ $entity->contents->title }}
     </x-slot:title>
+    <form method="POST" action="{{ route('logout') }}">
+        @csrf
+        <button type="submit" style="margin-left: 0">Logout</button>
+    </form>
     <pre>{{ $entity->toJSON(JSON_PRETTY_PRINT) }}</pre>
     <x-edit :entity="$entity"></x-edit>
     <x-create :parent-entity-id="$entity->id"></x-create>

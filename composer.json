@@ -10,7 +10,8 @@
     "illuminate/routing": "^13.0",
     "illuminate/support": "^13.0",
     "illuminate/view": "^13.0",
-    "pugx/shortid-php": "^1.3"
+    "pugx/shortid-php": "^1.3",
+    "spatie/laravel-permission": "^8.0"
   },
   "require-dev": {
     "larastan/larastan": "^3.13",
@@ -23,7 +24,8 @@
       "KusikusiCMS\\Models\\": "packages/models/src/",
       "KusikusiCMS\\Routes\\": "packages/routes/src/",
       "KusikusiCMS\\Media\\": "packages/media/src/",
-      "KusikusiCMS\\Admin\\": "packages/admin/src/"
+      "KusikusiCMS\\Admin\\": "packages/admin/src/",
+      "KusikusiCMS\\Acl\\": "packages/acl/src/"
     }
   },
   "autoload-dev": {
@@ -31,7 +33,8 @@
       "KusikusiCMS\\Models\\Tests\\": "packages/models/tests/",
       "KusikusiCMS\\Routes\\Tests\\": "packages/routes/tests/",
       "KusikusiCMS\\Media\\Tests\\": "packages/media/tests/",
-      "KusikusiCMS\\Admin\\Tests\\": "packages/admin/tests/"
+      "KusikusiCMS\\Admin\\Tests\\": "packages/admin/tests/",
+      "KusikusiCMS\\Acl\\Tests\\": "packages/acl/tests/"
     }
   },
   "scripts": {

@@ -10,6 +10,7 @@ export default {
         'routes',
         'media',
         'admin',
+        'acl',
         'sandbox',
         'starter',
         'monorepo',

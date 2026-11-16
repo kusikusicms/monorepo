@@ -13,6 +13,7 @@ class HomeController extends Controller
     public function index(): View
     {
         $entities = Entity::withContents(['lang' => 'en'])
+            ->whereUserCan('view')
             ->where('parent_entity_id', null)
             ->currentlyLive()->get();
 

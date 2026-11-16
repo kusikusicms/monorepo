@@ -2,18 +2,20 @@
 
 namespace Tests\Feature;
 
-// use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\User;
 use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
-    /**
-     * A basic test example.
-     */
-    public function test_the_application_returns_a_successful_response(): void
+    public function test_guests_are_redirected_to_the_login_page(): void
     {
-        $response = $this->get('/entities');
+        $this->get('/entities')->assertRedirect(route('login'));
+    }
 
-        $response->assertStatus(200);
+    public function test_the_admin_gets_a_successful_response(): void
+    {
+        $admin = User::query()->where('name', 'admin')->firstOrFail();
+
+        $this->actingAs($admin)->get('/entities')->assertStatus(200);
     }
 }

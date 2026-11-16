@@ -34,7 +34,9 @@
 </head>
 <body class="">
 <header class="">
-    <a href="/entities">Root</a>
+    @auth
+        <a href="/entities">Root</a>
+    @endauth
     <h1>{{ $title }}</h1>
 </header>
 <main>
