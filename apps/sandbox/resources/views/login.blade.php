@@ -10,4 +10,5 @@
         @csrf
         <button type="submit" style="margin-left: 0">Login</button>
     </form>
+    <p>Or return to the <a href="/">public</a> page</p>
 </x-layout>
