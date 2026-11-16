@@ -42,6 +42,7 @@ jobs:
             models
             routes
             media
+            acl
             admin
             sandbox
             starter
