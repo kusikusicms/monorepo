@@ -1,3 +1,9 @@
+## [13.3.0](https://github.com/kusikusicms/monorepo/compare/v13.2.0...v13.3.0) (2026-11-16)
+
+### Features
+
+* **acl:** add entity permissions package ([#33](https://github.com/kusikusicms/monorepo/issues/33)) ([59c8ac1](https://github.com/kusikusicms/monorepo/commit/59c8ac17d55a2e65bff5a02f12f578df01be2e85))
+
 ## [13.2.0](https://github.com/kusikusicms/monorepo/compare/v13.1.0...v13.2.0) (2026-11-08)
 
 ### Features
