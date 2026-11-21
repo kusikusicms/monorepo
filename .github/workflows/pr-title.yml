@@ -44,7 +44,7 @@ jobs:
             media
             acl
             admin
-            acl
+            api
             sandbox
             starter
             monorepo
