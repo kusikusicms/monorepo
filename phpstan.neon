@@ -10,6 +10,7 @@ parameters:
         - packages/media/src
         - packages/admin/src
         - packages/acl/src
+        - packages/api/src
     excludePaths:
         - packages/*/vendor
     tmpDir: .phpstan.cache
