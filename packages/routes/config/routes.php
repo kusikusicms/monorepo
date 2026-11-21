@@ -50,4 +50,11 @@ return [
     'formats' => ['html', 'rss', 'amp', 'json', 'xml'],
 
     'default_format' => 'html',
+
+    /*
+     * Contribution to kusikusicms/api (route field, entity routes, path resolution), used only when it is installed.
+     */
+    'api' => [
+        'enabled' => env('KUSIKUSICMS_ROUTES_API', true),
+    ],
 ];

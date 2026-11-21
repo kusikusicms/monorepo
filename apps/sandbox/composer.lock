@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c3d99e7f5673bbc0ddac61d90a2e6051",
+    "content-hash": "fe3d60a4f6a6e6b1631484ec492af414",
     "packages": [
         {
             "name": "brick/math",
@@ -1117,7 +1117,7 @@
             "dist": {
                 "type": "path",
                 "url": "../../packages/acl",
-                "reference": "e40cb226d7b18533cded97916f44571eacc133da"
+                "reference": "07e483e913c86700ad061d4b519a95e715b4ee8b"
             },
             "require": {
                 "illuminate/auth": "^13.0",
@@ -1132,6 +1132,9 @@
             "require-dev": {
                 "orchestra/testbench": "^11.0",
                 "phpunit/phpunit": "^13.0"
+            },
+            "suggest": {
+                "kusikusicms/api": "Adds `can` flags, filtered entity lists and GET /me/permissions to the KusikusiCMS JSON API."
             },
             "type": "library",
             "extra": {
@@ -1206,6 +1209,60 @@
                 "MIT"
             ],
             "description": "Admin UI for managing content in KusikusiCMS.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "kusikusicms/api",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "../../packages/api",
+                "reference": "e90e66252aba0dbd4e155fd81f0b57cef1d2eeb7"
+            },
+            "require": {
+                "illuminate/auth": "^13.0",
+                "illuminate/console": "^13.0",
+                "illuminate/database": "^13.0",
+                "illuminate/http": "^13.0",
+                "illuminate/routing": "^13.0",
+                "illuminate/support": "^13.0",
+                "kusikusicms/acl": "^13.0",
+                "kusikusicms/models": "^13.0",
+                "laravel/sanctum": "^4.0",
+                "php": "^8.4"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^11.0",
+                "phpunit/phpunit": "^13.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "KusikusiCMS\\Api\\ApiServiceProvider"
+                    ]
+                },
+                "branch-alias": {
+                    "dev-main": "13.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "KusikusiCMS\\Api\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "KusikusiCMS\\Api\\Tests\\": "tests/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Versioned JSON API for KusikusiCMS: token and SPA auth, entities, capabilities and extension hooks.",
             "transport-options": {
                 "symlink": true,
                 "relative": true
@@ -1312,7 +1369,7 @@
             "dist": {
                 "type": "path",
                 "url": "../../packages/routes",
-                "reference": "abe863892066c4e35cbc229f69705b6d0b946fc4"
+                "reference": "1bc57b2903fc05bba3f4c5eab2353beb3d818036"
             },
             "require": {
                 "illuminate/console": "^13.0",
@@ -1328,6 +1385,9 @@
             "require-dev": {
                 "orchestra/testbench": "^11.0",
                 "phpunit/phpunit": "^13.0"
+            },
+            "suggest": {
+                "kusikusicms/api": "Adds the route field, entity route endpoints and path resolution to the KusikusiCMS JSON API."
             },
             "type": "library",
             "extra": {
@@ -1648,6 +1708,70 @@
                 "source": "https://github.com/laravel/prompts/tree/v0.3.27"
             },
             "time": "2026-11-09T16:07:10+00:00"
+        },
+        {
+            "name": "laravel/sanctum",
+            "version": "v4.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel/sanctum.git",
+                "reference": "a8f7ef1bd5f8b78159effa1ffae851b0dc72cd8b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel/sanctum/zipball/a8f7ef1bd5f8b78159effa1ffae851b0dc72cd8b",
+                "reference": "a8f7ef1bd5f8b78159effa1ffae851b0dc72cd8b",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "illuminate/console": "^12.0|^13.0",
+                "illuminate/contracts": "^12.0|^13.0",
+                "illuminate/database": "^12.0|^13.0",
+                "illuminate/support": "^12.0|^13.0",
+                "php": "^8.2",
+                "symfony/console": "^7.0|^8.0"
+            },
+            "require-dev": {
+                "jasonmccreary/double": "^1.0",
+                "mockery/mockery": "^1.6",
+                "orchestra/testbench": "^10.8|^11.0",
+                "phpstan/phpstan": "^1.10"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Laravel\\Sanctum\\SanctumServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Laravel\\Sanctum\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Taylor Otwell",
+                    "email": "taylor@laravel.com"
+                }
+            ],
+            "description": "Laravel Sanctum provides a featherweight authentication system for SPAs and simple APIs.",
+            "keywords": [
+                "auth",
+                "laravel",
+                "sanctum"
+            ],
+            "support": {
+                "issues": "https://github.com/laravel/sanctum/issues",
+                "source": "https://github.com/laravel/sanctum"
+            },
+            "time": "2026-11-11T14:11:40+00:00"
         },
         {
             "name": "laravel/serializable-closure",
@@ -5648,16 +5772,16 @@
         },
         {
             "name": "symfony/polyfill-php85",
-            "version": "v1.43.0",
+            "version": "v1.44.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-php85.git",
-                "reference": "86a42cbcc07adc331481a5ab310a4024bfc227f6"
+                "reference": "94c794cb5ba51784bc259f11e9f128593297d8dc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-php85/zipball/86a42cbcc07adc331481a5ab310a4024bfc227f6",
-                "reference": "86a42cbcc07adc331481a5ab310a4024bfc227f6",
+                "url": "https://api.github.com/repos/symfony/polyfill-php85/zipball/94c794cb5ba51784bc259f11e9f128593297d8dc",
+                "reference": "94c794cb5ba51784bc259f11e9f128593297d8dc",
                 "shasum": ""
             },
             "require": {
@@ -5704,7 +5828,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-php85/tree/v1.43.0"
+                "source": "https://github.com/symfony/polyfill-php85/tree/v1.44.0"
             },
             "funding": [
                 {
@@ -5724,7 +5848,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-09-25T15:46:47+00:00"
+            "time": "2026-10-30T15:20:09+00:00"
         },
         {
             "name": "symfony/polyfill-php86",
@@ -9329,6 +9453,7 @@
     "stability-flags": {
         "kusikusicms/acl": 20,
         "kusikusicms/admin": 20,
+        "kusikusicms/api": 20,
         "kusikusicms/media": 20,
         "kusikusicms/models": 20,
         "kusikusicms/routes": 20

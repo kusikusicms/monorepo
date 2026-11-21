@@ -141,6 +141,10 @@ See [docs/request-handling.md](docs/request-handling.md).
 
 See [docs/errors.md](docs/errors.md).
 
+## JSON API
+
+With [`kusikusicms/api`](https://github.com/kusikusicms/api) installed, entities get a `route` field and the API gets route endpoints (`/entities/{id}/routes`, `/routes/{id}`, `/routes/resolve`), authorized with the `KusikusiCMS\Routes\Abilities` constants. See [docs/api.md](docs/api.md).
+
 ## Testing
 
 ```shell
@@ -157,6 +161,7 @@ See [docs/testing.md](docs/testing.md).
 - [docs/request-handling.md](docs/request-handling.md)
 - [docs/errors.md](docs/errors.md)
 - [docs/testing.md](docs/testing.md)
+- [docs/api.md](docs/api.md)
 - [docs/design-decisions.md](docs/design-decisions.md)
 
 ## License

@@ -6,11 +6,14 @@ use Composer\InstalledVersions;
 use Illuminate\Foundation\Console\AboutCommand;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use KusikusiCMS\Api\Api;
+use KusikusiCMS\Api\Support\Capabilities;
 use KusikusiCMS\Models\Events\EntityContentDeleted;
 use KusikusiCMS\Models\Events\EntityContentSaved;
 use KusikusiCMS\Models\Events\EntityContentSaving;
 use KusikusiCMS\Models\Events\EntitySaved;
 use KusikusiCMS\Models\Events\EntitySaving;
+use KusikusiCMS\Routes\Api\RoutesApiContribution;
 use KusikusiCMS\Routes\Builders\EntityRouteMacros;
 use KusikusiCMS\Routes\Console\InstallCommand;
 use KusikusiCMS\Routes\Listeners\SyncEntityRoutes;
@@ -41,6 +44,11 @@ class RoutesServiceProvider extends ServiceProvider
         Event::listen([EntityContentSaved::class, EntityContentDeleted::class], SyncSlugRoutes::class);
         Event::listen(EntitySaving::class, [SyncEntityRoutes::class, 'validate']);
         Event::listen(EntitySaved::class, [SyncEntityRoutes::class, 'handle']);
+        // The api package is suggested, never required: contribute only when it is installed and its provider is loaded.
+        if (class_exists(Api::class) && $this->app->bound(Capabilities::class) && config('kusikusicms.routes.api.enabled', true)) {
+            RoutesApiContribution::register($this->packageVersion());
+        }
+
         AboutCommand::add('KusikusiCMS routes package', fn () => ['Version' => $this->packageVersion()]);
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         if (config('kusikusicms.routes.catch_all.enabled', true)) {
