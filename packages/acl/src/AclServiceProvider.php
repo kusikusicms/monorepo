@@ -7,6 +7,7 @@ use Illuminate\Foundation\Console\AboutCommand;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use KusikusiCMS\Acl\Api\AclApiContribution;
 use KusikusiCMS\Acl\Builders\EntityAclMacros;
 use KusikusiCMS\Acl\Console\CheckCommand;
 use KusikusiCMS\Acl\Console\CreatePermissionCommand;
@@ -14,6 +15,8 @@ use KusikusiCMS\Acl\Console\InstallCommand;
 use KusikusiCMS\Acl\Listeners\AuthorizeEntityWrites;
 use KusikusiCMS\Acl\Policies\EntityPolicy;
 use KusikusiCMS\Acl\Services\PermissionResolver;
+use KusikusiCMS\Api\Api;
+use KusikusiCMS\Api\Support\Capabilities;
 use KusikusiCMS\Models\Entity;
 use KusikusiCMS\Models\Events\EntityContentDeleting;
 use KusikusiCMS\Models\Events\EntityContentSaving;
@@ -52,6 +55,11 @@ class AclServiceProvider extends ServiceProvider
             Event::listen(EntityRestoring::class, [AuthorizeEntityWrites::class, 'restoring']);
             Event::listen(EntityContentSaving::class, [AuthorizeEntityWrites::class, 'contentSaving']);
             Event::listen(EntityContentDeleting::class, [AuthorizeEntityWrites::class, 'contentDeleting']);
+        }
+
+        // The api package is suggested, never required: contribute only when it is installed and its provider is loaded.
+        if (class_exists(Api::class) && $this->app->bound(Capabilities::class) && config('kusikusicms.acl.api.enabled', true)) {
+            AclApiContribution::register($this->packageVersion());
         }
 
         AboutCommand::add('KusikusiCMS ACL package', fn () => [

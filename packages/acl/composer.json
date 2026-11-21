@@ -13,6 +13,9 @@
     "laravel/prompts": "^0.3.25",
     "spatie/laravel-permission": "^8.0"
   },
+  "suggest": {
+    "kusikusicms/api": "Adds `can` flags, filtered entity lists and GET /me/permissions to the KusikusiCMS JSON API."
+  },
   "autoload": {
     "psr-4": {
       "KusikusiCMS\\Acl\\": "src/"

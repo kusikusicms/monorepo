@@ -7,4 +7,8 @@ return [
     'guard' => [
         'enabled' => env('KUSIKUSICMS_ACL_GUARD', false),
     ],
+    // Contribution to kusikusicms/api (`can` flags, filtered lists, GET /me/permissions), used only when it is installed.
+    'api' => [
+        'enabled' => env('KUSIKUSICMS_ACL_API', true),
+    ],
 ];

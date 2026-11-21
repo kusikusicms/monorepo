@@ -57,6 +57,7 @@ Then check permissions the Laravel way:
 | Optional guard that blocks unauthorized writes in HTTP requests | `KUSIKUSICMS_ACL_GUARD=true` | [Enforcement](docs/enforcement.md#the-event-guard) |
 | Filtered lists in one query | `Entity::query()->whereUserCan('view')->paginate()` | [Querying](docs/querying.md) |
 | Artisan commands | `php artisan k:acl:check update post1 --user=1` | [Commands](docs/commands.md) |
+| `can` flags, filtered lists and `GET /me/permissions` in the JSON API | with `kusikusicms/api` installed | [JSON API](docs/api.md) |
 
 A short example of each:
 
@@ -88,6 +89,7 @@ php artisan k:acl:check update post1 --user=1
 - [Enforcement](docs/enforcement.md): controllers, Blade, middleware, form requests, API resources and the event guard.
 - [Querying](docs/querying.md): `whereUserCan()` with the other entity filters and pagination.
 - [Commands](docs/commands.md): every `k:acl:*` command and the related Spatie commands.
+- [JSON API](docs/api.md): what acl adds to `kusikusicms/api` when it is installed.
 - [Recipes](docs/recipes.md): public sites, members-only sections, blog authors, editors, private branches, testing.
 - [Design decisions](docs/design-decisions.md): why Spatie, why a policy plus a guard, and the limits.
 

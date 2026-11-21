@@ -30,7 +30,9 @@ scope    self | children | descendants | *  (descendants = depth >= 1, never the
 | `AclServiceProvider` | merges `kusikusicms.acl`, resolver singleton, `Gate::policy`, macros, guard listeners (only when `guard.enabled`), `EntitySaved` cache flush, commands, `AboutCommand` |
 | `Enums\EntityAction`, `Enums\EntityScope` | the action and scope values |
 | `Support\EntityPermission` | immutable value object: `make()`, `parse()`, `name()`, `allows()`; throws `InvalidEntityPermissionException` |
-| `Services\PermissionResolver` | single checks: builds candidate names from the tree, asks Spatie `checkPermissionTo()` on the user and the guest role; `allows`, `allowsCreate`, `matchingPermission`, `matchingCreatePermission`, `hasAnyPermission`, `guestRole`, `clearCache` |
+| `Services\PermissionResolver` | single checks: builds candidate names from the tree, asks Spatie `checkPermissionTo()` on the user and the guest role; `allows`, `allowsCreate`, `matchingPermission`, `matchingCreatePermission`, `hasAnyPermission`, `guestRole`, `clearCache`; `primeAncestors(ids)` loads many ancestor lists in one query; `batch(fn)` remembers a missing guest role only while the batch runs |
+| `Api\AclApiContribution` | registered from the provider only when `KusikusiCMS\Api\Api` exists, its provider is loaded and `kusikusicms.acl.api.enabled`: `can` flags hook (primes ancestors and runs one `batch()` per response), index modifier `whereUserCan('view')`, `routes/api.php`, the `acl` capability, and handlers for `KusikusiCMS\Routes\Abilities` (mapped to `update`) when routes is installed |
+| `Api\Http\Controllers\MePermissionsController` | `GET /me/permissions`: user and guest entity permissions parsed with `EntityPermission` |
 | `Support\PermissionParser` | list filtering: reads the user's and guest's permission names and folds them into `all`, `non_root`, `self_ids`, `children_ids`, `descendant_ids` |
 | `Builders\EntityAclQueries` + `EntityAclMacros` | the `whereUserCan()` mixin on `EntityBuilder`; public methods return closures (each public method becomes a macro, keep helpers elsewhere, e.g. `Support\CaseSensitiveWhereIn`) |
 | `Policies\EntityPolicy` | Laravel abilities, nullable user (works for guests) |
@@ -42,7 +44,8 @@ scope    self | children | descendants | *  (descendants = depth >= 1, never the
 
 - **The parser and the Spatie matcher must agree.** Any grammar change goes to `EntityPermission`, `PermissionResolver::candidatesFor()` and `PermissionParser`/`EntityAclQueries` together; `DocumentationExamplesTest::test_lists_and_single_checks_agree_for_every_documented_permission` and `EntityAclQueriesTest` must stay green.
 - **Create is checked on the parent**, everywhere (resolver, policy, guard, check command).
-- **Guest = everyone**: every check ORs the user with the guest role. Never memoize a missing guest role (a role created later in the process must be picked up).
+- **Guest = everyone**: every check ORs the user with the guest role. Never memoize a missing guest role (a role created later in the process must be picked up), except inside `PermissionResolver::batch()`, which forgets it when the batch ends.
+- **api is optional**: `kusikusicms/api` is only in `suggest`. Every reference to `KusikusiCMS\Api\*` or `KusikusiCMS\Routes\*` lives in `src/Api/` and runs only behind the `class_exists` checks.
 - **The guard is HTTP-only and opt-in**: `config('kusikusicms.acl.guard.enabled')`, `! app()->runningInConsole()` and `! Acl::isAuthorizationBypassed()`.
 - **Never use mass query writes** (`query()->update()`, `upsert()`) in package code for entities or contents: they skip the events the guard relies on.
 - **`whereUserCan()` never changes the selected columns** and adds one grouped `where`; it throws `LogicException` on non-Entity builders.
@@ -65,6 +68,8 @@ vendor/bin/phpunit --testsuite acl --filter Resolver
 ```
 
 Orchestra Testbench, SQLite in memory, Spatie migrations loaded from the vendor stub (`tests/Fixtures/Migrations`), wildcards on, fixture `User` with `HasRoles` (`guard_name = web`) and `UserWithoutRoles`. Simulate HTTP for the guard by setting `Application::$isRunningInConsole` to false (see `AuthorizeEntityWritesTest`). Install tests write into the Testbench skeleton and clean up in `setUp`/`tearDown`.
+
+API contribution tests live in `tests/Api` (`ApiTestCase` loads Sanctum and the api provider and flushes the api hooks in `tearDown`).
 
 ## Quality gate
 
