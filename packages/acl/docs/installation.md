@@ -43,6 +43,7 @@ It asks:
 | Create a guest role whose permissions apply to everyone? | yes | `--guest-role=guest` (`none` disables it) |
 | Which permissions does the guest role have? | `entities.view.*.*` | `--guest-permissions="entities.view.*.*"` (separated by `\|`) |
 | Enable the event guard? | no | `--event-guard=yes\|no` |
+| Create an admin role that can manage roles and user roles? | no | `--admin-role=admin` (`none`, the default, skips it) |
 
 It then:
 
@@ -50,7 +51,8 @@ It then:
 2. publishes `database/migrations/*_create_permission_tables.php` when missing, and changes the user id columns to `uuid`/`ulid` if you chose so;
 3. writes `config/kusikusicms/acl.php` with your answers (skipped when it exists, unless `--force`);
 4. creates the guest role and its permissions when the permission tables exist;
-5. warns if your user model lacks `HasRoles`.
+5. with an admin role, creates the manage permission (`kusikusicms.acl.manage`) and a role holding it, used by the [access management endpoints](api.md#managing-access);
+6. warns if your user model lacks `HasRoles`.
 
 ### Non-interactively (CI, scripts)
 
@@ -101,8 +103,16 @@ return [
     'prefix' => 'entities',           // first part of every entity permission
     'guard_name' => 'web',            // guard of the permissions and roles checked
     'guest_role' => 'guest',          // role applied to everyone; null disables it
+    'manage_permission' => 'kusikusicms.acl.manage', // lets a user manage roles and user roles, see api.md
     'guard' => [
         'enabled' => env('KUSIKUSICMS_ACL_GUARD', false), // the event guard, see enforcement.md
+    ],
+    'api' => [                        // used only when kusikusicms/api is installed, see api.md
+        'enabled' => env('KUSIKUSICMS_ACL_API', true),
+        'users' => [
+            'enabled' => env('KUSIKUSICMS_ACL_API_USERS', true),
+            'search_columns' => ['name', 'email'],
+        ],
     ],
 ];
 ```

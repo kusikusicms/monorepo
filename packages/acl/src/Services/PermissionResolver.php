@@ -199,6 +199,16 @@ class PermissionResolver
         }
     }
 
+    /**
+     * The ancestor ids of an entity, nearest first (cached; use primeAncestors() to load many at once).
+     *
+     * @return list<string>
+     */
+    public function ancestorIdsOf(string $entityId): array
+    {
+        return $this->ancestorIds($entityId);
+    }
+
     public function clearCache(): void
     {
         $this->ancestorCache = [];

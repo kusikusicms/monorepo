@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\File;
 use KusikusiCMS\Acl\Tests\Fixtures\User;
 use KusikusiCMS\Acl\Tests\Fixtures\UserWithoutRoles;
 use KusikusiCMS\Acl\Tests\TestCase;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class InstallCommandTest extends TestCase
@@ -108,9 +109,26 @@ class InstallCommandTest extends TestCase
             ->expectsQuestion('What is the name of the guest role?', 'guest')
             ->expectsQuestion('Which permissions does the guest role have? (separated by "|")', 'entities.view')
             ->expectsConfirmation('Enable the event guard? It blocks unauthorized entity writes during HTTP requests.', 'no')
+            ->expectsConfirmation('Create an admin role that can manage roles and user roles?', 'no')
             ->assertSuccessful();
 
         $this->assertSame(['entities.view'], Role::findByName('guest', 'web')->permissions->pluck('name')->all());
+    }
+
+    public function test_admin_role_option_seeds_the_manage_permission(): void
+    {
+        $this->artisan('k:acl:install', ['--admin-role' => 'admin', '--no-interaction' => true])->assertSuccessful();
+
+        $admin = Role::findByName('admin', 'web');
+        $this->assertSame(['kusikusicms.acl.manage'], $admin->permissions->pluck('name')->all());
+    }
+
+    public function test_without_the_admin_role_option_no_admin_role_is_created(): void
+    {
+        $this->artisan('k:acl:install', ['--no-interaction' => true])->assertSuccessful();
+
+        $this->assertSame(0, Role::query()->where('name', 'admin')->count());
+        $this->assertSame(0, Permission::query()->where('name', 'kusikusicms.acl.manage')->count());
     }
 
     public function test_invalid_options_fail(): void

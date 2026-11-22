@@ -5,6 +5,7 @@ namespace KusikusiCMS\Acl\Api\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use KusikusiCMS\Acl\Acl;
 use KusikusiCMS\Acl\Exceptions\InvalidEntityPermissionException;
 use KusikusiCMS\Acl\Services\PermissionResolver;
 use KusikusiCMS\Acl\Support\EntityPermission;
@@ -20,6 +21,7 @@ class MePermissionsController extends Controller
             'data' => [
                 'user' => $this->entityPermissions($request->user()),
                 'guest' => $this->entityPermissions($resolver->guestRole()),
+                'can_manage' => Acl::canManage($request->user()),
             ],
         ]);
     }

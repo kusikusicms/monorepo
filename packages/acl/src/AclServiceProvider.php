@@ -3,6 +3,7 @@
 namespace KusikusiCMS\Acl;
 
 use Composer\InstalledVersions;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Foundation\Console\AboutCommand;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
@@ -44,6 +45,9 @@ class AclServiceProvider extends ServiceProvider
     {
         EntityAclMacros::register();
         Gate::policy(Entity::class, EntityPolicy::class);
+        foreach (Abilities::all() as $ability) {
+            Gate::define($ability, fn (?Authenticatable $user): bool => Acl::canManage($user));
+        }
         Event::listen(EntitySaved::class, function (): void {
             $this->app->make(PermissionResolver::class)->clearCache();
         });

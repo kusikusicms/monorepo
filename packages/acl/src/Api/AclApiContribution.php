@@ -5,10 +5,14 @@ namespace KusikusiCMS\Acl\Api;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
+use KusikusiCMS\Acl\Acl;
+use KusikusiCMS\Acl\Exceptions\LastManagerException;
+use KusikusiCMS\Acl\Exceptions\ProtectedRoleException;
 use KusikusiCMS\Acl\Services\PermissionResolver;
 use KusikusiCMS\Api\Api;
 use KusikusiCMS\Api\Http\Resources\EntityResource;
 use KusikusiCMS\Api\Services\EntityQuery;
+use KusikusiCMS\Api\Support\ApiErrorRenderer;
 use KusikusiCMS\Models\Builders\EntityBuilder;
 use KusikusiCMS\Models\Entity;
 use KusikusiCMS\Routes\Abilities as RouteAbilities;
@@ -23,6 +27,9 @@ use WeakMap;
  *   PermissionResolver::batch(), so the number of queries does not grow with the page size.
  * - Entity lists are filtered with whereUserCan('view').
  * - GET /me/permissions.
+ * - Roles and role permissions management (`/roles`), behind the acl Abilities (manage permission).
+ * - User search and user roles (`/users`), when `api.users.enabled` and the user model uses HasRoles.
+ * - GET /entities/{id}/permissions: the roles' access to one entity (EntityAccessInspector).
  * - Handlers for the routes package abilities (mapped to `update` on the entity) when routes is installed.
  */
 final class AclApiContribution
@@ -49,9 +56,18 @@ final class AclApiContribution
             }
         }
 
+        ApiErrorRenderer::map(LastManagerException::class, 409, 'last_manager');
+        ApiErrorRenderer::map(ProtectedRoleException::class, 409, 'protected_role');
+
         Api::routes(fn () => require __DIR__.'/../../routes/api.php');
 
-        Api::capability('acl', $version, ['can-flags', 'filtered-lists', 'me.permissions']);
+        $features = ['can-flags', 'filtered-lists', 'me.permissions', 'roles', 'permissions.manage', 'entity-access'];
+
+        if (Acl::usersApiEnabled()) {
+            $features[] = 'users';
+        }
+
+        Api::capability('acl', $version, $features);
     }
 
     /**

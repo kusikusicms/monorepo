@@ -6,11 +6,13 @@ use Illuminate\Console\Command;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
+use KusikusiCMS\Acl\Acl;
 use KusikusiCMS\Acl\Exceptions\InvalidEntityPermissionException;
 use KusikusiCMS\Acl\Support\EntityPermission;
 use RuntimeException;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 use Spatie\Permission\PermissionServiceProvider;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -31,6 +33,7 @@ class InstallCommand extends Command
         {--guest-role= : The name of the role applied to everyone ("none" to disable, default "guest")}
         {--guest-permissions= : The guest role permissions separated by "|" (default "entities.view.*.*")}
         {--event-guard= : Enable the event guard that blocks unauthorized writes: yes or no (default "no")}
+        {--admin-role= : Create this role with the manage permission to administer roles ("none" to skip, default "none")}
         {--force : Overwrite the published ACL config}';
 
     protected $aliases = ['k:acl:install'];
@@ -58,6 +61,7 @@ class InstallCommand extends Command
         $guestRole = $this->guestRole();
         $guestPermissions = $guestRole === null ? [] : $this->guestPermissions();
         $eventGuard = $this->booleanValue('event-guard', 'Enable the event guard? It blocks unauthorized entity writes during HTTP requests.', false);
+        $adminRole = $this->adminRole();
 
         if ($guard === '' || $userIdType === null || $guestPermissions === null || $eventGuard === null) {
             return self::FAILURE;
@@ -76,6 +80,10 @@ class InstallCommand extends Command
 
         if ($guestRole !== null) {
             $this->createGuestRole($guestRole, $guestPermissions, $guard);
+        }
+
+        if ($adminRole !== null) {
+            $this->createAdminRole($adminRole, $guard);
         }
 
         $this->checkUserModel();
@@ -201,6 +209,27 @@ class InstallCommand extends Command
     }
 
     /**
+     * Create the admin role that holds the manage permission, when the permission tables exist.
+     */
+    protected function createAdminRole(string $roleName, string $guard): void
+    {
+        try {
+            if (! Schema::hasTable((string) config('permission.table_names.roles', 'roles'))) {
+                $this->components->warn("Run the migrations and this command again to create the [{$roleName}] role.");
+
+                return;
+            }
+
+            $role = Role::findOrCreate($roleName, $guard);
+            $role->givePermissionTo(Permission::findOrCreate(Acl::managePermission(), $guard));
+            app(PermissionRegistrar::class)->forgetCachedPermissions();
+            $this->components->info("Role [{$roleName}] can manage roles with [".Acl::managePermission().'].');
+        } catch (QueryException) {
+            $this->components->warn("Could not create the [{$roleName}] role (run the migrations first).");
+        }
+    }
+
+    /**
      * Warn when the user model cannot have roles and permissions.
      */
     protected function checkUserModel(): void
@@ -233,6 +262,27 @@ class InstallCommand extends Command
         }
 
         return trim(text(label: 'What is the name of the guest role?', default: 'guest', required: true));
+    }
+
+    /**
+     * The admin role name, or null when it is skipped. Skipped unless the option or a prompt asks for it.
+     */
+    protected function adminRole(): ?string
+    {
+        $option = $this->option('admin-role');
+        if (is_string($option)) {
+            $option = trim($option);
+
+            return $option === '' || $option === 'none' ? null : $option;
+        }
+        if (! $this->input->isInteractive()) {
+            return null;
+        }
+        if (! confirm(label: 'Create an admin role that can manage roles and user roles?', default: false)) {
+            return null;
+        }
+
+        return trim(text(label: 'What is the name of the admin role?', default: 'admin', required: true));
     }
 
     /**

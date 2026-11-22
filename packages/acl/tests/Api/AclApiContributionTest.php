@@ -100,7 +100,22 @@ class AclApiContributionTest extends ApiTestCase
                     'entity_ids' => ['*'],
                     'scopes' => ['*'],
                 ]],
+                'can_manage' => false,
             ]]);
+    }
+
+    public function test_me_permissions_reports_can_manage_for_a_manager(): void
+    {
+        Sanctum::actingAs($this->userWith('kusikusicms.acl.manage'));
+
+        $this->getJson('/api/v1/me/permissions')->assertOk()->assertJsonPath('data.can_manage', true);
+    }
+
+    public function test_me_permissions_reports_can_manage_false_for_a_non_manager(): void
+    {
+        Sanctum::actingAs($this->userWith('entities.view'));
+
+        $this->getJson('/api/v1/me/permissions')->assertOk()->assertJsonPath('data.can_manage', false);
     }
 
     public function test_me_permissions_requires_authentication(): void
@@ -112,7 +127,7 @@ class AclApiContributionTest extends ApiTestCase
     {
         $this->getJson('/api/v1/capabilities')
             ->assertJsonPath('data.packages.1.name', 'acl')
-            ->assertJsonPath('data.packages.1.features', ['can-flags', 'filtered-lists', 'me.permissions']);
+            ->assertJsonPath('data.packages.1.features', ['can-flags', 'filtered-lists', 'me.permissions', 'roles', 'permissions.manage', 'entity-access', 'users']);
     }
 
     protected function countQueries(string $uri): int
