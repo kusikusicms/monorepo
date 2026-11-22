@@ -7,6 +7,7 @@
     {"name": "media",   "path": "packages/media",   "repository": "media",   "split": true,  "publish": true},
     {"name": "admin",   "path": "packages/admin",   "repository": "admin",   "split": true,  "publish": true},
     {"name": "acl",     "path": "packages/acl",     "repository": "acl",     "split": true,  "publish": true},
+    {"name": "api",     "path": "packages/api",     "repository": "api",     "split": true,  "publish": true},
     {"name": "starter", "path": "apps/starter",     "repository": "starter", "split": true,  "publish": false},
     {"name": "sandbox", "path": "apps/sandbox",     "repository": "sandbox", "split": false, "publish": false}
   ]

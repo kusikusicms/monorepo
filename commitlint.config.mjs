@@ -11,6 +11,7 @@ export default {
         'media',
         'admin',
         'acl',
+        'api',
         'sandbox',
         'starter',
         'monorepo',

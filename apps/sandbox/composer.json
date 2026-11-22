@@ -11,6 +11,7 @@
     "require": {
         "php": "^8.4",
         "kusikusicms/admin": "*@dev",
+        "kusikusicms/api": "*@dev",
         "kusikusicms/acl": "*@dev",
         "kusikusicms/media": "*@dev",
         "kusikusicms/models": "*@dev",
@@ -123,6 +124,13 @@
         {
             "type": "path",
             "url": "../../packages/acl",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "../../packages/api",
             "options": {
                 "symlink": true
             }

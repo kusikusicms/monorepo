@@ -2,6 +2,7 @@
 
 namespace KusikusiCMS\Acl\Services;
 
+use Closure;
 use Illuminate\Contracts\Auth\Authenticatable;
 use KusikusiCMS\Acl\Enums\EntityAction;
 use KusikusiCMS\Acl\Enums\EntityScope;
@@ -20,6 +21,11 @@ class PermissionResolver
 
     /** @var array<string, Role|null> */
     private array $guestRoleCache = [];
+
+    /**
+     * Depth of nested batch() calls; while > 0 a missing guest role is remembered.
+     */
+    private int $batchDepth = 0;
 
     public function allows(?Authenticatable $user, EntityAction $action, Entity|string $entity): bool
     {
@@ -91,7 +97,12 @@ class PermissionResolver
         $cacheKey = $guardName.'|'.$roleName;
 
         // Only a found role is memoized, so a guest role created later in the process is picked up.
-        if (! isset($this->guestRoleCache[$cacheKey])) {
+        // Inside batch() a missing role is remembered too, until the batch ends.
+        $remembered = $this->batchDepth > 0
+            ? array_key_exists($cacheKey, $this->guestRoleCache)
+            : isset($this->guestRoleCache[$cacheKey]);
+
+        if (! $remembered) {
             $this->guestRoleCache[$cacheKey] = Role::query()
                 ->where('name', $roleName)
                 ->where('guard_name', $guardName)
@@ -122,6 +133,80 @@ class PermissionResolver
         }
 
         return false;
+    }
+
+    /**
+     * Run many checks as one batch (for example the `can` flags of an API page): a missing guest role is looked
+     * up once instead of once per check. Outside batches a missing guest role is never memoized.
+     *
+     * @template T
+     *
+     * @param  Closure(): T  $callback
+     * @return T
+     */
+    public function batch(Closure $callback): mixed
+    {
+        $this->batchDepth++;
+
+        try {
+            return $callback();
+        } finally {
+            $this->batchDepth--;
+
+            if ($this->batchDepth === 0) {
+                $this->guestRoleCache = array_filter($this->guestRoleCache, static fn (?Role $role) => $role !== null);
+            }
+        }
+    }
+
+    /**
+     * Load the ancestor ids of many entities with one query, so later checks on them (for example the `can` flags
+     * of an API page) do not query the relations table once per entity. Already cached ids are skipped.
+     *
+     * @param  iterable<int, string>  $entityIds
+     */
+    public function primeAncestors(iterable $entityIds): void
+    {
+        $missing = [];
+
+        foreach ($entityIds as $entityId) {
+            $entityId = (string) $entityId;
+
+            if ($entityId !== '' && ! array_key_exists($entityId, $this->ancestorCache)) {
+                $missing[$entityId] = [];
+            }
+        }
+
+        if ($missing === []) {
+            return;
+        }
+
+        foreach (array_chunk(array_keys($missing), 500) as $chunk) {
+            $relations = EntityRelation::query()
+                ->whereIn('caller_entity_id', $chunk)
+                ->where('kind', EntityRelation::RELATION_ANCESTOR)
+                ->orderBy('caller_entity_id')
+                ->orderBy('depth')
+                ->get(['caller_entity_id', 'called_entity_id']);
+
+            foreach ($relations as $relation) {
+                $missing[(string) $relation->getAttribute('caller_entity_id')][] = (string) $relation->getAttribute('called_entity_id');
+            }
+        }
+
+        foreach ($missing as $entityId => $ancestors) {
+            $this->ancestorCache[$entityId] = $ancestors;
+        }
+    }
+
+    /**
+     * The ancestor ids of an entity, nearest first (cached; use primeAncestors() to load many at once).
+     *
+     * @return list<string>
+     */
+    public function ancestorIdsOf(string $entityId): array
+    {
+        return $this->ancestorIds($entityId);
     }
 
     public function clearCache(): void

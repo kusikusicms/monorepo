@@ -37,6 +37,7 @@ php artisan k:acl:install --guard=web --user-id-type=uuid --guest-role=guest \
     --guest-permissions="entities.view.*.*" --event-guard=no --no-interaction
 php artisan k:acl:install --guest-role=none --no-interaction   # no guest role
 php artisan k:acl:install --force --event-guard=yes --no-interaction   # rewrite config/kusikusicms/acl.php
+php artisan k:acl:install --admin-role=admin --no-interaction   # also seed the manage permission and an admin role
 ```
 
 ## `kusikusicms:acl:create-permission` (`k:acl:create-permission`)
